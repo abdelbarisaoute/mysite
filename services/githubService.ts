@@ -122,6 +122,48 @@ class GitHubService {
       throw error;
     }
   }
+
+  async deleteFile(path: string, message: string): Promise<boolean> {
+    if (!this.config) {
+      throw new Error('GitHub service not configured');
+    }
+
+    try {
+      // Get the current file SHA (required for deletion)
+      const sha = await this.getFileSha(path);
+      if (!sha) {
+        throw new Error('File not found or cannot be deleted');
+      }
+
+      const response = await fetch(
+        `https://api.github.com/repos/${this.config.owner}/${this.config.repo}/contents/${path}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${this.config.token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: message,
+            sha: sha,
+            branch: this.config.branch,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('GitHub API error:', errorData);
+        throw new Error(`Failed to delete file: ${errorData.message || response.statusText}`);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting file from GitHub:', error);
+      throw error;
+    }
+  }
 }
 
 export const githubService = new GitHubService();

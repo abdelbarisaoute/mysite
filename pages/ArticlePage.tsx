@@ -1,6 +1,6 @@
 
 import React, { useContext, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import ContentRenderer from '../components/ContentRenderer';
 import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
@@ -9,15 +9,17 @@ import { escapeStringLiteral, escapeTemplateLiteral, generateValidIdentifier } f
 
 const ArticlePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { articles, updateArticle } = useContext(ArticleContext);
+  const { articles, updateArticle, deleteArticle } = useContext(ArticleContext);
   const article = articles.find(a => a.id === id);
   const { isAuthenticated } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(article?.title || '');
   const [editedSummary, setEditedSummary] = useState(article?.summary || '');
   const [editedContent, setEditedContent] = useState(article?.content || '');
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleEdit = () => {
     if (article) {
@@ -87,6 +89,43 @@ export const ${identifier}: Article = {
     setIsEditing(false);
   };
 
+  const handleDelete = async () => {
+    if (!article) return;
+
+    const confirmed = window.confirm(`Are you sure you want to delete the article "${article.title}"? This action cannot be undone.`);
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+
+    try {
+      // Delete from context (which deletes from localStorage)
+      deleteArticle(article.id);
+
+      // If GitHub is configured, delete from repository
+      if (githubService.isConfigured()) {
+        try {
+          await githubService.deleteFile(
+            `data/articles/${article.id}.ts`,
+            `Delete article "${article.title}" via web interface`
+          );
+          alert('Article deleted and removed from GitHub! The site will be redeployed shortly.');
+        } catch (error) {
+          console.error('Failed to delete from GitHub:', error);
+          alert('Article deleted locally, but failed to delete from GitHub. Please check your settings and try again.');
+        }
+      } else {
+        alert('Article deleted locally only. Configure GitHub in Settings to delete from the repository.');
+      }
+
+      // Navigate to home page
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting article:', error);
+      alert('Failed to delete article. Please try again.');
+      setIsDeleting(false);
+    }
+  };
+
   if (!article) {
     return (
       <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm">
@@ -146,11 +185,19 @@ export const ${identifier}: Article = {
             <div className="flex justify-between items-start">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{article.title}</h1>
               {isAuthenticated && (
-                <button 
-                  onClick={handleEdit} 
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition ml-4 flex-shrink-0">
-                  Edit
-                </button>
+                <div className="flex space-x-2 ml-4 flex-shrink-0">
+                  <button 
+                    onClick={handleEdit} 
+                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition">
+                    Edit
+                  </button>
+                  <button 
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    {isDeleting ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
               )}
             </div>
           </header>

@@ -7,12 +7,14 @@ interface ArticleContextType {
   articles: Article[];
   addArticle: (article: Article) => void;
   updateArticle: (article: Article) => void;
+  deleteArticle: (articleId: string) => void;
 }
 
 const defaultArticleContext: ArticleContextType = {
   articles: [],
   addArticle: () => {},
   updateArticle: () => {},
+  deleteArticle: () => {},
 };
 
 export const ArticleContext = createContext<ArticleContextType>(defaultArticleContext);
@@ -84,8 +86,22 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
+  const deleteArticle = (articleId: string) => {
+    setArticles(prevArticles => {
+      const newArticles = prevArticles.filter(article => article.id !== articleId);
+
+      // Remove from custom articles if it exists there
+      const customArticlesJSON = localStorage.getItem('custom-articles');
+      const currentCustomArticles = customArticlesJSON ? JSON.parse(customArticlesJSON) : [];
+      const updatedCustomArticles = currentCustomArticles.filter((a: Article) => a.id !== articleId);
+      localStorage.setItem('custom-articles', JSON.stringify(updatedCustomArticles));
+
+      return newArticles;
+    });
+  };
+
   return (
-    <ArticleContext.Provider value={{ articles, addArticle, updateArticle }}>
+    <ArticleContext.Provider value={{ articles, addArticle, updateArticle, deleteArticle }}>
       {children}
     </ArticleContext.Provider>
   );
