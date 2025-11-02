@@ -6,8 +6,26 @@ This website now supports persistent content editing through GitHub integration.
 
 ### Editable Content
 - **Home Page**: Title and description can be edited
-- **Resume**: Full markdown content is editable
+- **Resume**: Full markdown content is editable with live preview
 - **Articles**: Create new articles and edit existing ones (title, summary, and content)
+  - **NEW**: Full LaTeX support for text formatting and mathematical expressions
+  - **NEW**: Live preview in edit mode - see your rendered content as you type
+
+### LaTeX Support
+Articles now support comprehensive LaTeX commands:
+- Text formatting: `\textbf{bold}`, `\textit{italic}`, `\emph{emphasized}`
+- Document structure: `\section{Title}`, `\subsection{Subtitle}`
+- Lists: `\begin{itemize}...\end{itemize}`, `\begin{enumerate}...\end{enumerate}`
+- Math expressions: Inline `$E=mc^2$` and display `$$...$$`
+- Special environments: `\begin{remarque}...\end{remarque}`
+
+See the [LaTeX Support Documentation](../LATEX_SUPPORT.md) for complete details.
+
+### Live Preview
+When editing articles or resume content, enable "Show Live Preview" to see:
+- Real-time rendering of your LaTeX and markdown
+- Side-by-side comparison of source and output
+- Immediate feedback on formatting and syntax
 
 ### Storage Options
 The website supports two storage modes:
