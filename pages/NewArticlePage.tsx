@@ -3,6 +3,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
+import ContentRenderer from '../components/ContentRenderer';
 import { Article } from '../types';
 import { githubService } from '../services/githubService';
 import { escapeStringLiteral, escapeTemplateLiteral, generateValidIdentifier } from '../utils/codeGeneration';
@@ -12,6 +13,7 @@ const NewArticlePage: React.FC = () => {
   const [summary, setSummary] = useState('');
   const [content, setContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   
   const { isAuthenticated } = useContext(AuthContext);
   const { addArticle } = useContext(ArticleContext);
@@ -105,17 +107,46 @@ export const ${identifier}: Article = {
             required
           />
         </div>
-        <div>
-          <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
-          <textarea
-            id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={15}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-mono bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
-            placeholder="Write your article content here. You can use Markdown and LaTeX ($...$ or $$...$$)."
-            required
-          />
+        
+        {/* Toggle for split view */}
+        <div className="flex items-center space-x-2">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showPreview}
+              onChange={(e) => setShowPreview(e.target.checked)}
+              className="mr-2"
+            />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Show Live Preview</span>
+          </label>
+        </div>
+        
+        <div className={`${showPreview ? 'grid grid-cols-1 lg:grid-cols-2 gap-4' : ''}`}>
+          <div>
+            <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Content (LaTeX Supported)
+            </label>
+            <textarea
+              id="content"
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={15}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-mono text-sm bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+              placeholder="Write your content with LaTeX support. Use $ for inline math, $$ for display math, \textbf{} for bold, \\section{} for sections, etc."
+              required
+            />
+          </div>
+          
+          {showPreview && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Live Preview
+              </label>
+              <div className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 dark:bg-gray-900 dark:border-gray-600 overflow-auto" style={{ minHeight: '400px' }}>
+                <ContentRenderer content={content} />
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex justify-end space-x-2">
             <button type="button" onClick={() => navigate('/contents')} disabled={isSaving} className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition disabled:opacity-50 disabled:cursor-not-allowed">Cancel</button>
