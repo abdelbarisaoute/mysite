@@ -89,7 +89,10 @@ const Header: React.FC = () => {
                 Resume
               </NavLink>
               {isAuthenticated ? (
-                <button onClick={logout} className={navLinkClasses({isActive: false})}>Logout</button>
+                <>
+                  <NavLink to="/settings" className={navLinkClasses}>Settings</NavLink>
+                  <button onClick={logout} className={navLinkClasses({isActive: false})}>Logout</button>
+                </>
               ) : (
                 <NavLink to="/admin" className={navLinkClasses}>Admin</NavLink>
               )}

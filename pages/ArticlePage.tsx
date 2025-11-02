@@ -1,29 +1,91 @@
 
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ContentRenderer from '../components/ContentRenderer';
 import { AuthContext } from '../context/AuthContext';
-import { useEditableContent } from '../hooks/useEditableContent';
 import { ArticleContext } from '../context/ArticleContext';
+import { githubService } from '../services/githubService';
+import { escapeStringLiteral, escapeTemplateLiteral, generateValidIdentifier } from '../utils/codeGeneration';
 
 const ArticlePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { articles } = useContext(ArticleContext);
+  const { articles, updateArticle } = useContext(ArticleContext);
   const article = articles.find(a => a.id === id);
   const { isAuthenticated } = useContext(AuthContext);
 
-  const {
-    isEditing,
-    setIsEditing,
-    content,
-    editedContent,
-    setEditedContent,
-    handleSave,
-    handleCancel,
-  } = useEditableContent(
-    `article-content-${article?.id}`,
-    article?.content || ''
-  );
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(article?.title || '');
+  const [editedSummary, setEditedSummary] = useState(article?.summary || '');
+  const [editedContent, setEditedContent] = useState(article?.content || '');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleEdit = () => {
+    if (article) {
+      setEditedTitle(article.title);
+      setEditedSummary(article.summary);
+      setEditedContent(article.content);
+      setIsEditing(true);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!article) return;
+
+    setIsSaving(true);
+
+    const updatedArticle = {
+      ...article,
+      title: editedTitle,
+      summary: editedSummary,
+      content: editedContent,
+    };
+
+    // Update in context (which updates localStorage)
+    updateArticle(updatedArticle);
+
+    // If GitHub is configured, commit to repository
+    if (githubService.isConfigured()) {
+      try {
+        // Generate the article file content with safe escaping
+        const identifier = generateValidIdentifier(article.id);
+        const fileContent = `import { Article } from '../../types';
+
+export const ${identifier}: Article = {
+  id: '${escapeStringLiteral(article.id)}',
+  title: '${escapeStringLiteral(editedTitle)}',
+  date: '${escapeStringLiteral(article.date)}',
+  summary: '${escapeStringLiteral(editedSummary)}',
+  content: \`${escapeTemplateLiteral(editedContent)}\`,
+};
+`;
+        
+        await githubService.commitFile({
+          path: `data/articles/${article.id}.ts`,
+          content: fileContent,
+          message: `Update article "${editedTitle}" via web interface`,
+        });
+        
+        alert('Article updated and committed to GitHub! The site will be redeployed shortly.');
+      } catch (error) {
+        console.error('Failed to commit to GitHub:', error);
+        alert('Article updated locally, but failed to commit to GitHub. Please check your settings and try again.');
+      }
+    } else {
+      alert('Article updated locally only. Configure GitHub in Settings to commit changes to the repository.');
+    }
+
+    setIsEditing(false);
+    setIsSaving(false);
+  };
+
+  const handleCancel = () => {
+    if (article) {
+      setEditedTitle(article.title);
+      setEditedSummary(article.summary);
+      setEditedContent(article.content);
+    }
+    setIsEditing(false);
+  };
 
   if (!article) {
     return (
@@ -39,37 +101,62 @@ const ArticlePage: React.FC = () => {
 
   return (
     <article className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
-      <header className="mb-8 border-b dark:border-gray-700 pb-6">
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-          Published on {new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
-        <div className="flex justify-between items-start">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{article.title}</h1>
-            {isAuthenticated && !isEditing && (
-                <button 
-                onClick={() => setIsEditing(true)} 
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition ml-4 flex-shrink-0">
-                Edit
-                </button>
-            )}
-        </div>
-      </header>
-      
       {isEditing ? (
-        <div>
-          <textarea
-            value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
-            className="w-full h-screen p-2 border rounded-md font-mono bg-white dark:bg-gray-900 dark:text-gray-200 border-gray-300 dark:border-gray-600"
-            aria-label="Article Content"
-          />
-          <div className="mt-4 flex justify-end space-x-2">
-            <button onClick={handleCancel} className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition">Cancel</button>
-            <button onClick={handleSave} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition">Save</button>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+            <input
+              type="text"
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Summary</label>
+            <textarea
+              value={editedSummary}
+              onChange={(e) => setEditedSummary(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Content</label>
+            <textarea
+              value={editedContent}
+              onChange={(e) => setEditedContent(e.target.value)}
+              rows={20}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 font-mono bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            />
+          </div>
+          <div className="flex justify-end space-x-2">
+            <button onClick={handleCancel} disabled={isSaving} className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition disabled:opacity-50 disabled:cursor-not-allowed">Cancel</button>
+            <button onClick={handleSave} disabled={isSaving} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+              {isSaving ? 'Saving...' : 'Save'}
+            </button>
           </div>
         </div>
       ) : (
-        <ContentRenderer content={content} />
+        <>
+          <header className="mb-8 border-b dark:border-gray-700 pb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+              Published on {new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+            <div className="flex justify-between items-start">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{article.title}</h1>
+              {isAuthenticated && (
+                <button 
+                  onClick={handleEdit} 
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition ml-4 flex-shrink-0">
+                  Edit
+                </button>
+              )}
+            </div>
+          </header>
+          
+          <ContentRenderer content={article.content} />
+        </>
       )}
     </article>
   );
