@@ -35,6 +35,8 @@ jobs:
         run: npm run build
 
       - name: Add .nojekyll file
+        # Prevents GitHub Pages from processing files with Jekyll
+        # This is necessary for Vite/React apps to work correctly
         run: touch dist/.nojekyll
 
       - name: Setup Pages

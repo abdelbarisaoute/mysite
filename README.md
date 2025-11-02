@@ -38,7 +38,9 @@ The GitHub Actions workflow (`.github/workflows/deploy.yml`) will automatically:
 - Build the website when you push to `main` branch
 - Deploy the built files to GitHub Pages
 
-Your website will be available at: `https://abdelbarisaoute.github.io/mysite/`
+Your website will be available at: `https://<username>.github.io/<repository-name>/`
+
+For this repository: `https://abdelbarisaoute.github.io/mysite/`
 
 ### Manual Deployment
 
