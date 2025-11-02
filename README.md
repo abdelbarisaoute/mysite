@@ -19,6 +19,18 @@ View your app in AI Studio: https://ai.studio/apps/drive/1GyDBaew28VreWKAJ7Ynx9l
 3. Run the app:
    `npm run dev`
 
+## Content Editing
+
+This website supports editing content directly from the web interface! See the [Content Editing Guide](CONTENT_EDITING_GUIDE.md) for detailed instructions on:
+- Setting up GitHub integration for persistent changes
+- Editing home page content, resume, and articles
+- Creating new articles through the web interface
+
+**Quick Start:**
+1. Log in at `/admin` (password: `admin`)
+2. Go to Settings to configure GitHub integration (optional but recommended)
+3. Start editing content on any page with the "Edit" button
+
 ## Deployment
 
 This website is automatically deployed to GitHub Pages when changes are pushed to the `main` branch.
