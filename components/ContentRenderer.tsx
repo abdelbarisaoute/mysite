@@ -1,9 +1,8 @@
 
 import React, { useMemo } from 'react';
 import DOMPurify from 'dompurify';
-
-// This tells TypeScript that a 'katex' object exists on the global window object.
-declare const katex: any;
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 interface ContentRendererProps {
   content: string;
@@ -87,10 +86,6 @@ const processLatexEnvironments = (text: string): string => {
 
 const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
   const renderedParts = useMemo(() => {
-    if (typeof katex === 'undefined') {
-      return [<p key="no-katex">KaTeX library not loaded.</p>];
-    }
-    
     // First, process LaTeX environments (must be done before splitting by math delimiters)
     let processedContent = processLatexEnvironments(content);
     
