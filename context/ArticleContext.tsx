@@ -6,11 +6,13 @@ import { articles as staticArticles } from '../data/articles';
 interface ArticleContextType {
   articles: Article[];
   addArticle: (article: Article) => void;
+  updateArticle: (article: Article) => void;
 }
 
 const defaultArticleContext: ArticleContextType = {
   articles: [],
   addArticle: () => {},
+  updateArticle: () => {},
 };
 
 export const ArticleContext = createContext<ArticleContextType>(defaultArticleContext);
@@ -49,8 +51,41 @@ export const ArticleProvider: React.FC<{ children: ReactNode }> = ({ children })
     });
   };
 
+  const updateArticle = (updatedArticle: Article) => {
+    setArticles(prevArticles => {
+      const newArticles = prevArticles.map(article => 
+        article.id === updatedArticle.id ? updatedArticle : article
+      );
+
+      // If it's a static article that was updated, store it in custom articles
+      if (staticArticleIds.has(updatedArticle.id)) {
+        const customArticlesJSON = localStorage.getItem('custom-articles');
+        const currentCustomArticles = customArticlesJSON ? JSON.parse(customArticlesJSON) : [];
+        
+        // Check if it already exists in custom articles
+        const existingIndex = currentCustomArticles.findIndex((a: Article) => a.id === updatedArticle.id);
+        if (existingIndex >= 0) {
+          currentCustomArticles[existingIndex] = updatedArticle;
+        } else {
+          currentCustomArticles.push(updatedArticle);
+        }
+        localStorage.setItem('custom-articles', JSON.stringify(currentCustomArticles));
+      } else {
+        // Update in custom articles storage
+        const customArticlesJSON = localStorage.getItem('custom-articles');
+        const currentCustomArticles = customArticlesJSON ? JSON.parse(customArticlesJSON) : [];
+        const updatedCustomArticles = currentCustomArticles.map((a: Article) => 
+          a.id === updatedArticle.id ? updatedArticle : a
+        );
+        localStorage.setItem('custom-articles', JSON.stringify(updatedCustomArticles));
+      }
+
+      return newArticles;
+    });
+  };
+
   return (
-    <ArticleContext.Provider value={{ articles, addArticle }}>
+    <ArticleContext.Provider value={{ articles, addArticle, updateArticle }}>
       {children}
     </ArticleContext.Provider>
   );

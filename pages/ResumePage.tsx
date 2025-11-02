@@ -15,8 +15,9 @@ const ResumePage: React.FC = () => {
     editedContent, 
     setEditedContent, 
     handleSave,
-    handleCancel
-  } = useEditableContent('resumeContent', initialResumeContent);
+    handleCancel,
+    isSaving
+  } = useEditableContent('resumeContent', initialResumeContent, 'data/resume.ts');
   
   const [htmlContent, setHtmlContent] = useState<string>('');
   
@@ -56,8 +57,10 @@ const ResumePage: React.FC = () => {
             aria-label="Resume Content"
           />
           <div className="mt-4 flex justify-end space-x-2">
-            <button onClick={handleCancel} className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition">Cancel</button>
-            <button onClick={handleSave} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition">Save</button>
+            <button onClick={handleCancel} disabled={isSaving} className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition disabled:opacity-50 disabled:cursor-not-allowed">Cancel</button>
+            <button onClick={handleSave} disabled={isSaving} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+              {isSaving ? 'Saving...' : 'Save'}
+            </button>
           </div>
         </div>
       ) : htmlContent ? (
