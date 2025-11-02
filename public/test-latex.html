@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LaTeX Test</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .content {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        h2, h3 {
+            color: #333;
+        }
+        .border-l-4 {
+            border-left: 4px solid #3b82f6;
+            background: #eff6ff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        ul {
+            list-style-type: disc;
+            margin-left: 25px;
+        }
+    </style>
+</head>
+<body>
+    <h1>LaTeX Rendering Test</h1>
+    <div class="content" id="output"></div>
+
+    <script>
+        // Test content with LaTeX commands
+        const testContent = `This is a test article with \\textbf{bold text} and \\textit{italic text}.
+
+\\section{Introduction}
+
+This section demonstrates LaTeX support with both text commands and math.
+
+\\subsection{Math Example}
+
+Inline math: $E = mc^2$ and $\\alpha + \\beta = \\gamma$
+
+Display math:
+$$
+\\int_0^\\infty e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}
+$$
+
+\\begin{itemize}
+\\item First item with inline math $x^2$
+\\item Second item with \\textbf{bold}
+\\item Third item with \\textit{italic}
+\\end{itemize}
+
+\\begin{remarque}
+This is a special remark block that should be highlighted.
+\\end{remarque}`;
+
+        // Wait for KaTeX to load
+        function waitForKaTeX() {
+            if (typeof katex !== 'undefined') {
+                renderContent();
+            } else {
+                setTimeout(waitForKaTeX, 100);
+            }
+        }
+
+        function processLatexTextCommands(text) {
+            let processed = text;
+            
+            // Handle text formatting commands
+            processed = processed.replace(/\\textbf\{([^}]*)\}/g, '<strong>$1</strong>');
+            processed = processed.replace(/\\textit\{([^}]*)\}/g, '<em>$1</em>');
+            processed = processed.replace(/\\emph\{([^}]*)\}/g, '<em>$1</em>');
+            processed = processed.replace(/\\underline\{([^}]*)\}/g, '<u>$1</u>');
+            
+            // Handle section commands
+            processed = processed.replace(/\\section\{([^}]*)\}/g, '<h2>$1</h2>');
+            processed = processed.replace(/\\subsection\{([^}]*)\}/g, '<h3>$1</h3>');
+            
+            return processed;
+        }
+
+        function processLatexEnvironments(text) {
+            let processed = text;
+            
+            // Handle itemize
+            processed = processed.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
+                const items = content.split(/\\item\s+/).filter(item => item.trim());
+                const listItems = items.map(item => `<li>${item.trim()}</li>`).join('');
+                return `<ul>${listItems}</ul>`;
+            });
+            
+            // Handle custom environments
+            processed = processed.replace(/\\begin\{remarque\}([\s\S]*?)\\end\{remarque\}/g, 
+                '<div class="border-l-4"><strong>Remarque:</strong> $1</div>');
+            
+            return processed;
+        }
+
+        function renderContent() {
+            let content = processLatexEnvironments(testContent);
+            content = processLatexTextCommands(content);
+            
+            // Split by math delimiters
+            const parts = content.split(/(\$\$[\s\S]*?\$\$|\$[^$]*?\$)/g);
+            
+            let html = '';
+            parts.forEach(part => {
+                if (part.startsWith('$$') && part.endsWith('$$')) {
+                    const latex = part.substring(2, part.length - 2);
+                    html += katex.renderToString(latex, { displayMode: true, throwOnError: false });
+                } else if (part.startsWith('$') && part.endsWith('$')) {
+                    const latex = part.substring(1, part.length - 1);
+                    html += katex.renderToString(latex, { displayMode: false, throwOnError: false });
+                } else {
+                    // Replace newlines with <br>
+                    html += part.split('\n').map(line => line || '<br>').join('');
+                }
+            });
+            
+            document.getElementById('output').innerHTML = html;
+        }
+
+        waitForKaTeX();
+    </script>
+</body>
+</html>

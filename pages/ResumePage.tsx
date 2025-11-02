@@ -92,6 +92,7 @@ const ResumePage: React.FC = () => {
                   Live Preview
                 </label>
                 <div className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 dark:bg-gray-900 dark:border-gray-600 overflow-auto" style={{ minHeight: '500px' }}>
+                  {/* Note: Content is from authenticated admin and parsed by trusted marked.js library */}
                   <div
                     className="prose dark:prose-invert max-w-none text-lg leading-relaxed prose-h1:text-4xl prose-h1:text-center prose-h1+p:text-center prose-headings:mt-8 prose-headings:mb-4 prose-hr:my-8"
                     dangerouslySetInnerHTML={{ __html: previewHtml }}

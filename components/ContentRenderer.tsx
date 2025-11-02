@@ -8,6 +8,12 @@ interface ContentRendererProps {
   content: string;
 }
 
+// Note on security: The content processed here comes from authenticated admin users
+// and is stored as TypeScript files in the repository. The content goes through
+// escapeStringLiteral/escapeTemplateLiteral when saved. While we use dangerouslySetInnerHTML
+// for the processed HTML, the content is trusted as it's controlled by the site owner.
+// The LaTeX commands are transformed into safe HTML tags before rendering.
+
 // Helper function to process LaTeX text commands
 const processLatexTextCommands = (text: string): string => {
   let processed = text;
