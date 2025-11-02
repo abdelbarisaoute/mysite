@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
 import { Article } from '../types';
 import { githubService } from '../services/githubService';
+import { escapeStringLiteral, escapeTemplateLiteral, generateValidIdentifier } from '../utils/codeGeneration';
 
 const NewArticlePage: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -46,15 +47,16 @@ const NewArticlePage: React.FC = () => {
     // If GitHub is configured, commit to repository
     if (githubService.isConfigured()) {
       try {
-        // Generate the article file content
+        // Generate the article file content with safe escaping
+        const identifier = generateValidIdentifier(articleId);
         const fileContent = `import { Article } from '../../types';
 
-export const ${articleId.replace(/-/g, '')}: Article = {
-  id: '${articleId}',
-  title: '${title.trim().replace(/'/g, "\\'")}',
-  date: '${newArticle.date}',
-  summary: '${summary.trim().replace(/'/g, "\\'")}',
-  content: \`${content.trim().replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`,
+export const ${identifier}: Article = {
+  id: '${escapeStringLiteral(articleId)}',
+  title: '${escapeStringLiteral(title.trim())}',
+  date: '${escapeStringLiteral(newArticle.date)}',
+  summary: '${escapeStringLiteral(summary.trim())}',
+  content: \`${escapeTemplateLiteral(content.trim())}\`,
 };
 `;
         

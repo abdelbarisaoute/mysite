@@ -64,8 +64,10 @@ class GitHubService {
       // Get the current file SHA if it exists (needed for updates)
       const sha = await this.getFileSha(fileContent.path);
 
-      // Base64 encode the content
-      const encodedContent = btoa(unescape(encodeURIComponent(fileContent.content)));
+      // Base64 encode the content (UTF-8 safe)
+      const utf8Bytes = new TextEncoder().encode(fileContent.content);
+      const binaryString = Array.from(utf8Bytes, byte => String.fromCharCode(byte)).join('');
+      const encodedContent = btoa(binaryString);
 
       const body: any = {
         message: fileContent.message,
