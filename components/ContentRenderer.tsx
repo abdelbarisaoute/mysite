@@ -1,5 +1,6 @@
 
 import React, { useMemo } from 'react';
+import DOMPurify from 'dompurify';
 
 // This tells TypeScript that a 'katex' object exists on the global window object.
 declare const katex: any;
@@ -10,9 +11,8 @@ interface ContentRendererProps {
 
 // Note on security: The content processed here comes from authenticated admin users
 // and is stored as TypeScript files in the repository. The content goes through
-// escapeStringLiteral/escapeTemplateLiteral when saved. While we use dangerouslySetInnerHTML
-// for the processed HTML, the content is trusted as it's controlled by the site owner.
-// The LaTeX commands are transformed into safe HTML tags before rendering.
+// escapeStringLiteral/escapeTemplateLiteral when saved. We use DOMPurify to sanitize
+// the HTML generated from LaTeX commands before rendering.
 
 // Helper function to process LaTeX text commands
 const processLatexTextCommands = (text: string): string => {
@@ -105,21 +105,29 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
         if (part.startsWith('$$') && part.endsWith('$$')) {
           const latex = part.substring(2, part.length - 2);
           const html = katex.renderToString(latex, { displayMode: true, throwOnError: false });
-          return <div key={index} className="my-4" dangerouslySetInnerHTML={{ __html: html }} />;
+          // KaTeX output is already safe, but sanitize for extra security
+          const sanitized = DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'style'] });
+          return <div key={index} className="my-4" dangerouslySetInnerHTML={{ __html: sanitized }} />;
         }
         if (part.startsWith('$') && part.endsWith('$')) {
           const latex = part.substring(1, part.length - 1);
           const html = katex.renderToString(latex, { displayMode: false, throwOnError: false });
-          return <span key={index} dangerouslySetInnerHTML={{ __html: html }} />;
+          // KaTeX output is already safe, but sanitize for extra security
+          const sanitized = DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'style'] });
+          return <span key={index} dangerouslySetInnerHTML={{ __html: sanitized }} />;
         }
       } catch (error) {
         console.error("KaTeX rendering error:", error);
         return <span key={index} className="text-red-500">{part}</span>
       }
       
-      // Process HTML from LaTeX commands
+      // Process HTML from LaTeX commands - sanitize before rendering
       if (part.includes('<')) {
-        return <span key={index} dangerouslySetInnerHTML={{ __html: part }} />;
+        const sanitized = DOMPurify.sanitize(part, {
+          ALLOWED_TAGS: ['strong', 'em', 'u', 'h2', 'h3', 'h4', 'ul', 'ol', 'li', 'div', 'br'],
+          ALLOWED_ATTR: ['class'],
+        });
+        return <span key={index} dangerouslySetInnerHTML={{ __html: sanitized }} />;
       }
       
       // Render newlines correctly from the string content
