@@ -74,7 +74,7 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-1 text-xl font-bold text-gray-900 dark:text-gray-100">
-              <img src="/mysite/pi-logo.svg" alt="Pi Logo" className="h-12 w-12" />
+              <img src="/mysite/pi-logo.svg" alt="Pi Logo" className="h-16 w-16" />
               <span>Phys</span>
             </Link>
           </div>
