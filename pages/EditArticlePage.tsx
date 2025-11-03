@@ -38,7 +38,7 @@ const EditArticlePage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!id ||!title.trim() || !summary.trim() || !content.trim()) {
+    if (!id || !title.trim() || !summary.trim() || !content.trim()) {
         alert("Please fill out all fields.");
         return;
     }
