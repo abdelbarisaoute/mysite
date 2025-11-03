@@ -66,17 +66,3 @@ export function downloadFile(content: string, filename: string): void {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
-
-/**
- * Generates import statement for the article in index.ts
- */
-export function generateImportStatement(article: Article): string {
-  return `import { ${toCamelCase(article.id)} } from './${article.id}';`;
-}
-
-/**
- * Generates array item for the article in index.ts
- */
-export function generateArrayItem(article: Article): string {
-  return `  ${toCamelCase(article.id)},`;
-}
