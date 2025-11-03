@@ -79,7 +79,7 @@ const Header: React.FC = () => {
             </Link>
           </div>
           <div className="flex items-center space-x-2 md:space-x-4">
-            <div className="flex items-center space-x-2 md:space-x-4">
+            <div className="hidden md:flex items-center space-x-4">
               <NavLink to="/" className={navLinkClasses}>
                 Home
               </NavLink>
