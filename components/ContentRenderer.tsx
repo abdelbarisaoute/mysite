@@ -100,6 +100,12 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
     // Step 2: Apply text formatting
     let processed = processLatexTextCommands(textWithoutRemarks);
 
+    // Convert LaTeX paragraph spacing to HTML paragraphs
+    processedContent = processedContent
+          .replace(/\n\s*\n/g, '</p><p>')   // double newline → new paragraph
+          .replace(/\n/g, ' ');             // single newline → space
+
+
     // Step 3: Render math outside of remark blocks
     let html = renderMathToHTML(processed);
 
