@@ -21,6 +21,6 @@ On a indiqué dans l'introduction de ce chapitre que l'intérêt de ce type de v
 \$\$ \\int V(t)dt = \\frac{A}{\\omega} \\sin(\\omega t -\\phi) = \\frac{A}{\\omega} \\cos\\left(\\omega t -\\phi -\\frac{\\pi}{2} \\right) \$\$
 Ainsi la dérivation et l'intégration d'une vibration monochromatique ne modifie que sa phase, ce qui explique leur rôle fondamental dans la modélisation des phénomènes oscillatoires et ondulatoires.
 \\begin{remarque}
-Ainsi, le signe négatif dans \\((\\omega t - \\phi)\\) traduit simplement le fait qu’une phase plus grande implique que la vibration atteint son maximum plus tard dans le temps.
+Ainsi, le signe négatif dans \$(\\omega t - \\phi)\$ traduit simplement le fait qu’une phase plus grande implique que la vibration atteint son maximum plus tard dans le temps.
 \\end{remarque}`,
 };
