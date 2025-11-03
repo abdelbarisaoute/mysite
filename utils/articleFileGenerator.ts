@@ -27,10 +27,18 @@ export const ${toCamelCase(article.id)}: Article = {
 }
 
 /**
- * Converts a kebab-case string to camelCase
+ * Converts a kebab-case string to camelCase, ensuring it's a valid JavaScript identifier
  */
 function toCamelCase(str: string): string {
-  return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+  // Convert to camelCase
+  let result = str.replace(/-(.)/g, (_, char) => char.toUpperCase());
+  
+  // Ensure it starts with a letter or underscore (prepend underscore if it starts with a number)
+  if (/^[0-9]/.test(result)) {
+    result = '_' + result;
+  }
+  
+  return result;
 }
 
 /**
