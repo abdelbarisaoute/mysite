@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <linearGradient id="piGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background circle with subtle fill -->
+  <circle cx="24" cy="24" r="22" fill="url(#piGradient)" opacity="0.12"/>
+  <!-- Greek letter Pi (π) with angular design -->
+  <!-- Top horizontal bar -->
+  <path d="M 12 16 L 36 16 L 36 19 L 33 19 L 33 32 L 29 32 L 29 19 L 19 19 L 19 32 L 15 32 L 15 19 L 12 19 Z" fill="url(#piGradient)" stroke="url(#piGradient)" stroke-width="0.5"/>
+  <!-- Angular accent on top right corner -->
+  <path d="M 34 14 L 38 16 L 36 18 Z" fill="url(#piGradient)" opacity="0.8"/>
+  <!-- Small accent dots for design -->
+  <circle cx="24" cy="12" r="1.5" fill="url(#piGradient)" opacity="0.6"/>
+</svg>
