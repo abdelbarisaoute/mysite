@@ -7,7 +7,7 @@ interface ContentRendererProps {
   content: string;
 }
 
-// --- Helper: process text-based LaTeX commands like \textbf, \section, etc.
+// --- Helper: process LaTeX text commands like \textbf, \section, etc.
 const processLatexTextCommands = (text: string): string => {
   let processed = text;
 
@@ -23,52 +23,52 @@ const processLatexTextCommands = (text: string): string => {
   return processed;
 };
 
-// --- Helper: process LaTeX environments like \begin{itemize}, \begin{remarque}, etc.
-const processLatexEnvironments = (text: string): string => {
-  let processed = text;
+// --- Helper: process LaTeX environments and protect remark boxes
+const extractRemarkBlocks = (text: string) => {
+  const remarks: string[] = [];
+  const placeholder = '__REMARK_PLACEHOLDER__';
 
-  // Itemize lists
-  processed = processed.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
-    const items = content.split(/\\item\s+/).filter((item) => item.trim());
-    return `<ul class="list-disc ml-6 my-3">${items.map((item) => `<li>${item}</li>`).join('')}</ul>`;
+  const processed = text.replace(/\\begin\{remarque\}([\s\S]*?)\\end\{remarque\}/g, (match, content) => {
+    remarks.push(content.trim());
+    return `${placeholder}${remarks.length - 1}${placeholder}`;
   });
 
-  // Enumerate lists
-  processed = processed.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
-    const items = content.split(/\\item\s+/).filter((item) => item.trim());
-    return `<ol class="list-decimal ml-6 my-3">${items.map((item) => `<li>${item}</li>`).join('')}</ol>`;
-  });
-
-  // --- FIXED: Remarque environment now keeps math delimiters intact
-  processed = processed.replace(
-    /\\begin\{remarque\}([\s\S]*?)\\end\{remarque\}/g,
-    (match, content) => {
-      return `<div class="remarque border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20 p-4 my-3 rounded">
-        <strong>Remarque:</strong> ${content.trim()}
-      </div>`;
-    }
-  );
-
-  return processed;
+  return { processed, remarks };
 };
 
-// --- Component ---
+const restoreRemarkBlocks = (text: string, remarks: string[]) => {
+  let restored = text;
+
+  remarks.forEach((content, i) => {
+    const inner = DOMPurify.sanitize(content, { ADD_ATTR: ['class'] });
+    restored = restored.replace(
+      new RegExp(`__REMARK_PLACEHOLDER__${i}__REMARK_PLACEHOLDER__`, 'g'),
+      `<div class="border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20 p-4 my-3 rounded">
+         <strong>Remarque:</strong> ${inner}
+       </div>`
+    );
+  });
+
+  return restored;
+};
+
+// --- Main component
 const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
   const renderedParts = useMemo(() => {
-    // Step 1: Handle environments first (preserve math delimiters inside)
-    let processedContent = processLatexEnvironments(content);
+    // Step 1: Extract remark blocks before KaTeX splitting
+    const { processed: textWithoutRemarks, remarks } = extractRemarkBlocks(content);
 
-    // Step 2: Handle inline LaTeX text commands
-    processedContent = processLatexTextCommands(processedContent);
+    // Step 2: Process text formatting commands
+    let processedContent = processLatexTextCommands(textWithoutRemarks);
 
-    // Step 3: Split into KaTeX and text parts
+    // Step 3: Split text into math and non-math parts
     const parts = processedContent.split(
       /(\$\$[\s\S]*?\$\$|\$[^$]*?\$|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\])/g
     );
 
-    return parts.map((part, index) => {
+    // Step 4: Render KaTeX
+    const renderedParts = parts.map((part, index) => {
       try {
-        // Display equations
         if (part.startsWith('$$') && part.endsWith('$$')) {
           const latex = part.slice(2, -2);
           const html = katex.renderToString(latex, { displayMode: true, throwOnError: false });
@@ -80,8 +80,6 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
             />
           );
         }
-
-        // Inline equations
         if (part.startsWith('$') && part.endsWith('$')) {
           const latex = part.slice(1, -1);
           const html = katex.renderToString(latex, { displayMode: false, throwOnError: false });
@@ -92,8 +90,6 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
             />
           );
         }
-
-        // \(...\)
         if (part.startsWith('\\(') && part.endsWith('\\)')) {
           const latex = part.slice(2, -2);
           const html = katex.renderToString(latex, { displayMode: false, throwOnError: false });
@@ -104,8 +100,6 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
             />
           );
         }
-
-        // \[...\]
         if (part.startsWith('\\[') && part.endsWith('\\]')) {
           const latex = part.slice(2, -2);
           const html = katex.renderToString(latex, { displayMode: true, throwOnError: false });
@@ -117,28 +111,25 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
             />
           );
         }
-
       } catch (err) {
         console.error('KaTeX rendering error:', err);
       }
 
-      // Step 4: Sanitize and render HTML (for remarque, headings, etc.)
+      // Otherwise render plain text (with basic HTML)
       const sanitized = DOMPurify.sanitize(part, {
-        ALLOWED_TAGS: [
-          'strong', 'em', 'u', 'h2', 'h3', 'h4', 'ul', 'ol', 'li',
-          'div', 'br', 'p', 'span'
-        ],
+        ALLOWED_TAGS: ['strong', 'em', 'u', 'h2', 'h3', 'h4', 'ul', 'ol', 'li', 'div', 'br', 'p', 'span'],
         ALLOWED_ATTR: ['class'],
       });
 
-      // Handle newlines in plain text
-      return sanitized.split('\n').map((line, i) => (
-        <React.Fragment key={`${index}-${i}`}>
-          <span dangerouslySetInnerHTML={{ __html: line }} />
-          {i < sanitized.split('\n').length - 1 && <br />}
-        </React.Fragment>
-      ));
+      return <span key={index} dangerouslySetInnerHTML={{ __html: sanitized }} />;
     });
+
+    // Step 5: Join everything and restore remark boxes
+    const htmlJoined = renderedParts.map((r) => (typeof r === 'string' ? r : (r as any).props?.dangerouslySetInnerHTML?.__html || '')).join('');
+    const restoredHTML = restoreRemarkBlocks(htmlJoined, remarks);
+
+    // Step 6: Final sanitized React output
+    return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(restoredHTML) }} />;
   }, [content]);
 
   return (
