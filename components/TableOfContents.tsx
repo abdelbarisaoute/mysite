@@ -42,17 +42,19 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
     
     // Sort by position in content
     return items.sort((a, b) => {
-      const aPos = content.indexOf(`\\section{${a.text}}`);
-      const bPos = content.indexOf(`\\section{${b.text}}`);
-      const aSubPos = content.indexOf(`\\subsection{${a.text}}`);
-      const bSubPos = content.indexOf(`\\subsection{${b.text}}`);
-      const aSubSubPos = content.indexOf(`\\subsubsection{${a.text}}`);
-      const bSubSubPos = content.indexOf(`\\subsubsection{${b.text}}`);
+      // Find the position of each item based on its level
+      const getPosition = (item: TOCItem) => {
+        if (item.level === 2) {
+          return content.indexOf(`\\section{${item.text}}`);
+        } else if (item.level === 3) {
+          return content.indexOf(`\\subsection{${item.text}}`);
+        } else if (item.level === 4) {
+          return content.indexOf(`\\subsubsection{${item.text}}`);
+        }
+        return -1;
+      };
       
-      const posA = aPos !== -1 ? aPos : (aSubPos !== -1 ? aSubPos : aSubSubPos);
-      const posB = bPos !== -1 ? bPos : (bSubPos !== -1 ? bSubPos : bSubSubPos);
-      
-      return posA - posB;
+      return getPosition(a) - getPosition(b);
     });
   }, [content]);
 
@@ -72,9 +74,9 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
       <h2 className="text-lg font-bold mb-3 text-gray-900 dark:text-gray-100">Contents</h2>
       <nav>
         <ul className="space-y-1">
-          {tocItems.map((item, index) => (
+          {tocItems.map((item) => (
             <li
-              key={index}
+              key={item.id}
               className={`${
                 item.level === 2 ? 'ml-0' : item.level === 3 ? 'ml-4' : 'ml-8'
               }`}
