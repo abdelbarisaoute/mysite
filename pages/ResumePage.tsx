@@ -3,8 +3,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { resumeContent as initialResumeContent } from '../data/resume';
 import { AuthContext } from '../context/AuthContext';
 import { useEditableContent } from '../hooks/useEditableContent';
-
-declare const marked: any;
+import { marked } from 'marked';
 
 const ResumePage: React.FC = () => {
   const { isAuthenticated } = useContext(AuthContext);
@@ -23,25 +22,23 @@ const ResumePage: React.FC = () => {
   const [showPreview, setShowPreview] = useState(true);
   
   useEffect(() => {
-    const parseMarkdown = () => {
-      if (typeof marked !== 'undefined') {
-        setHtmlContent(marked.parse(content));
-        return true;
-      }
-      return false;
+    const parseMarkdown = async () => {
+      const html = await marked.parse(content);
+      setHtmlContent(html);
     };
-    if (!parseMarkdown()) {
-      const timer = setTimeout(parseMarkdown, 100);
-      return () => clearTimeout(timer);
-    }
+    parseMarkdown();
   }, [content]);
   
   const [previewHtml, setPreviewHtml] = useState<string>('');
   
   useEffect(() => {
-    if (isEditing && showPreview && typeof marked !== 'undefined') {
-      setPreviewHtml(marked.parse(editedContent));
-    }
+    const parsePreview = async () => {
+      if (isEditing && showPreview) {
+        const html = await marked.parse(editedContent);
+        setPreviewHtml(html);
+      }
+    };
+    parsePreview();
   }, [editedContent, isEditing, showPreview]);
 
   return (
