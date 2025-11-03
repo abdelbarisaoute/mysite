@@ -73,8 +73,9 @@ const Header: React.FC = () => {
       <nav className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              MySite
+            <Link to="/" className="flex items-center space-x-2 text-xl font-bold text-gray-900 dark:text-gray-100">
+              <img src="/mysite/logo.svg" alt="MySite Logo" className="h-8 w-8" />
+              <span>MySite</span>
             </Link>
           </div>
           <div className="flex items-center space-x-2 md:space-x-4">
