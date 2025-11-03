@@ -30,7 +30,7 @@ export const ${toCamelCase(article.id)}: Article = {
  * Converts a kebab-case string to camelCase, ensuring it's a valid JavaScript identifier
  */
 function toCamelCase(str: string): string {
-  // Remove all non-alphanumeric characters except hyphens, convert to lowercase
+  // Convert to lowercase first, then remove all non-alphanumeric characters except hyphens
   let cleaned = str.toLowerCase().replace(/[^a-z0-9-]/g, '');
   
   // Convert to camelCase
@@ -41,9 +41,9 @@ function toCamelCase(str: string): string {
     result = '_' + result;
   }
   
-  // If result is empty or contains only numbers, use a default prefix
+  // If result is empty or contains only numbers, use a default prefix with timestamp for uniqueness
   if (!result || /^_*[0-9]+$/.test(result)) {
-    result = 'article' + result;
+    result = 'article' + (result || Date.now());
   }
   
   return result;
