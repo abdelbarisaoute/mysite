@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
 import { Article } from '../types';
 import { generateArticleFileContent, downloadFile } from '../utils/articleFileGenerator';
+import { saveArticleToRepository, isGitHubConfigured } from '../utils/githubAPI';
 
 const EditArticlePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,12 +18,20 @@ const EditArticlePage: React.FC = () => {
   const [summary, setSummary] = useState('');
   const [content, setContent] = useState('');
   const [currentArticle, setCurrentArticle] = useState<Article | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<{type: 'success' | 'error', message: string} | null>(null);
+  const [githubConfigured, setGithubConfigured] = useState(false);
   
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/admin');
     }
   }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    // Check if GitHub is configured
+    isGitHubConfigured().then(setGithubConfigured);
+  }, []);
 
   useEffect(() => {
     if (articles.length > 0) {
@@ -39,7 +48,7 @@ const EditArticlePage: React.FC = () => {
     }
   }, [id, articles, navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id || !title.trim() || !summary.trim() || !content.trim()) {
         alert("Please fill out all fields.");
@@ -48,6 +57,9 @@ const EditArticlePage: React.FC = () => {
     const articleToEdit = articles.find(article => article.id === id);
     if (!articleToEdit) return;
 
+    setIsSaving(true);
+    setSaveStatus(null);
+
     const updatedArticle: Article = {
         ...articleToEdit,
         title: title.trim(),
@@ -55,8 +67,33 @@ const EditArticlePage: React.FC = () => {
         content: content.trim(),
     };
 
+    // Update in localStorage
     updateArticle(updatedArticle);
-    navigate(`/article/${updatedArticle.id}`);
+
+    // Try to save to repository automatically
+    if (githubConfigured) {
+      const result = await saveArticleToRepository(updatedArticle, true);
+      
+      if (result.success) {
+        setSaveStatus({
+          type: 'success',
+          message: 'Article updated successfully in repository!'
+        });
+        // Wait a moment to show the success message
+        setTimeout(() => {
+          navigate(`/article/${updatedArticle.id}`);
+        }, 1500);
+      } else {
+        setSaveStatus({
+          type: 'error',
+          message: `Failed to update in repository: ${result.error || 'Unknown error'}`
+        });
+        setIsSaving(false);
+      }
+    } else {
+      // If GitHub not configured, just navigate after local update
+      navigate(`/article/${updatedArticle.id}`);
+    }
   };
 
   const handleDownloadFile = () => {
@@ -78,11 +115,36 @@ const EditArticlePage: React.FC = () => {
     <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
       <h1 className="text-3xl font-bold mb-6 pb-2 border-b-2 border-blue-500">Edit Article</h1>
       
-      <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-        <p className="text-sm text-blue-800 dark:text-blue-200">
-          💾 After editing, you can download the updated file to save it to your repository.
-        </p>
-      </div>
+      {saveStatus && (
+        <div className={`mb-4 p-3 rounded-md border ${
+          saveStatus.type === 'success' 
+            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+            : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+        }`}>
+          <p className={`text-sm font-semibold ${
+            saveStatus.type === 'success' 
+              ? 'text-green-800 dark:text-green-200' 
+              : 'text-red-800 dark:text-red-200'
+          }`}>
+            {saveStatus.type === 'success' ? '✓ ' : '⚠ '}
+            {saveStatus.message}
+          </p>
+        </div>
+      )}
+
+      {githubConfigured ? (
+        <div className="mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+          <p className="text-sm text-green-800 dark:text-green-200">
+            ✓ Auto-save enabled: Changes will be saved to repository automatically
+          </p>
+        </div>
+      ) : (
+        <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+          <p className="text-sm text-blue-800 dark:text-blue-200">
+            💾 Manual save: You can download the updated file after editing
+          </p>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -120,15 +182,23 @@ const EditArticlePage: React.FC = () => {
           />
         </div>
         <div className="flex justify-end space-x-2">
-            <button 
-              type="button" 
-              onClick={handleDownloadFile}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition"
-            >
-              📥 Download File
-            </button>
+            {!githubConfigured && (
+              <button 
+                type="button" 
+                onClick={handleDownloadFile}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition"
+              >
+                📥 Download File
+              </button>
+            )}
             <button type="button" onClick={() => navigate(`/article/${id}`)} className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition">Cancel</button>
-            <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition">Save Changes</button>
+            <button 
+              type="submit" 
+              disabled={isSaving}
+              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </button>
         </div>
       </form>
     </div>

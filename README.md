@@ -73,11 +73,48 @@ You can also trigger a manual deployment:
 
 ## Admin Access
 
-The website includes an admin panel for managing articles:
+The website includes an admin panel for managing articles with automatic file saving:
 
 - Navigate to `/admin` to log in
 - Default password: `admin` (you can change this in `context/AuthContext.tsx`)
 - Once logged in, you can create, edit, and delete articles
+- **New!** Articles can be automatically saved to your repository (see setup below)
+
+### Setting Up Automatic Article Saving
+
+To enable automatic saving of articles to your GitHub repository:
+
+1. **Create a GitHub Personal Access Token:**
+   - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
+   - Click "Generate new token (classic)"
+   - Give it a descriptive name (e.g., "Article Auto-Save")
+   - Select the `repo` scope (Full control of private repositories)
+   - Generate and copy the token
+
+2. **Configure the application:**
+   - Copy `.env.example` to `.env`
+   - Add your token: `VITE_GITHUB_TOKEN=your_token_here`
+   - Or update `metadata.json` with your GitHub configuration (not recommended for security)
+
+3. **For production deployment:**
+   - Add the token as a GitHub Actions secret:
+     - Go to your repository settings
+     - Navigate to Secrets and variables → Actions
+     - Add a new repository secret named `VITE_GITHUB_TOKEN`
+     - Use this in your deployment workflow
+
+4. **How it works:**
+   - When you create or edit an article, it will automatically be saved to `data/articles/`
+   - A commit is created and pushed to your repository
+   - The article file is generated in the correct TypeScript format
+   - Changes will appear after the next GitHub Pages deployment
+
+### Manual Save Option
+
+If automatic saving is not configured, you can still:
+- Download the article file manually after creation/editing
+- Save it to `data/articles/[article-id].ts` in your local repository
+- Commit and push the changes manually
 
 ## Project Structure
 
