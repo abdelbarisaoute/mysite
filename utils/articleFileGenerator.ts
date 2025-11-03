@@ -16,7 +16,7 @@ export function generateArticleFileContent(article: Article): string {
 
 export const ${toCamelCase(article.id)}: Article = {
   id: '${article.id}',
-  title: '${article.title.replace(/'/g, "\\'")}',
+  title: '${article.title.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}',
   date: '${article.date}',
   summary: \`${escapeContent(article.summary)}\`,
   content: \`${escapeContent(article.content)}\`
