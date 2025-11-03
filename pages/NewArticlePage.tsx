@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
 import { Article } from '../types';
-import { generateArticleFileContent, downloadFile, generateImportStatement, generateArrayItem } from '../utils/articleFileGenerator';
+import { generateArticleFileContent, downloadFile } from '../utils/articleFileGenerator';
+
 
 const NewArticlePage: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -80,21 +81,18 @@ const NewArticlePage: React.FC = () => {
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
           <h2 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3">📁 Save to Repository (Optional)</h2>
           <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
-            To persist this article permanently in your repository, follow these steps:
+            To persist this article permanently in your repository, follow these simplified steps:
           </p>
           
           <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300 mb-4">
             <li>Click the "Download Article File" button below to download the TypeScript file</li>
             <li>Save the file to <code className="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">data/articles/{savedArticle.id}.ts</code></li>
-            <li>Update <code className="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">data/articles/index.ts</code> by adding:
-              <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-700 rounded font-mono text-xs overflow-x-auto">
-                <div>{generateImportStatement(savedArticle)}</div>
-                <div className="mt-1">// Add to the articles array:</div>
-                <div>{generateArrayItem(savedArticle)}</div>
-              </div>
-            </li>
             <li>Commit and push the changes to your repository</li>
           </ol>
+
+          <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded text-sm text-green-800 dark:text-green-200 mb-3">
+            ✨ <strong>New!</strong> Articles are now automatically discovered! No need to manually update index.ts - just add your file and push!
+          </div>
 
           <button
             onClick={handleDownloadFile}

@@ -109,9 +109,30 @@ mysite/
 ### Changing Site Content:
 
 1. **Personal Information**: Edit the content in `pages/HomePage.tsx` and `pages/ResumePage.tsx`
-2. **Articles**: Add/edit article files in `data/articles/`
+2. **Articles**: Add/edit article files in `data/articles/`. New article files are automatically discovered - no need to manually update `index.ts`!
 3. **Site Title**: Change the title in `index.html` and `components/Header.tsx`
 4. **Colors/Styling**: Modify Tailwind classes or the Tailwind config in `index.html`
+
+### Adding New Articles:
+
+Articles are now automatically discovered! Simply:
+
+1. Create a new TypeScript file in `data/articles/` (e.g., `my-new-article.ts`)
+2. Export an Article object following this format:
+   ```typescript
+   import { Article } from '../../types';
+
+   export const myNewArticle: Article = {
+     id: 'my-new-article',
+     title: 'My New Article',
+     date: '2024-11-03',
+     summary: 'A brief summary of the article',
+     content: `Your article content here...`
+   };
+   ```
+3. Commit and push - the article will be automatically included!
+
+The build system uses Vite's `import.meta.glob` to automatically discover all article files in the `data/articles/` directory.
 
 ### Changing the Base Path:
 
