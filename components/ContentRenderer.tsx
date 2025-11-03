@@ -93,7 +93,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
     processedContent = processLatexTextCommands(processedContent);
     
     // Regex to find and capture LaTeX blocks ($$...$$) and inline math ($...$)
-    const parts = processedContent.split(/(\$\$[\s\S]*?\$\$|\$[^$]*?\$)/g);
+    const parts = processedContent.split(/(\$\$[\s\S]*?\$\$|\$[^$]*?\$|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\])/g);
 
     return parts.map((part, index) => {
       try {
@@ -111,6 +111,20 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
           const sanitized = DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'style'] });
           return <span key={index} dangerouslySetInnerHTML={{ __html: sanitized }} />;
         }
+        if (part.startsWith('\\(') && part.endsWith('\\)')) {
+        const latex = part.substring(2, part.length - 2);
+        const html = katex.renderToString(latex, { displayMode: false, throwOnError: false });
+        const sanitized = DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'style'] });
+        return <span key={index} dangerouslySetInnerHTML={{ __html: sanitized }} />;
+        }
+
+if (part.startsWith('\\[') && part.endsWith('\\]')) {
+  const latex = part.substring(2, part.length - 2);
+  const html = katex.renderToString(latex, { displayMode: true, throwOnError: false });
+  const sanitized = DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'style'] });
+  return <div key={index} className="my-4" dangerouslySetInnerHTML={{ __html: sanitized }} />;
+}
+
       } catch (error) {
         console.error("KaTeX rendering error:", error);
         return <span key={index} className="text-red-500">{part}</span>
