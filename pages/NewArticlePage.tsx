@@ -31,7 +31,17 @@ const NewArticlePage: React.FC = () => {
     }
 
     const newArticle: Article = {
-        id: title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+        id: (() => {
+          // Generate ID from title
+          let id = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+          // Remove leading/trailing hyphens
+          id = id.replace(/^-+|-+$/g, '');
+          // Ensure ID is not empty and doesn't start with a number
+          if (!id || /^[0-9]/.test(id)) {
+            id = 'article-' + (id || Date.now());
+          }
+          return id;
+        })(),
         title: title.trim(),
         summary: summary.trim(),
         content: content.trim(),
