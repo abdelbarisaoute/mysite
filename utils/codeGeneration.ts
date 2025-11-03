@@ -19,7 +19,6 @@ export function escapeTemplateLiteral(str: string): string {
   return str
     .replace(/\\/g, '\\\\')  // Escape backslashes first
     .replace(/`/g, '\\`')     // Escape backticks
-    .replace(/\$/g, '\\$');   // Escape dollar signs
 }
 
 /**
