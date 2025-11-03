@@ -33,6 +33,9 @@ function toCamelCase(str: string): string {
   // Convert to lowercase first, then remove all non-alphanumeric characters except hyphens
   let cleaned = str.toLowerCase().replace(/[^a-z0-9-]/g, '');
   
+  // Remove consecutive hyphens
+  cleaned = cleaned.replace(/-+/g, '-');
+  
   // Convert to camelCase
   let result = cleaned.replace(/-(.)/g, (_, char) => char.toUpperCase());
   
