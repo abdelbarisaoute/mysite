@@ -22,23 +22,17 @@ const ResumePage: React.FC = () => {
   const [showPreview, setShowPreview] = useState(true);
   
   useEffect(() => {
-    const parseMarkdown = async () => {
-      const html = await marked.parse(content);
-      setHtmlContent(html);
-    };
-    parseMarkdown();
+    const html = marked.parse(content) as string;
+    setHtmlContent(html);
   }, [content]);
   
   const [previewHtml, setPreviewHtml] = useState<string>('');
   
   useEffect(() => {
-    const parsePreview = async () => {
-      if (isEditing && showPreview) {
-        const html = await marked.parse(editedContent);
-        setPreviewHtml(html);
-      }
-    };
-    parsePreview();
+    if (isEditing && showPreview) {
+      const html = marked.parse(editedContent) as string;
+      setPreviewHtml(html);
+    }
   }, [editedContent, isEditing, showPreview]);
 
   return (
