@@ -90,6 +90,8 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
 
     // Step 2: Apply text formatting
     let processed = processLatexTextCommands(textWithoutRemarks);
+    processed = processed.replace(/\\\$/g, '$');
+
 
     // Step 3: Render math outside of remark blocks
     let html = renderMathToHTML(processed);
