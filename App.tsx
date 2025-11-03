@@ -10,6 +10,7 @@ import SearchPage from './pages/SearchPage';
 import AdminPage from './pages/AdminPage';
 import NewArticlePage from './pages/NewArticlePage';
 import EditArticlePage from './pages/EditArticlePage';
+import GitHubSetupPage from './pages/GitHubSetupPage';
 import { ArticleProvider } from './context/ArticleContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
@@ -32,6 +33,7 @@ const App: React.FC = () => {
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/new-article" element={<NewArticlePage />} />
                   <Route path="/edit-article/:id" element={<EditArticlePage />} />
+                  <Route path="/github-setup" element={<GitHubSetupPage />} />
                 </Routes>
               </main>
               <footer className="text-center p-4 mt-8 border-t border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-sm">

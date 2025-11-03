@@ -102,6 +102,7 @@ const Header: React.FC = () => {
               {isAuthenticated ? (
                   <>
                   <NavLink to="/new-article" className={navLinkClasses}>New Article</NavLink>
+                  <NavLink to="/github-setup" className={navLinkClasses} title="Setup GitHub Auto-Save">⚙️</NavLink>
                   <button onClick={handleLogout} className={buttonClasses}>Logout</button>
                   </>
               ) : (
