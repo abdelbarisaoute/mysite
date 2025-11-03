@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
 import { Article } from '../types';
+import { generateArticleFileContent, downloadFile } from '../utils/articleFileGenerator';
 
 const EditArticlePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,6 +16,7 @@ const EditArticlePage: React.FC = () => {
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [content, setContent] = useState('');
+  const [currentArticle, setCurrentArticle] = useState<Article | null>(null);
   
   useEffect(() => {
     if (!isAuthenticated) {
@@ -29,6 +31,7 @@ const EditArticlePage: React.FC = () => {
           setTitle(articleToEdit.title);
           setSummary(articleToEdit.summary);
           setContent(articleToEdit.content);
+          setCurrentArticle(articleToEdit);
         } else if (id) {
             alert('Article not found!');
             navigate('/contents');
@@ -56,9 +59,31 @@ const EditArticlePage: React.FC = () => {
     navigate(`/article/${updatedArticle.id}`);
   };
 
+  const handleDownloadFile = () => {
+    if (!currentArticle) return;
+    
+    const updatedArticle: Article = {
+      ...currentArticle,
+      title: title.trim(),
+      summary: summary.trim(),
+      content: content.trim(),
+    };
+    
+    const fileContent = generateArticleFileContent(updatedArticle);
+    const filename = `${updatedArticle.id}.ts`;
+    downloadFile(fileContent, filename);
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
       <h1 className="text-3xl font-bold mb-6 pb-2 border-b-2 border-blue-500">Edit Article</h1>
+      
+      <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+        <p className="text-sm text-blue-800 dark:text-blue-200">
+          💾 After editing, you can download the updated file to save it to your repository.
+        </p>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
@@ -95,6 +120,13 @@ const EditArticlePage: React.FC = () => {
           />
         </div>
         <div className="flex justify-end space-x-2">
+            <button 
+              type="button" 
+              onClick={handleDownloadFile}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition"
+            >
+              📥 Download File
+            </button>
             <button type="button" onClick={() => navigate(`/article/${id}`)} className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition">Cancel</button>
             <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition">Save Changes</button>
         </div>
