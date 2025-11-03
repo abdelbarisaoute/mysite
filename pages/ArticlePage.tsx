@@ -1,15 +1,12 @@
 
 import React, { useContext } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import ContentRenderer from '../components/ContentRenderer';
 import { ArticleContext } from '../context/ArticleContext';
-import { AuthContext } from '../context/AuthContext';
 
 const ArticlePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { articles, deleteArticle } = useContext(ArticleContext);
-  const { isAuthenticated } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const { articles } = useContext(ArticleContext);
   const article = articles.find(a => a.id === id);
 
   if (!article) {
@@ -24,13 +21,6 @@ const ArticlePage: React.FC = () => {
     );
   }
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this article?')) {
-      deleteArticle(article.id);
-      navigate('/contents');
-    }
-  };
-
   return (
     <article className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
       <header className="mb-8 border-b dark:border-gray-700 pb-6">
@@ -41,13 +31,6 @@ const ArticlePage: React.FC = () => {
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{article.title}</h1>
         </div>
       </header>
-
-      {isAuthenticated && (
-        <div className="flex justify-end space-x-2 mb-6">
-            <Link to={`/edit-article/${article.id}`} className="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600 transition text-sm font-medium">Edit</Link>
-            <button onClick={handleDelete} className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition text-sm font-medium">Delete</button>
-        </div>
-      )}
       
       <ContentRenderer content={article.content} />
     </article>

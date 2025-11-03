@@ -5,7 +5,6 @@ import { SearchIcon } from './icons/SearchIcon';
 import { Article } from '../types';
 import { ArticleContext } from '../context/ArticleContext';
 import ThemeToggleButton from './ThemeToggleButton';
-import { AuthContext } from '../context/AuthContext';
 
 const Header: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -13,7 +12,6 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const { articles } = useContext(ArticleContext);
-  const { isAuthenticated, logout } = useContext(AuthContext);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,19 +58,12 @@ const Header: React.FC = () => {
     };
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
   const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
     `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
       isActive
         ? 'bg-gray-900 dark:bg-blue-600 text-white'
         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
     }`;
-    
-  const buttonClasses = `px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100`;
 
   return (
     <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700">
@@ -97,18 +88,6 @@ const Header: React.FC = () => {
             </div>
             
             <ThemeToggleButton />
-
-            <div className="hidden md:flex items-center space-x-2">
-              {isAuthenticated ? (
-                  <>
-                  <NavLink to="/new-article" className={navLinkClasses}>New Article</NavLink>
-                  <NavLink to="/github-setup" className={navLinkClasses} title="Setup GitHub Auto-Save">⚙️</NavLink>
-                  <button onClick={handleLogout} className={buttonClasses}>Logout</button>
-                  </>
-              ) : (
-                  <NavLink to="/admin" className={navLinkClasses}>Admin</NavLink>
-              )}
-            </div>
 
             <div className="flex items-center" ref={searchContainerRef}>
               <form onSubmit={handleSearch} className="relative">
