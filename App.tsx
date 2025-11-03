@@ -16,12 +16,6 @@ import { ThemeProvider } from './context/ThemeContext';
 import { GitHubProvider } from './context/GitHubContext';
 
 const App: React.FC = () => {
-  const MainLayout: React.FC<{ children: React.ReactNode; wide?: boolean }> = ({ children, wide }) => (
-    <main className={`${wide ? 'max-w-7xl' : 'max-w-4xl'} mx-auto p-4 sm:p-6 lg:p-8`}>
-      {children}
-    </main>
-  );
-
   return (
     <ThemeProvider>
       <AuthProvider>
@@ -30,16 +24,18 @@ const App: React.FC = () => {
           <HashRouter>
             <div className="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen transition-colors duration-300">
               <Header />
-              <Routes>
-                <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
-                <Route path="/contents" element={<MainLayout><ContentsPage /></MainLayout>} />
-                <Route path="/resume" element={<MainLayout><ResumePage /></MainLayout>} />
-                <Route path="/article/:id" element={<MainLayout wide><ArticlePage /></MainLayout>} />
-                <Route path="/search" element={<MainLayout><SearchPage /></MainLayout>} />
-                <Route path="/admin" element={<MainLayout><AdminPage /></MainLayout>} />
-                <Route path="/new-article" element={<MainLayout><NewArticlePage /></MainLayout>} />
-                <Route path="/settings" element={<MainLayout><SettingsPage /></MainLayout>} />
-              </Routes>
+              <main className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/contents" element={<ContentsPage />} />
+                  <Route path="/resume" element={<ResumePage />} />
+                  <Route path="/article/:id" element={<ArticlePage />} />
+                  <Route path="/search" element={<SearchPage />} />
+                  <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/new-article" element={<NewArticlePage />} />
+                  <Route path="/settings" element={<SettingsPage />} />
+                </Routes>
+              </main>
               <footer className="text-center p-4 mt-8 border-t border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-sm">
                   <p>&copy; 2024 Abdelbari Saoutelhak. All rights reserved.</p>
               </footer>

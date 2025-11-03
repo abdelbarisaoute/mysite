@@ -14,18 +14,9 @@ const processLatexTextCommands = (text: string): string => {
   processed = processed.replace(/\\textit\{([^}]*)\}/g, '<em>$1</em>');
   processed = processed.replace(/\\emph\{([^}]*)\}/g, '<em>$1</em>');
   processed = processed.replace(/\\underline\{([^}]*)\}/g, '<u>$1</u>');
-  processed = processed.replace(/\\section\{([^}]*)\}/g, (match, content) => {
-    const id = `section-${content.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-    return `<h2 id="${id}" class="text-2xl font-bold mt-6 mb-3">${content}</h2>`;
-  });
-  processed = processed.replace(/\\subsection\{([^}]*)\}/g, (match, content) => {
-    const id = `subsection-${content.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-    return `<h3 id="${id}" class="text-xl font-bold mt-5 mb-2">${content}</h3>`;
-  });
-  processed = processed.replace(/\\subsubsection\{([^}]*)\}/g, (match, content) => {
-    const id = `subsubsection-${content.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
-    return `<h4 id="${id}" class="text-lg font-bold mt-4 mb-2">${content}</h4>`;
-  });
+  processed = processed.replace(/\\section\{([^}]*)\}/g, '<h2 class="text-2xl font-bold mt-6 mb-3">$1</h2>');
+  processed = processed.replace(/\\subsection\{([^}]*)\}/g, '<h3 class="text-xl font-bold mt-5 mb-2">$1</h3>');
+  processed = processed.replace(/\\subsubsection\{([^}]*)\}/g, '<h4 class="text-lg font-bold mt-4 mb-2">$1</h4>');
   return processed;
 };
 
