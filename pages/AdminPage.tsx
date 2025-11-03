@@ -1,6 +1,5 @@
-
 import React, { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const AdminPage: React.FC = () => {
@@ -47,6 +46,15 @@ const AdminPage: React.FC = () => {
             </button>
           </div>
         </form>
+        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <Link
+            to="/github-setup"
+            className="flex items-center justify-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium transition"
+          >
+            <span className="mr-2">⚙️</span>
+            Setup GitHub Auto-Save
+          </Link>
+        </div>
       </div>
     </div>
   );
