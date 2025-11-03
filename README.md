@@ -96,7 +96,7 @@ The website includes an admin panel for managing articles:
 
 ### Step 2: Add Token as a Repository Secret
 
-1. Go to your repository on GitHub: `https://github.com/[your-username]/mysite`
+1. Go to your repository on GitHub: `https://github.com/[your-username]/[repository-name]`
 2. Click **Settings** → **Secrets and variables** → **Actions**
 3. Click **"New repository secret"**
 4. Set the name to: `VITE_GITHUB_TOKEN`
@@ -120,7 +120,7 @@ This passes your token to the build process, enabling the auto-save feature.
 
 1. Push a change to the `main` branch to trigger a deployment
 2. Wait for the GitHub Actions workflow to complete
-3. Navigate to your deployed site at `https://[username].github.io/mysite/`
+3. Navigate to your deployed site at `https://[username].github.io/[repository-name]/`
 4. Go to `/admin` and log in
 5. Create a new article
 6. The article should be automatically saved to your repository!
