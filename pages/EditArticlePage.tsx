@@ -79,10 +79,7 @@ const EditArticlePage: React.FC = () => {
           type: 'success',
           message: 'Article updated successfully in repository!'
         });
-        // Wait a moment to show the success message
-        setTimeout(() => {
-          navigate(`/article/${updatedArticle.id}`);
-        }, 1500);
+        setIsSaving(false);
       } else {
         setSaveStatus({
           type: 'error',
@@ -92,6 +89,7 @@ const EditArticlePage: React.FC = () => {
       }
     } else {
       // If GitHub not configured, just navigate after local update
+      setIsSaving(false);
       navigate(`/article/${updatedArticle.id}`);
     }
   };
@@ -200,6 +198,17 @@ const EditArticlePage: React.FC = () => {
               {isSaving ? 'Saving...' : 'Save Changes'}
             </button>
         </div>
+        
+        {saveStatus && saveStatus.type === 'success' && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={() => navigate(`/article/${id}`)}
+              className="text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              Continue to article →
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

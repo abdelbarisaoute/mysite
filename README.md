@@ -94,7 +94,7 @@ To enable automatic saving of articles to your GitHub repository:
 2. **Configure the application:**
    - Copy `.env.example` to `.env`
    - Add your token: `VITE_GITHUB_TOKEN=your_token_here`
-   - Or update `metadata.json` with your GitHub configuration (not recommended for security)
+   - **Never commit the `.env` file to version control**
 
 3. **For production deployment:**
    - Add the token as a GitHub Actions secret:
@@ -102,6 +102,7 @@ To enable automatic saving of articles to your GitHub repository:
      - Navigate to Secrets and variables → Actions
      - Add a new repository secret named `VITE_GITHUB_TOKEN`
      - Use this in your deployment workflow
+   - Update your deployment workflow to pass the secret as an environment variable
 
 4. **How it works:**
    - When you create or edit an article, it will automatically be saved to `data/articles/`

@@ -28,8 +28,8 @@ async function getGitHubConfig(): Promise<GitHubConfig | null> {
       return null;
     }
     
-    // Get token from metadata (for development) or from environment
-    const token = metadata.github.token || import.meta.env.VITE_GITHUB_TOKEN;
+    // Get token from environment variable only (not from metadata for security)
+    const token = import.meta.env.VITE_GITHUB_TOKEN;
     
     if (!token) {
       console.warn('GitHub token not configured');
@@ -76,6 +76,13 @@ async function getFileSHA(
   }
 }
 
+interface GitHubCommitRequest {
+  message: string;
+  content: string;
+  branch: string;
+  sha?: string;
+}
+
 /**
  * Commits an article file to the GitHub repository
  */
@@ -96,8 +103,10 @@ export async function saveArticleToRepository(
     const filePath = `data/articles/${article.id}.ts`;
     const fileContent = generateArticleFileContent(article);
     
-    // Base64 encode the content
-    const contentBase64 = btoa(unescape(encodeURIComponent(fileContent)));
+    // Base64 encode the content using TextEncoder for proper UTF-8 encoding
+    const encoder = new TextEncoder();
+    const data = encoder.encode(fileContent);
+    const contentBase64 = btoa(String.fromCharCode(...data));
     
     // Get existing file SHA if updating
     let sha: string | null = null;
@@ -110,7 +119,7 @@ export async function saveArticleToRepository(
       ? `Update article: ${article.title}`
       : `Add new article: ${article.title}`;
     
-    const requestBody: any = {
+    const requestBody: GitHubCommitRequest = {
       message: commitMessage,
       content: contentBase64,
       branch: config.branch,
