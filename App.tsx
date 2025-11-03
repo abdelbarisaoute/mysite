@@ -9,18 +9,16 @@ import ArticlePage from './pages/ArticlePage';
 import SearchPage from './pages/SearchPage';
 import AdminPage from './pages/AdminPage';
 import NewArticlePage from './pages/NewArticlePage';
-import SettingsPage from './pages/SettingsPage';
-import { AuthProvider } from './context/AuthContext';
+import EditArticlePage from './pages/EditArticlePage';
 import { ArticleProvider } from './context/ArticleContext';
 import { ThemeProvider } from './context/ThemeContext';
-import { GitHubProvider } from './context/GitHubContext';
+import { AuthProvider } from './context/AuthContext';
 
 const App: React.FC = () => {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <GitHubProvider>
-          <ArticleProvider>
+        <ArticleProvider>
           <HashRouter>
             <div className="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen transition-colors duration-300">
               <Header />
@@ -33,18 +31,17 @@ const App: React.FC = () => {
                   <Route path="/search" element={<SearchPage />} />
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/new-article" element={<NewArticlePage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/edit-article/:id" element={<EditArticlePage />} />
                 </Routes>
               </main>
               <footer className="text-center p-4 mt-8 border-t border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-sm">
-                  <p>&copy; 2024 Abdelbari Saoutelhak. All rights reserved.</p>
+                  <p>&copy; 2024 Your Name Here. All rights reserved.</p>
               </footer>
             </div>
           </HashRouter>
         </ArticleProvider>
-      </GitHubProvider>
-    </AuthProvider>
-  </ThemeProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

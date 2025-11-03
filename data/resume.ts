@@ -25,7 +25,7 @@ Physics undergraduate student with practical experience in Raman spectroscopy on
 
 ## Experience
 **Research Internship - Laboratoire Charles Coulomb (L2C), University of Montpellier**
-*June 2 – June 27, 2024*
+*June 2 – June 27, 2025*
 - Experiments in Raman and photoluminescence (PL) spectroscopy on single-walled carbon nanotubes (SWCNTs)
 - Study of the effects of quaterthiophene (4T) encapsulation on optical and structural properties of nanotubes
 - Analysis of spectra (RBM, G, D, 2D, PL) to identify doping, mechanical strain, electronic interactions, and thermal effects

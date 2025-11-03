@@ -2,11 +2,9 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { ArticleContext } from '../context/ArticleContext';
-import { AuthContext } from '../context/AuthContext';
 
 const ContentsPage: React.FC = () => {
   const { articles } = useContext(ArticleContext);
-  const { isAuthenticated } = useContext(AuthContext);
 
   const sortedArticles = [...articles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
@@ -14,11 +12,6 @@ const ContentsPage: React.FC = () => {
     <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
       <div className="flex justify-between items-center mb-6 pb-2 border-b-2 border-blue-500">
         <h1 className="text-3xl font-bold">Table of Contents</h1>
-        {isAuthenticated && (
-           <Link to="/new-article" className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition text-sm font-medium">
-              New Article
-            </Link>
-        )}
       </div>
       <div className="space-y-6">
         {sortedArticles.map(article => (

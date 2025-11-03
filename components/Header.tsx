@@ -3,17 +3,17 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { SearchIcon } from './icons/SearchIcon';
 import { Article } from '../types';
-import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
 import ThemeToggleButton from './ThemeToggleButton';
+import { AuthContext } from '../context/AuthContext';
 
 const Header: React.FC = () => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<Article[]>([]);
   const navigate = useNavigate();
   const searchContainerRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, logout } = useContext(AuthContext);
   const { articles } = useContext(ArticleContext);
+  const { isAuthenticated, logout } = useContext(AuthContext);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +60,10 @@ const Header: React.FC = () => {
     };
   }, []);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
     `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
@@ -67,15 +71,16 @@ const Header: React.FC = () => {
         ? 'bg-gray-900 dark:bg-blue-600 text-white'
         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
     }`;
+    
+  const buttonClasses = `px-3 py-2 rounded-md text-sm font-medium transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100`;
 
   return (
     <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-200 dark:border-gray-700">
       <nav className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-1 text-xl font-bold text-gray-900 dark:text-gray-100">
-              <img src="/mysite/pi-logo.svg" alt="Pi Logo" className="h-16 w-16" />
-              <span>Phys</span>
+            <Link to="/" className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              MySite
             </Link>
           </div>
           <div className="flex items-center space-x-2 md:space-x-4">
@@ -89,17 +94,20 @@ const Header: React.FC = () => {
               <NavLink to="/resume" className={navLinkClasses}>
                 Resume
               </NavLink>
-              {isAuthenticated ? (
-                <>
-                  <NavLink to="/settings" className={navLinkClasses}>Settings</NavLink>
-                  <button onClick={logout} className={navLinkClasses({isActive: false})}>Logout</button>
-                </>
-              ) : (
-                <NavLink to="/admin" className={navLinkClasses}>Admin</NavLink>
-              )}
             </div>
             
             <ThemeToggleButton />
+
+            <div className="hidden md:flex items-center space-x-2">
+              {isAuthenticated ? (
+                  <>
+                  <NavLink to="/new-article" className={navLinkClasses}>New Article</NavLink>
+                  <button onClick={handleLogout} className={buttonClasses}>Logout</button>
+                  </>
+              ) : (
+                  <NavLink to="/admin" className={navLinkClasses}>Admin</NavLink>
+              )}
+            </div>
 
             <div className="flex items-center" ref={searchContainerRef}>
               <form onSubmit={handleSearch} className="relative">
