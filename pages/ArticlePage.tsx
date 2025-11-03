@@ -2,6 +2,7 @@
 import React, { useContext, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import ContentRenderer from '../components/ContentRenderer';
+import TableOfContents from '../components/TableOfContents';
 import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
 import { githubService } from '../services/githubService';
@@ -140,7 +141,16 @@ export const ${identifier}: Article = {
   }
 
   return (
-    <article className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
+    <div className="flex gap-6">
+      {/* Table of Contents - Left Sidebar */}
+      {!isEditing && (
+        <aside className="hidden lg:block w-64 flex-shrink-0">
+          <TableOfContents content={article.content} />
+        </aside>
+      )}
+      
+      {/* Main Article Content */}
+      <article className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm flex-1">
       {isEditing ? (
         <div className="space-y-4">
           <div>
@@ -237,7 +247,8 @@ export const ${identifier}: Article = {
           <ContentRenderer content={article.content} />
         </>
       )}
-    </article>
+      </article>
+    </div>
   );
 };
 
