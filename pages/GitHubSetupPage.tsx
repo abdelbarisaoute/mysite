@@ -3,13 +3,21 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isGitHubConfigured } from '../utils/githubAPI';
 
+interface GitHubMetadata {
+  owner: string;
+  repo: string;
+  branch: string;
+}
+
 const GitHubSetupPage: React.FC = () => {
   const [githubConfigured, setGithubConfigured] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [githubInfo, setGithubInfo] = useState<GitHubMetadata | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     checkConfiguration();
+    loadGitHubInfo();
   }, []);
 
   const checkConfiguration = async () => {
@@ -18,6 +26,28 @@ const GitHubSetupPage: React.FC = () => {
     setGithubConfigured(configured);
     setIsChecking(false);
   };
+
+  const loadGitHubInfo = async () => {
+    try {
+      const response = await fetch('/mysite/metadata.json');
+      if (response.ok) {
+        const metadata = await response.json();
+        if (metadata.github) {
+          setGithubInfo(metadata.github);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load GitHub metadata:', error);
+    }
+  };
+
+  const repoUrl = githubInfo 
+    ? `https://github.com/${githubInfo.owner}/${githubInfo.repo}`
+    : 'https://github.com/[your-username]/[your-repo]';
+  
+  const deployedUrl = githubInfo
+    ? `https://${githubInfo.owner}.github.io/${githubInfo.repo}/`
+    : 'https://[username].github.io/[repository-name]/';
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
@@ -110,7 +140,7 @@ const GitHubSetupPage: React.FC = () => {
                 Store your token securely in GitHub repository secrets so the deployment workflow can use it.
               </p>
               <ol className="list-decimal list-inside space-y-2 text-gray-700 dark:text-gray-300 ml-4">
-                <li>Go to your repository on GitHub: <code className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">https://github.com/abdelbarisaoute/mysite</code></li>
+                <li>Go to your repository on GitHub: <code className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">{repoUrl}</code></li>
                 <li>Click <strong>Settings</strong> → <strong>Secrets and variables</strong> → <strong>Actions</strong></li>
                 <li>Click <strong>"New repository secret"</strong></li>
                 <li>Set the name to: <code className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm font-bold">VITE_GITHUB_TOKEN</code></li>
@@ -155,7 +185,7 @@ const GitHubSetupPage: React.FC = () => {
               <ol className="list-decimal list-inside space-y-2 text-gray-700 dark:text-gray-300 ml-4">
                 <li>Push a change to the <code className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">main</code> branch to trigger a deployment</li>
                 <li>Wait for the GitHub Actions workflow to complete (check the Actions tab)</li>
-                <li>Navigate to your deployed site at <code className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">https://abdelbarisaoute.github.io/mysite/</code></li>
+                <li>Navigate to your deployed site at <code className="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">{deployedUrl}</code></li>
                 <li>
                   <button 
                     onClick={checkConfiguration}
