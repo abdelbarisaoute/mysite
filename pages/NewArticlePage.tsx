@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
 import { Article } from '../types';
 import { generateArticleFileContent, downloadFile } from '../utils/articleFileGenerator';
+import { saveArticleToRepository, isGitHubConfigured } from '../utils/githubAPI';
 
 
 const NewArticlePage: React.FC = () => {
@@ -13,6 +14,9 @@ const NewArticlePage: React.FC = () => {
   const [content, setContent] = useState('');
   const [showInstructions, setShowInstructions] = useState(false);
   const [savedArticle, setSavedArticle] = useState<Article | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
+  const [githubConfigured, setGithubConfigured] = useState(false);
   
   const { isAuthenticated } = useContext(AuthContext);
   const { addArticle } = useContext(ArticleContext);
@@ -24,12 +28,20 @@ const NewArticlePage: React.FC = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Check if GitHub is configured
+    isGitHubConfigured().then(setGithubConfigured);
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !summary.trim() || !content.trim()) {
         alert("Please fill out all fields.");
         return;
     }
+
+    setIsSaving(true);
+    setSaveStatus(null);
 
     const newArticle: Article = {
         id: (() => {
@@ -49,8 +61,33 @@ const NewArticlePage: React.FC = () => {
         date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
     };
 
+    // Save to localStorage first
     addArticle(newArticle);
     setSavedArticle(newArticle);
+
+    // Try to save to repository automatically
+    if (githubConfigured) {
+      const result = await saveArticleToRepository(newArticle, false);
+      
+      if (result.success) {
+        setSaveStatus({
+          type: 'success',
+          message: 'Article saved successfully to repository! The changes will appear after the next deployment.'
+        });
+      } else {
+        setSaveStatus({
+          type: 'error',
+          message: `Failed to save to repository: ${result.error || 'Unknown error'}. You can download the file manually.`
+        });
+      }
+    } else {
+      setSaveStatus({
+        type: 'info',
+        message: 'GitHub not configured. You can download the file manually to add it to your repository.'
+      });
+    }
+
+    setIsSaving(false);
     setShowInstructions(true);
   };
 
@@ -71,36 +108,64 @@ const NewArticlePage: React.FC = () => {
   if (showInstructions && savedArticle) {
     return (
       <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
-        <h1 className="text-3xl font-bold mb-6 pb-2 border-b-2 border-green-500">Article Saved Successfully!</h1>
+        <h1 className="text-3xl font-bold mb-6 pb-2 border-b-2 border-green-500">Article Saved!</h1>
         
         <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
           <p className="text-green-800 dark:text-green-200 font-semibold mb-2">✓ Article saved to browser storage</p>
           <p className="text-sm text-green-700 dark:text-green-300">Your article is now visible on the website.</p>
         </div>
 
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-          <h2 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3">📁 Save to Repository (Optional)</h2>
-          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
-            To persist this article permanently in your repository, follow these simplified steps:
-          </p>
-          
-          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300 mb-4">
-            <li>Click the "Download Article File" button below to download the TypeScript file</li>
-            <li>Save the file to <code className="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">data/articles/{savedArticle.id}.ts</code></li>
-            <li>Commit and push the changes to your repository</li>
-          </ol>
-
-          <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded text-sm text-green-800 dark:text-green-200 mb-3">
-            ✨ <strong>New!</strong> Articles are now automatically discovered! No need to manually update index.ts - just add your file and push!
+        {saveStatus && (
+          <div className={`mb-6 p-4 rounded-md border ${
+            saveStatus.type === 'success' 
+              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+              : saveStatus.type === 'error'
+              ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+              : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+          }`}>
+            <p className={`font-semibold mb-2 ${
+              saveStatus.type === 'success' 
+                ? 'text-green-800 dark:text-green-200' 
+                : saveStatus.type === 'error'
+                ? 'text-red-800 dark:text-red-200'
+                : 'text-blue-800 dark:text-blue-200'
+            }`}>
+              {saveStatus.type === 'success' ? '✓ ' : saveStatus.type === 'error' ? '⚠ ' : 'ℹ '}
+              {saveStatus.type === 'success' ? 'Saved to Repository' : saveStatus.type === 'error' ? 'Repository Save Failed' : 'Manual Save Required'}
+            </p>
+            <p className={`text-sm ${
+              saveStatus.type === 'success' 
+                ? 'text-green-700 dark:text-green-300' 
+                : saveStatus.type === 'error'
+                ? 'text-red-700 dark:text-red-300'
+                : 'text-blue-700 dark:text-blue-300'
+            }`}>
+              {saveStatus.message}
+            </p>
           </div>
+        )}
 
-          <button
-            onClick={handleDownloadFile}
-            className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition mb-2"
-          >
-            📥 Download Article File
-          </button>
-        </div>
+        {(!githubConfigured || saveStatus?.type === 'error') && (
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+            <h2 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3">📁 Manual Save Option</h2>
+            <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+              You can manually download and save the article file to your repository:
+            </p>
+            
+            <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300 mb-4">
+              <li>Click "Download Article File" below</li>
+              <li>Save to <code className="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">data/articles/{savedArticle.id}.ts</code></li>
+              <li>Commit and push to your repository</li>
+            </ol>
+
+            <button
+              onClick={handleDownloadFile}
+              className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition mb-2"
+            >
+              📥 Download Article File
+            </button>
+          </div>
+        )}
 
         <div className="flex justify-end space-x-2">
           <button
@@ -160,7 +225,13 @@ const NewArticlePage: React.FC = () => {
         </div>
         <div className="flex justify-end space-x-2">
             <button type="button" onClick={() => navigate('/contents')} className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition">Cancel</button>
-            <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition">Save Article</button>
+            <button 
+              type="submit" 
+              disabled={isSaving}
+              className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving ? 'Saving...' : 'Save Article'}
+            </button>
         </div>
       </form>
     </div>
