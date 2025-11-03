@@ -4,11 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
 import { Article } from '../types';
+import { generateArticleFileContent, downloadFile, generateImportStatement, generateArrayItem } from '../utils/articleFileGenerator';
 
 const NewArticlePage: React.FC = () => {
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [content, setContent] = useState('');
+  const [showInstructions, setShowInstructions] = useState(false);
+  const [savedArticle, setSavedArticle] = useState<Article | null>(null);
   
   const { isAuthenticated } = useContext(AuthContext);
   const { addArticle } = useContext(ArticleContext);
@@ -28,7 +31,7 @@ const NewArticlePage: React.FC = () => {
     }
 
     const newArticle: Article = {
-        id: title.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now(),
+        id: title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
         title: title.trim(),
         summary: summary.trim(),
         content: content.trim(),
@@ -36,8 +39,78 @@ const NewArticlePage: React.FC = () => {
     };
 
     addArticle(newArticle);
-    navigate(`/article/${newArticle.id}`);
+    setSavedArticle(newArticle);
+    setShowInstructions(true);
   };
+
+  const handleDownloadFile = () => {
+    if (!savedArticle) return;
+    
+    const fileContent = generateArticleFileContent(savedArticle);
+    const filename = `${savedArticle.id}.ts`;
+    downloadFile(fileContent, filename);
+  };
+
+  const handleContinue = () => {
+    if (savedArticle) {
+      navigate(`/article/${savedArticle.id}`);
+    }
+  };
+
+  if (showInstructions && savedArticle) {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
+        <h1 className="text-3xl font-bold mb-6 pb-2 border-b-2 border-green-500">Article Saved Successfully!</h1>
+        
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+          <p className="text-green-800 dark:text-green-200 font-semibold mb-2">✓ Article saved to browser storage</p>
+          <p className="text-sm text-green-700 dark:text-green-300">Your article is now visible on the website.</p>
+        </div>
+
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+          <h2 className="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-3">📁 Save to Repository (Optional)</h2>
+          <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+            To persist this article permanently in your repository, follow these steps:
+          </p>
+          
+          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700 dark:text-gray-300 mb-4">
+            <li>Click the "Download Article File" button below to download the TypeScript file</li>
+            <li>Save the file to <code className="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">data/articles/{savedArticle.id}.ts</code></li>
+            <li>Update <code className="bg-gray-200 dark:bg-gray-700 px-1 py-0.5 rounded">data/articles/index.ts</code> by adding:
+              <div className="mt-2 p-2 bg-gray-100 dark:bg-gray-700 rounded font-mono text-xs overflow-x-auto">
+                <div>{generateImportStatement(savedArticle)}</div>
+                <div className="mt-1">// Add to the articles array:</div>
+                <div>{generateArrayItem(savedArticle)}</div>
+              </div>
+            </li>
+            <li>Commit and push the changes to your repository</li>
+          </ol>
+
+          <button
+            onClick={handleDownloadFile}
+            className="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 transition mb-2"
+          >
+            📥 Download Article File
+          </button>
+        </div>
+
+        <div className="flex justify-end space-x-2">
+          <button
+            onClick={() => navigate('/contents')}
+            className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition"
+          >
+            Back to Contents
+          </button>
+          <button
+            onClick={handleContinue}
+            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition"
+          >
+            View Article
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
