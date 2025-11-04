@@ -2,6 +2,8 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { SearchIcon } from './icons/SearchIcon';
+import { MenuIcon } from './icons/MenuIcon';
+import { CloseIcon } from './icons/CloseIcon';
 import { Article } from '../types';
 import { ArticleContext } from '../context/ArticleContext';
 import ThemeToggleButton from './ThemeToggleButton';
@@ -9,6 +11,7 @@ import ThemeToggleButton from './ThemeToggleButton';
 const Header: React.FC = () => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<Article[]>([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const { articles } = useContext(ArticleContext);
@@ -46,6 +49,22 @@ const Header: React.FC = () => {
     setSuggestions([]);
   };
 
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [mobileMenuOpen]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -63,6 +82,13 @@ const Header: React.FC = () => {
       isActive
         ? 'bg-gray-900 dark:bg-blue-600 text-white'
         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
+    }`;
+
+  const mobileNavLinkClasses = ({ isActive }: { isActive: boolean }) =>
+    `block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+      isActive
+        ? 'bg-gray-900 dark:bg-blue-600 text-white'
+        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
     }`;
 
   return (
@@ -122,8 +148,48 @@ const Header: React.FC = () => {
                 )}
               </form>
             </div>
+
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <CloseIcon className="h-6 w-6" />
+              ) : (
+                <MenuIcon className="h-6 w-6" />
+              )}
+            </button>
           </div>
         </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden py-4 space-y-2 border-t border-gray-200 dark:border-gray-700">
+            <NavLink
+              to="/"
+              onClick={closeMobileMenu}
+              className={mobileNavLinkClasses}
+            >
+              Home
+            </NavLink>
+            <NavLink
+              to="/contents"
+              onClick={closeMobileMenu}
+              className={mobileNavLinkClasses}
+            >
+              Contents
+            </NavLink>
+            <NavLink
+              to="/resume"
+              onClick={closeMobileMenu}
+              className={mobileNavLinkClasses}
+            >
+              Resume
+            </NavLink>
+          </div>
+        )}
       </nav>
     </header>
   );
