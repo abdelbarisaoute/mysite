@@ -625,9 +625,17 @@ export const ${variableName}: Article = {
                     rows={12}
                     required
                   />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Use $$ for block equations and $ for inline equations (e.g., $e = mc^2$)
-                  </p>
+                  <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-xs">
+                    <p className="font-semibold mb-1">💡 LaTeX Support:</p>
+                    <div className="space-y-1">
+                      <p>• <strong>Inline math:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">$E = mc^2$</code></p>
+                      <p>• <strong>Display math:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">$$\int_0^\infty e^{"{-x}"} dx = 1$$</code></p>
+                      <p>• <strong>Matrices:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">$$\begin{"{pmatrix}"} a & b \\ c & d \end{"{pmatrix}"}$$</code></p>
+                      <p>• <strong>Aligned equations:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">$$\begin{"{aligned}"} x &= a \\ y &= b \end{"{aligned}"}$$</code></p>
+                      <p>• <strong>Cases:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">$$f(x) = \begin{"{cases}"} ... \end{"{cases}"}$$</code></p>
+                    </div>
+                    <p className="mt-2 font-semibold">📝 Markdown Support: # Headers, **bold**, *italic*, `code`, [links](url), - lists, &gt; quotes</p>
+                  </div>
                 </div>
 
                 <div className="flex gap-2">
