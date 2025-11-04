@@ -58,6 +58,8 @@ This repository is configured for automatic deployment to GitHub Pages. The depl
 
 **📚 For complete deployment instructions, see [ADMIN_GUIDE.md](ADMIN_GUIDE.md#deployment-guide)**
 
+**✅ Use the [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) to ensure proper setup**
+
 ### Quick Setup:
 
 1. Go to your repository settings on GitHub
