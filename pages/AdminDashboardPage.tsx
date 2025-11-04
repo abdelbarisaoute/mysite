@@ -68,7 +68,7 @@ const AdminDashboardPage: React.FC = () => {
     if (!githubToken.trim() || !repoOwner.trim() || !repoName.trim()) {
       setMessage({ 
         type: 'error', 
-        text: 'All fields are required. Please fill in all fields.' 
+        text: 'All fields are required.' 
       });
       return;
     }
@@ -92,8 +92,10 @@ const AdminDashboardPage: React.FC = () => {
       localStorage.removeItem('githubRepoOwner');
       localStorage.removeItem('githubRepoName');
       setGithubToken('');
-      setRepoOwner('');
-      setRepoName('');
+      // Reset to default values from getRepositoryInfo
+      const { repoOwner: defaultOwner, repoName: defaultName } = getRepositoryInfo();
+      setRepoOwner(defaultOwner);
+      setRepoName(defaultName);
       setTokenConfigured(false);
       setMessage({ 
         type: 'success', 
@@ -433,7 +435,7 @@ export const ${variableName}: Article = {
                 value={githubToken}
                 onChange={(e) => setGithubToken(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
-                placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                placeholder="Enter your GitHub Personal Access Token"
                 required
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
