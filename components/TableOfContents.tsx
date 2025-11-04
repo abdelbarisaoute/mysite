@@ -1,4 +1,5 @@
 import React, { useMemo, useEffect, useState } from 'react';
+import { generateId } from '../utils/idGenerator';
 
 interface TOCItem {
   id: string;
@@ -43,10 +44,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
     
     // Generate IDs and create TOC items
     allMatches.forEach((item) => {
-      const id = item.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-|-$/g, '');
+      const id = generateId(item.title);
       items.push({ id, title: item.title, level: item.level });
     });
     
@@ -70,8 +68,11 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
     const headings = document.querySelectorAll('h2, h3, h4');
     headings.forEach((heading) => observer.observe(heading));
 
-    return () => observer.disconnect();
-  }, []);
+    return () => {
+      // Cleanup: disconnect observer when component unmounts
+      observer.disconnect();
+    };
+  }, [tocItems]); // Re-run when tocItems change
 
   if (tocItems.length === 0) {
     return null;

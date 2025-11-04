@@ -2,18 +2,11 @@ import React, { useMemo } from 'react';
 import DOMPurify from 'dompurify';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import { generateId } from '../utils/idGenerator';
 
 interface ContentRendererProps {
   content: string;
 }
-
-// --- Helper: generate ID from title
-const generateId = (title: string): string => {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-};
 
 // --- Helper: process LaTeX text commands like \textbf, \section, etc.
 const processLatexTextCommands = (text: string): string => {
