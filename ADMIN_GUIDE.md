@@ -4,7 +4,7 @@ This guide provides detailed instructions for accessing and using the admin dash
 
 ## Table of Contents
 1. [Accessing the Admin Dashboard](#accessing-the-admin-dashboard)
-2. [First-Time Setup](#first-time-setup)
+2. [First-Time Setup](#first-time-setup) 
 3. [Managing Articles](#managing-articles)
 4. [GitHub Automation Setup](#github-automation-setup)
 5. [Security Best Practices](#security-best-practices)
