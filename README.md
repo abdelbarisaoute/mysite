@@ -6,6 +6,8 @@
 
 A modern, responsive personal academic website built with React, TypeScript, and Vite. This website includes features for displaying articles, a resume, dark mode support, and an admin panel for content management.
 
+> **📚 New to the admin dashboard?** Check out the comprehensive [ADMIN_GUIDE.md](ADMIN_GUIDE.md) for step-by-step instructions on accessing the admin panel, managing articles, setting up GitHub automation, and deploying your site.
+
 ## Features
 
 - 📝 Article management system with create, read, update, and delete functionality
@@ -54,7 +56,9 @@ npm run preview
 
 This repository is configured for automatic deployment to GitHub Pages. The deployment happens automatically when you push to the `main` branch.
 
-### Setup Instructions:
+**📚 For complete deployment instructions, see [ADMIN_GUIDE.md](ADMIN_GUIDE.md#deployment-guide)**
+
+### Quick Setup:
 
 1. Go to your repository settings on GitHub
 2. Navigate to **Settings** → **Pages**
@@ -73,120 +77,36 @@ You can also trigger a manual deployment:
 
 ## Admin Access
 
-The website includes an admin panel for managing articles:
+The website includes a secure admin panel for managing articles:
 
-- Navigate to `/admin` (or `#/admin` in HashRouter mode) to log in
-- Default password: `admin` (you can change this by setting the `VITE_ADMIN_PASSWORD` environment variable)
+- Navigate to `#/admin` to log in
+- Default password: `admin` (change this by setting the `VITE_ADMIN_PASSWORD` environment variable)
 - Once logged in, you can create, edit, and delete articles
-- **Automated article uploads to GitHub** (setup required - see below)
+- **Automated article uploads to GitHub** (setup required)
+
+**📚 For detailed instructions, see [ADMIN_GUIDE.md](ADMIN_GUIDE.md)**
+
+The admin guide includes:
+- Step-by-step login instructions
+- Complete GitHub automation setup
+- Security best practices
+- Troubleshooting tips
+- Deployment guide
 
 ## GitHub Automation Setup
 
-**Stop uploading articles manually!** This repository supports automated article uploads directly from the admin panel to your GitHub repository. Follow these steps to set it up:
+**Stop uploading articles manually!** This repository supports automated article uploads directly from the admin panel to your GitHub repository.
 
-### Step 1: Create a GitHub Personal Access Token
+**📚 For complete setup instructions, see [ADMIN_GUIDE.md](ADMIN_GUIDE.md)**
 
-1. Go to [GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)](https://github.com/settings/tokens)
-2. Click **"Generate new token (classic)"**
-3. Give it a descriptive name (e.g., "Article Auto-Save for mysite")
-4. Set an expiration date (recommended: 90 days or custom)
-5. **Select the `repo` scope** (this gives full control of private repositories)
-6. Scroll down and click **"Generate token"**
-7. **Copy the token immediately** (you won't be able to see it again!)
+### Quick Setup Summary
 
-### Step 2: Add Token as a Repository Secret
+1. **Create a GitHub Personal Access Token** with `repo` scope
+2. **Add it as a repository secret** named `VITE_GITHUB_TOKEN`
+3. **Verify the deployment workflow** includes the token in the build step
+4. **Test by creating an article** in the admin dashboard
 
-1. Go to your repository on GitHub: `https://github.com/[your-username]/[repository-name]`
-2. Click **Settings** → **Secrets and variables** → **Actions**
-3. Click **"New repository secret"**
-4. Set the name to: `VITE_GITHUB_TOKEN`
-5. Paste your personal access token in the value field
-6. Click **"Add secret"**
-
-### Step 3: Verify the Deployment Workflow
-
-The deployment workflow (`.github/workflows/deploy.yml`) should already be configured to use your secret. It should include:
-
-```yaml
-- name: Build
-  run: npm run build
-  env:
-    VITE_GITHUB_TOKEN: ${{ secrets.VITE_GITHUB_TOKEN }}
-```
-
-This passes your token to the build process, enabling the auto-save feature.
-
-### Step 4: Test the Setup
-
-1. Push a change to the `main` branch to trigger a deployment
-2. Wait for the GitHub Actions workflow to complete
-3. Navigate to your deployed site at `https://[username].github.io/[repository-name]/`
-4. Go to `/admin` and log in
-5. Create a new article
-6. The article should be automatically saved to your repository!
-7. Check your repository - you should see a new commit with your article in `data/articles/`
-
-### How It Works
-
-Once configured, the admin panel will:
-- ✅ Automatically commit new articles to `data/articles/[article-id].ts`
-- ✅ Generate properly formatted TypeScript files
-- ✅ Push changes directly to your GitHub repository
-- ✅ Trigger automatic redeployment via GitHub Actions
-- ✅ Show success/error status messages
-
-### Local Development Setup (Optional)
-
-If you want to test auto-save during local development:
-
-1. Copy `.env.example` to `.env` in your project root:
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Edit `.env` and configure your environment variables:
-   ```
-   VITE_GITHUB_TOKEN=your_personal_access_token_here
-   VITE_ADMIN_PASSWORD=your_secure_password
-   VITE_GITHUB_OWNER=your_github_username
-   VITE_GITHUB_REPO=your_repo_name
-   ```
-
-3. **Important:** Never commit the `.env` file to version control (it's already in `.gitignore`)
-
-4. Restart your development server:
-   ```bash
-   npm run dev
-   ```
-
-### Troubleshooting
-
-**"GitHub not configured" message appears:**
-- Verify you've added the `VITE_GITHUB_TOKEN` secret in repository settings
-- Check that your GitHub Actions workflow includes the `env` section in the build step
-- Ensure you've pushed changes and triggered a new deployment
-
-**"Failed to save to repository" error:**
-- Verify your personal access token has the `repo` scope
-- Check if your token has expired (tokens can expire after 90 days)
-- Ensure the token has permissions for your repository
-- Check the browser console for detailed error messages
-
-**Token expired:**
-- Generate a new personal access token following Step 1
-- Update the `VITE_GITHUB_TOKEN` secret in your repository settings
-
-### Manual Save Option (Fallback)
-
-If automatic saving is not configured or fails, you can still manage articles:
-1. Click **"Download Article File"** after creating/editing an article
-2. Save the downloaded `.ts` file to `data/articles/` in your local repository
-3. Commit and push the changes manually:
-   ```bash
-   git add data/articles/your-article.ts
-   git commit -m "Add new article"
-   git push
-   ```
+Once configured, articles are automatically committed to your repository and trigger redeployment!
 
 ## Project Structure
 
