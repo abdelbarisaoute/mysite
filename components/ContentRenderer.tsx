@@ -72,8 +72,8 @@ const restoreRemarkBlocks = (text: string, remarks: string[]) => {
     const rendered = renderMathToHTML(processed);
     const inner = DOMPurify.sanitize(rendered, { ADD_ATTR: ['class'] });
 
-    restored = restored.replace(
-      new RegExp(`__REMARK_PLACEHOLDER__${i}__REMARK_PLACEHOLDER__`, 'g'),
+    const placeholder = `__REMARK_PLACEHOLDER__${i}__REMARK_PLACEHOLDER__`;
+    restored = restored.split(placeholder).join(
       `<div class="border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20 p-4 my-3 rounded">
          <strong>Remarque:</strong> ${inner}
        </div>`
