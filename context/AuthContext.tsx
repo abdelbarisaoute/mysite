@@ -15,8 +15,8 @@ const defaultAuthContext: AuthContextType = {
 
 export const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 
-// Default admin password - users should change this
-const ADMIN_PASSWORD = 'admin';
+// Admin password from environment variable or default
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);

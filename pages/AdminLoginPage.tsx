@@ -52,9 +52,6 @@ const AdminLoginPage: React.FC = () => {
             Login
           </button>
         </form>
-        <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 text-center">
-          Default password: <code className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">admin</code>
-        </div>
       </div>
     </div>
   );

@@ -5,6 +5,13 @@ import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
 import { Article } from '../types';
 
+// Helper function to get repository information
+const getRepositoryInfo = () => {
+  const repoOwner = import.meta.env.VITE_GITHUB_OWNER || window.location.hostname.split('.')[0] || 'abdelbarisaoute';
+  const repoName = import.meta.env.VITE_GITHUB_REPO || window.location.pathname.split('/')[1] || 'mysite';
+  return { repoOwner, repoName };
+};
+
 const AdminDashboardPage: React.FC = () => {
   const { isAuthenticated, logout } = useContext(AuthContext);
   const { articles } = useContext(ArticleContext);
@@ -66,14 +73,23 @@ const AdminDashboardPage: React.FC = () => {
       )
       .join('');
 
+    // Properly escape the content for TypeScript template literal
+    const escapeForTemplate = (str: string): string => {
+      return str
+        .replace(/\\/g, '\\\\')  // Escape backslashes first
+        .replace(/`/g, '\\`')     // Escape backticks
+        .replace(/\$/g, '\\$')    // Escape dollar signs
+        .replace(/'/g, "\\'");    // Escape single quotes
+    };
+
     return `import { Article } from '../../types';
 
 export const ${variableName}: Article = {
   id: '${article.id}',
-  title: '${article.title.replace(/'/g, "\\'")}',
+  title: '${escapeForTemplate(article.title)}',
   date: '${article.date}',
-  summary: '${article.summary.replace(/'/g, "\\'")}',
-  content: \`${article.content.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`
+  summary: '${escapeForTemplate(article.summary)}',
+  content: \`${escapeForTemplate(article.content)}\`
 };
 `;
   };
@@ -104,12 +120,13 @@ export const ${variableName}: Article = {
     }
 
     const content = generateArticleContent(article);
-    const base64Content = btoa(unescape(encodeURIComponent(content)));
     
-    // Get repository info from the current URL or configuration
-    // For GitHub Pages: username.github.io/repo-name
-    const repoOwner = window.location.hostname.split('.')[0] || 'abdelbarisaoute';
-    const repoName = window.location.pathname.split('/')[1] || 'mysite';
+    // Use TextEncoder for proper UTF-8 encoding
+    const encoder = new TextEncoder();
+    const data = encoder.encode(content);
+    const base64Content = btoa(String.fromCharCode(...data));
+    
+    const { repoOwner, repoName } = getRepositoryInfo();
     const filePath = `data/articles/${article.id}.ts`;
 
     try {
@@ -216,8 +233,7 @@ export const ${variableName}: Article = {
     }
 
     setIsSubmitting(true);
-    const repoOwner = window.location.hostname.split('.')[0] || 'abdelbarisaoute';
-    const repoName = window.location.pathname.split('/')[1] || 'mysite';
+    const { repoOwner, repoName } = getRepositoryInfo();
     const filePath = `data/articles/${article.id}.ts`;
 
     try {
