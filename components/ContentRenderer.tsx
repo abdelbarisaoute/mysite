@@ -43,7 +43,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
         }
         
         // Handle bold text **text**
-        const processedLine = line.split(/(\*\*.*?\*\*)/g).map((segment, segIndex) => {
+        const processedLine = line.split(/(\*\*[^*]+?\*\*)/g).map((segment, segIndex) => {
           if (segment.startsWith('**') && segment.endsWith('**')) {
             return <strong key={segIndex}>{segment.substring(2, segment.length - 2)}</strong>;
           }
