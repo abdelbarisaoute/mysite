@@ -2,6 +2,46 @@
 
 This guide explains how to add images to your articles on the personal academic website.
 
+## Quick Method: Using the Admin Dashboard (Recommended)
+
+The easiest way to add images to your articles is through the built-in image upload feature in the admin dashboard.
+
+### Steps:
+
+1. **Access the Admin Dashboard**
+   - Navigate to `#/admin` and log in
+   - Click "New Article" or "Edit" an existing article
+
+2. **Click "📷 Upload Images"**
+   - You'll see an upload modal with drag-and-drop support
+
+3. **Upload Your Images**
+   - Drag and drop images, or click "Browse Files"
+   - Supports: PNG, JPG, GIF, SVG, WebP
+   - Multiple images can be uploaded at once
+
+4. **Download & Deploy**
+   - After upload, download the image files using the "Download Image" button
+   - Place the downloaded images in the `public/` directory of your repository
+   - Commit and push the images to GitHub
+   - The deployment workflow will make them available on your site
+
+5. **Insert into Article**
+   - Click "Insert into Article" to automatically add the image HTML to your content
+   - Or click "Copy HTML" to copy the markup and paste it manually
+   - The HTML is automatically generated with proper styling
+
+### Benefits:
+- ✅ No manual HTML writing needed
+- ✅ Automatic image markup generation
+- ✅ Preview of uploaded images
+- ✅ Proper styling classes pre-applied
+- ✅ Easy workflow integration
+
+## Manual Method: Direct Image Insertion
+
+If you prefer to manually add images or are working directly with article files:
+
 ## Overview
 
 Images can be embedded in article content using standard HTML `<img>` tags. The website's content renderer will display them properly within your articles.

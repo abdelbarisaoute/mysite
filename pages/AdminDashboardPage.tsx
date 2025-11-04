@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
 import { Article } from '../types';
 import ArticlePreview from '../components/ArticlePreview';
+import ImageUpload from '../components/ImageUpload';
 
 // Helper function to get repository information
 const getRepositoryInfo = () => {
@@ -636,6 +637,16 @@ export const ${variableName}: Article = {
                     </div>
                     <p className="mt-2 font-semibold">📝 Markdown Support: # Headers, **bold**, *italic*, `code`, [links](url), - lists, &gt; quotes</p>
                   </div>
+                  
+                  {/* Image Upload Component */}
+                  <ImageUpload 
+                    onImageInsert={(markdown) => {
+                      setFormData({ 
+                        ...formData, 
+                        content: formData.content + '\n\n' + markdown 
+                      });
+                    }} 
+                  />
                 </div>
 
                 <div className="flex gap-2">
