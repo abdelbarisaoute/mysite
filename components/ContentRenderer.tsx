@@ -1,8 +1,7 @@
 
 import React, { useMemo } from 'react';
-
-// This tells TypeScript that a 'katex' object exists on the global window object.
-declare const katex: any;
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 interface ContentRendererProps {
   content: string;
@@ -10,10 +9,6 @@ interface ContentRendererProps {
 
 const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
   const renderedParts = useMemo(() => {
-    if (typeof katex === 'undefined') {
-      return [<p key="no-katex">KaTeX library not loaded.</p>];
-    }
-    
     // Regex to find and capture LaTeX blocks ($$...$$) and inline math ($...$)
     const parts = content.split(/(\$\$[\s\S]*?\$\$|\$.*?\$)/g);
 
@@ -33,13 +28,35 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
         console.error("KaTeX rendering error:", error);
         return <span key={index} className="text-red-500">{part}</span>
       }
-      // Render newlines correctly from the string content
-      return part.split('\n').map((line, lineIndex) => (
-        <React.Fragment key={`${index}-${lineIndex}`}>
-          {line}
-          {lineIndex < part.split('\n').length - 1 && <br />}
-        </React.Fragment>
-      ));
+      
+      // Process markdown formatting for non-math parts
+      return part.split('\n').map((line, lineIndex) => {
+        // Handle headers
+        if (line.startsWith('### ')) {
+          return <h3 key={`${index}-${lineIndex}`} className="text-2xl font-bold mt-6 mb-3">{line.substring(4)}</h3>;
+        }
+        if (line.startsWith('## ')) {
+          return <h2 key={`${index}-${lineIndex}`} className="text-3xl font-bold mt-8 mb-4">{line.substring(3)}</h2>;
+        }
+        if (line.startsWith('# ')) {
+          return <h1 key={`${index}-${lineIndex}`} className="text-4xl font-bold mt-10 mb-5">{line.substring(2)}</h1>;
+        }
+        
+        // Handle bold text **text**
+        const processedLine = line.split(/(\*\*[^*]+?\*\*)/g).map((segment, segIndex) => {
+          if (segment.startsWith('**') && segment.endsWith('**')) {
+            return <strong key={segIndex}>{segment.substring(2, segment.length - 2)}</strong>;
+          }
+          return segment;
+        });
+        
+        return (
+          <React.Fragment key={`${index}-${lineIndex}`}>
+            {processedLine}
+            {lineIndex < part.split('\n').length - 1 && <br />}
+          </React.Fragment>
+        );
+      });
     });
   }, [content]);
 
