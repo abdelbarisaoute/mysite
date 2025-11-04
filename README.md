@@ -165,6 +165,19 @@ Articles are now automatically discovered! Simply:
 
 The build system uses Vite's `import.meta.glob` to automatically discover all article files in the `data/articles/` directory.
 
+## Troubleshooting
+
+### Articles Not Appearing After Deployment
+
+If you've added an article through the admin panel but don't see it on the live site:
+
+1. **Wait for deployment**: Automatic deployment takes 1-2 minutes after committing an article
+2. **Check deployment status**: Go to the **Actions** tab in your repository to verify the deployment succeeded
+3. **Clear browser cache**: Press `Ctrl+Shift+R` (Windows/Linux) or `Cmd+Shift+R` (Mac) to force refresh
+4. **Verify article file**: Check that the article file exists in `data/articles/` in your repository
+
+The site includes cache control headers to prevent HTML caching, but JavaScript bundles use hashed filenames for optimal performance.
+
 ### Changing the Base Path:
 
 If you want to deploy to a different repository name, update the `base` property in `vite.config.ts`:
