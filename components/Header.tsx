@@ -54,6 +54,18 @@ const Header: React.FC = () => {
   };
 
   useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
         setSuggestions([]);
@@ -70,6 +82,13 @@ const Header: React.FC = () => {
       isActive
         ? 'bg-gray-900 dark:bg-blue-600 text-white'
         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
+    }`;
+
+  const mobileNavLinkClasses = ({ isActive }: { isActive: boolean }) =>
+    `block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+      isActive
+        ? 'bg-gray-900 dark:bg-blue-600 text-white'
+        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
     }`;
 
   return (
@@ -151,39 +170,21 @@ const Header: React.FC = () => {
             <NavLink
               to="/"
               onClick={closeMobileMenu}
-              className={({ isActive }) =>
-                `block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive
-                    ? 'bg-gray-900 dark:bg-blue-600 text-white'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`
-              }
+              className={mobileNavLinkClasses}
             >
               Home
             </NavLink>
             <NavLink
               to="/contents"
               onClick={closeMobileMenu}
-              className={({ isActive }) =>
-                `block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive
-                    ? 'bg-gray-900 dark:bg-blue-600 text-white'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`
-              }
+              className={mobileNavLinkClasses}
             >
               Contents
             </NavLink>
             <NavLink
               to="/resume"
               onClick={closeMobileMenu}
-              className={({ isActive }) =>
-                `block px-3 py-2 rounded-md text-base font-medium transition-colors ${
-                  isActive
-                    ? 'bg-gray-900 dark:bg-blue-600 text-white'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`
-              }
+              className={mobileNavLinkClasses}
             >
               Resume
             </NavLink>
