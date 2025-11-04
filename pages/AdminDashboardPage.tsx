@@ -12,6 +12,9 @@ const getRepositoryInfo = () => {
   return { repoOwner, repoName };
 };
 
+// Common deployment message
+const DEPLOYMENT_INFO = 'The site will automatically rebuild within 1-2 minutes. Press Ctrl+Shift+R (Cmd+Shift+R on Mac) to see changes immediately.';
+
 const AdminDashboardPage: React.FC = () => {
   const { isAuthenticated, logout } = useContext(AuthContext);
   const { articles } = useContext(ArticleContext);
@@ -282,7 +285,7 @@ export const ${variableName}: Article = {
     if (success) {
       setMessage({ 
         type: 'success', 
-        text: `Article "${article.title}" has been ${editingArticle ? 'updated' : 'created'} and committed to GitHub! The site will automatically rebuild and deploy within 1-2 minutes. Use Ctrl+Shift+R (Cmd+Shift+R on Mac) to hard refresh and see the changes immediately.` 
+        text: `Article "${article.title}" has been ${editingArticle ? 'updated' : 'created'} and committed to GitHub! ${DEPLOYMENT_INFO}` 
       });
       resetForm();
     }
@@ -355,7 +358,7 @@ export const ${variableName}: Article = {
 
       setMessage({ 
         type: 'success', 
-        text: `Article "${article.title}" has been deleted from GitHub. The site will automatically rebuild and deploy within 1-2 minutes. Use Ctrl+Shift+R (Cmd+Shift+R on Mac) to hard refresh and see the changes immediately.` 
+        text: `Article "${article.title}" has been deleted from GitHub. ${DEPLOYMENT_INFO}` 
       });
     } catch (error) {
       console.error('GitHub API error:', error);
