@@ -75,8 +75,8 @@ You can also trigger a manual deployment:
 
 The website includes an admin panel for managing articles:
 
-- Navigate to `/admin` to log in
-- Default password: `admin` (you can change this in `context/AuthContext.tsx`)
+- Navigate to `/admin` (or `#/admin` in HashRouter mode) to log in
+- Default password: `admin` (you can change this by setting the `VITE_ADMIN_PASSWORD` environment variable)
 - Once logged in, you can create, edit, and delete articles
 - **Automated article uploads to GitHub** (setup required - see below)
 
@@ -144,9 +144,12 @@ If you want to test auto-save during local development:
    cp .env.example .env
    ```
 
-2. Edit `.env` and add your token:
+2. Edit `.env` and configure your environment variables:
    ```
    VITE_GITHUB_TOKEN=your_personal_access_token_here
+   VITE_ADMIN_PASSWORD=your_secure_password
+   VITE_GITHUB_OWNER=your_github_username
+   VITE_GITHUB_REPO=your_repo_name
    ```
 
 3. **Important:** Never commit the `.env` file to version control (it's already in `.gitignore`)
