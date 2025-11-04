@@ -95,8 +95,20 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
     }
     
     // Fallback to environment or defaults
-    const repoOwner = import.meta.env.VITE_GITHUB_OWNER || window.location.hostname.split('.')[0] || 'abdelbarisaoute';
-    const repoName = import.meta.env.VITE_GITHUB_REPO || window.location.pathname.split('/')[1] || 'mysite';
+    let repoOwner = import.meta.env.VITE_GITHUB_OWNER;
+    let repoName = import.meta.env.VITE_GITHUB_REPO;
+    
+    // Try to extract from hostname/pathname with validation
+    if (!repoOwner) {
+      const hostnameOwner = window.location.hostname.split('.')[0];
+      repoOwner = hostnameOwner && hostnameOwner !== 'localhost' ? hostnameOwner : 'abdelbarisaoute';
+    }
+    
+    if (!repoName) {
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      repoName = pathParts.length > 0 && pathParts[0] !== 'admin' ? pathParts[0] : 'mysite';
+    }
+    
     return { repoOwner, repoName };
   };
 
@@ -124,8 +136,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
 
     const { repoOwner, repoName } = getRepositoryInfo();
     
-    // Clean filename for URL-safe usage
-    const cleanName = image.name.toLowerCase().replace(/[^a-z0-9.]/g, '-');
+    // Clean filename for URL-safe usage while preserving file extension
+    const cleanName = image.name.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
     const filePath = `public/${cleanName}`;
 
     try {
@@ -139,7 +151,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
       // Read file as ArrayBuffer and convert to base64
       const arrayBuffer = await image.file.arrayBuffer();
       const bytes = new Uint8Array(arrayBuffer);
-      const base64Content = btoa(String.fromCharCode(...bytes));
+      
+      // Convert to base64 using chunked approach to avoid stack overflow
+      let binary = '';
+      const chunkSize = 8192;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        const chunk = bytes.subarray(i, i + chunkSize);
+        binary += String.fromCharCode(...chunk);
+      }
+      const base64Content = btoa(binary);
 
       // Check if file already exists
       let sha: string | undefined;
@@ -236,8 +256,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
   };
 
   const generateImageMarkdown = (imageName: string, alt: string = ''): string => {
-    // Generate clean filename for URL
-    const cleanName = imageName.toLowerCase().replace(/[^a-z0-9.]/g, '-');
+    // Generate clean filename for URL while preserving file extension
+    const cleanName = imageName.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
     const altText = alt || imageName.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
     
     return `<img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md my-4" />`;
