@@ -282,7 +282,7 @@ export const ${variableName}: Article = {
     if (success) {
       setMessage({ 
         type: 'success', 
-        text: `Article "${article.title}" has been ${editingArticle ? 'updated' : 'created'} and committed to GitHub! The site will update after the next deployment.` 
+        text: `Article "${article.title}" has been ${editingArticle ? 'updated' : 'created'} and committed to GitHub! The site will automatically rebuild and deploy within 1-2 minutes. Use Ctrl+Shift+R (Cmd+Shift+R on Mac) to hard refresh and see the changes immediately.` 
       });
       resetForm();
     }
@@ -355,7 +355,7 @@ export const ${variableName}: Article = {
 
       setMessage({ 
         type: 'success', 
-        text: `Article "${article.title}" has been deleted from GitHub. The site will update after the next deployment.` 
+        text: `Article "${article.title}" has been deleted from GitHub. The site will automatically rebuild and deploy within 1-2 minutes. Use Ctrl+Shift+R (Cmd+Shift+R on Mac) to hard refresh and see the changes immediately.` 
       });
     } catch (error) {
       console.error('GitHub API error:', error);
