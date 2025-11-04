@@ -64,10 +64,19 @@ const AdminDashboardPage: React.FC = () => {
   const handleSaveTokenSettings = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate required fields
+    if (!githubToken.trim() || !repoOwner.trim() || !repoName.trim()) {
+      setMessage({ 
+        type: 'error', 
+        text: 'All fields are required. Please fill in all fields.' 
+      });
+      return;
+    }
+    
     // Save token and repo info to localStorage
-    localStorage.setItem('githubToken', githubToken);
-    localStorage.setItem('githubRepoOwner', repoOwner);
-    localStorage.setItem('githubRepoName', repoName);
+    localStorage.setItem('githubToken', githubToken.trim());
+    localStorage.setItem('githubRepoOwner', repoOwner.trim());
+    localStorage.setItem('githubRepoName', repoName.trim());
     
     setTokenConfigured(true);
     setShowTokenSetup(false);
@@ -83,6 +92,8 @@ const AdminDashboardPage: React.FC = () => {
       localStorage.removeItem('githubRepoOwner');
       localStorage.removeItem('githubRepoName');
       setGithubToken('');
+      setRepoOwner('');
+      setRepoName('');
       setTokenConfigured(false);
       setMessage({ 
         type: 'success', 
@@ -513,6 +524,9 @@ export const ${variableName}: Article = {
               <li>Each commit triggers automatic redeployment</li>
               <li>Your token is stored securely in your browser</li>
             </ul>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">
+              <strong>Security Note:</strong> Your token is stored in your browser's localStorage and never sent to any third-party servers. Only use this on trusted devices. For production deployments, consider using environment variables or GitHub repository secrets.
+            </p>
           </div>
         )}
       </div>
