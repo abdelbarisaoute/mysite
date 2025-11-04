@@ -21,7 +21,7 @@ const App: React.FC = () => {
           <HashRouter>
             <div className="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen transition-colors duration-300">
               <Header />
-              <main className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+              <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
                 <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/contents" element={<ContentsPage />} />

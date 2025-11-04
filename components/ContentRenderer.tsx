@@ -109,7 +109,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
     return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class'] }) }} />;
   }, [content]);
 
-  return <div className="prose dark:prose-invert max-w-none text-lg leading-relaxed">{renderedParts}</div>;
+  return <div className="prose dark:prose-invert max-w-none text-lg leading-relaxed overflow-x-auto">{renderedParts}</div>;
 };
 
 export default ContentRenderer;

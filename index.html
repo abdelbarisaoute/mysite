@@ -25,6 +25,23 @@
       body {
         font-family: 'Inter', sans-serif;
       }
+      /* Ensure math equations are responsive and don't overflow */
+      .katex-display {
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0.5rem 0;
+      }
+      .katex {
+        font-size: 1em;
+      }
+      @media (max-width: 640px) {
+        .katex {
+          font-size: 0.9em;
+        }
+        .katex-display {
+          font-size: 0.85em;
+        }
+      }
     </style>
   <script type="importmap">
 {
