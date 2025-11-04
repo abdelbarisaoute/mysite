@@ -165,6 +165,59 @@ Articles are now automatically discovered! Simply:
 
 The build system uses Vite's `import.meta.glob` to automatically discover all article files in the `data/articles/` directory.
 
+### LaTeX and Math Support:
+
+The website includes comprehensive LaTeX rendering capabilities powered by KaTeX:
+
+**Mathematical Expressions:**
+- Inline math: `$E = mc^2$` renders as $E = mc^2$
+- Display math: `$$ \int_0^1 x^2 dx $$` renders centered
+- Alternative notations: `\(...\)` for inline, `\[...\]` for display
+
+**LaTeX Text Commands:**
+- `\textbf{bold text}` for **bold text**
+- `\textit{italic text}` for *italic text*
+- `\emph{emphasized text}` for *emphasized text*
+- `\underline{underlined text}` for underlined text
+
+**Document Structure:**
+- `\section{Section Title}` for main sections
+- `\subsection{Subsection Title}` for subsections
+- `\subsubsection{Subsubsection Title}` for sub-subsections
+
+**Remark Blocks:**
+```latex
+\begin{remarque}
+This is a highlighted remark block that supports both math $x^2$ and formatting.
+\end{remarque}
+```
+
+**Example Article with LaTeX:**
+```typescript
+export const exampleArticle: Article = {
+  id: 'example',
+  title: 'LaTeX Example',
+  date: '2024-11-04',
+  summary: 'Demonstrating LaTeX features',
+  content: `
+\\section{Introduction}
+
+This article uses \\textbf{bold} and \\textit{italic} text.
+
+\\subsection{Mathematics}
+
+Inline math: $E = mc^2$
+
+Display equation:
+$$ \\int_{-\\infty}^{\\infty} e^{-x^2} dx = \\sqrt{\\pi} $$
+
+\\begin{remarque}
+Important: The equation $a^2 + b^2 = c^2$ is the Pythagorean theorem.
+\\end{remarque}
+  `
+};
+```
+
 ## Troubleshooting
 
 ### Articles Not Appearing After Deployment
