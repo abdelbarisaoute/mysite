@@ -21,7 +21,7 @@ Once your site is deployed, you can access the admin panel in two ways:
 
 **For GitHub Pages Deployment:**
 - Visit: `https://[your-username].github.io/[repository-name]/#/admin`
-- Example: `https://abdelbarisaoute.github.io/mysite/#/admin`
+- Example: `https://yourusername.github.io/yourrepo/#/admin`
 
 **For Local Development:**
 - Start the development server: `npm run dev`
@@ -316,7 +316,7 @@ This section enables automatic article uploads directly from the admin panel to 
 
 3. **Access your site**:
    - URL: `https://[your-username].github.io/[repository-name]/`
-   - Example: `https://abdelbarisaoute.github.io/mysite/`
+   - Example: `https://yourusername.github.io/yourrepo/`
 
 #### Step 4: Verify
 
