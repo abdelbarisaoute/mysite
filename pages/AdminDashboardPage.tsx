@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
 import { Article } from '../types';
+import ArticlePreview from '../components/ArticlePreview';
 
 // Helper function to get repository information
 const getRepositoryInfo = () => {
@@ -30,6 +31,7 @@ const AdminDashboardPage: React.FC = () => {
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   
   // GitHub token configuration state
   const [showTokenSetup, setShowTokenSetup] = useState(false);
@@ -542,96 +544,123 @@ export const ${variableName}: Article = {
           <h2 className="text-2xl font-bold">
             {editingArticle ? 'Edit Article' : 'Create New Article'}
           </h2>
-          {!showCreateForm && (
-            <button
-              onClick={() => setShowCreateForm(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
-            >
-              New Article
-            </button>
-          )}
+          <div className="flex gap-2">
+            {showCreateForm && (
+              <button
+                onClick={() => setShowPreview(!showPreview)}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
+                {showPreview ? 'Hide Preview' : 'Show Preview'}
+              </button>
+            )}
+            {!showCreateForm && (
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
+                New Article
+              </button>
+            )}
+          </div>
         </div>
 
         {showCreateForm && (
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="title" className="block text-sm font-medium mb-2">
-                Title *
-              </label>
-              <input
-                type="text"
-                id="title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                required
-              />
+          <div className={`grid ${showPreview ? 'grid-cols-2' : 'grid-cols-1'} gap-6`}>
+            {/* Editor Panel */}
+            <div className="space-y-4">
+              <form onSubmit={handleSubmit} id="article-form">
+                <div className="mb-4">
+                  <label htmlFor="title" className="block text-sm font-medium mb-2">
+                    Title *
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    required
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="date" className="block text-sm font-medium mb-2">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    id="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Leave empty to use today's date
+                  </p>
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="summary" className="block text-sm font-medium mb-2">
+                    Summary *
+                  </label>
+                  <textarea
+                    id="summary"
+                    value={formData.summary}
+                    onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    rows={3}
+                    required
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="content" className="block text-sm font-medium mb-2">
+                    Content * (Supports Markdown and LaTeX)
+                  </label>
+                  <textarea
+                    id="content"
+                    value={formData.content}
+                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
+                    rows={12}
+                    required
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Use $$ for block equations and $ for inline equations (e.g., $e = mc^2$)
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded transition-colors"
+                  >
+                    {isSubmitting ? 'Saving...' : (editingArticle ? 'Update Article' : 'Create Article')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
 
-            <div className="mb-4">
-              <label htmlFor="date" className="block text-sm font-medium mb-2">
-                Date
-              </label>
-              <input
-                type="date"
-                id="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Leave empty to use today's date
-              </p>
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="summary" className="block text-sm font-medium mb-2">
-                Summary *
-              </label>
-              <textarea
-                id="summary"
-                value={formData.summary}
-                onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                rows={3}
-                required
-              />
-            </div>
-
-            <div className="mb-4">
-              <label htmlFor="content" className="block text-sm font-medium mb-2">
-                Content * (Supports Markdown and LaTeX)
-              </label>
-              <textarea
-                id="content"
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
-                rows={12}
-                required
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Use $$ for block equations and $ for inline equations (e.g., $e = mc^2$)
-              </p>
-            </div>
-
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded transition-colors"
-              >
-                {isSubmitting ? 'Saving...' : (editingArticle ? 'Update Article' : 'Create Article')}
-              </button>
-              <button
-                type="button"
-                onClick={resetForm}
-                className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
+            {/* Preview Panel */}
+            {showPreview && (
+              <div className="border-l border-gray-300 dark:border-gray-600 pl-6">
+                <ArticlePreview
+                  title={formData.title}
+                  date={formData.date}
+                  summary={formData.summary}
+                  content={formData.content}
+                />
+              </div>
+            )}
+          </div>
         )}
       </div>
 
