@@ -8,7 +8,15 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<Array<{ name: string; url: string; size: number }>>([]);
   const [showModal, setShowModal] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Get base path from vite config or default to '/mysite/'
+  const basePath = import.meta.env.BASE_URL || '/mysite/';
+
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -39,7 +47,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
     const imageFiles = files.filter(file => file.type.startsWith('image/'));
     
     if (imageFiles.length === 0) {
-      alert('Please upload only image files (PNG, JPG, GIF, SVG, WebP)');
+      showNotification('error', 'Please upload only image files (PNG, JPG, GIF, SVG, WebP)');
       return;
     }
 
@@ -69,7 +77,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
     const cleanName = imageName.toLowerCase().replace(/[^a-z0-9.]/g, '-');
     const altText = alt || imageName.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
     
-    return `<img src="/mysite/${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md my-4" />`;
+    return `<img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md my-4" />`;
   };
 
   const handleInsertImage = (image: { name: string; url: string }) => {
@@ -81,7 +89,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
   const handleCopyMarkdown = (image: { name: string; url: string }) => {
     const markdown = generateImageMarkdown(image.name);
     navigator.clipboard.writeText(markdown);
-    alert('Image markdown copied to clipboard!');
+    showNotification('success', 'Image HTML copied to clipboard!');
   };
 
   const handleDownloadImage = (image: { name: string; url: string }) => {
@@ -97,6 +105,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   return (
     <div className="my-4">
       <button
@@ -110,6 +120,17 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
+              {/* Notification Toast */}
+              {notification && (
+                <div className={`mb-4 p-3 rounded-lg ${
+                  notification.type === 'success' 
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 border border-green-300 dark:border-green-700'
+                    : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200 border border-red-300 dark:border-red-700'
+                }`}>
+                  {notification.message}
+                </div>
+              )}
+
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Upload Images</h2>
                 <button
