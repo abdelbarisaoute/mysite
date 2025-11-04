@@ -4,9 +4,19 @@ interface ImageUploadProps {
   onImageInsert: (markdown: string) => void;
 }
 
+interface UploadedImage {
+  name: string;
+  url: string;
+  size: number;
+  file?: File;
+  uploaded?: boolean;
+  uploading?: boolean;
+  error?: string;
+}
+
 const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<Array<{ name: string; url: string; size: number }>>([]);
+  const [uploadedImages, setUploadedImages] = useState<Array<UploadedImage>>([]);
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -55,10 +65,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
-        const newImage = {
+        const newImage: UploadedImage = {
           name: file.name,
           url: result,
-          size: file.size
+          size: file.size,
+          file: file,
+          uploaded: false,
+          uploading: false
         };
         setUploadedImages(prev => [...prev, newImage]);
       };
@@ -72,27 +85,197 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
+  // Get repository information from localStorage or environment
+  const getRepositoryInfo = () => {
+    const savedRepoOwner = localStorage.getItem('githubRepoOwner');
+    const savedRepoName = localStorage.getItem('githubRepoName');
+    
+    if (savedRepoOwner && savedRepoName) {
+      return { repoOwner: savedRepoOwner, repoName: savedRepoName };
+    }
+    
+    // Fallback to environment or defaults
+    let repoOwner = import.meta.env.VITE_GITHUB_OWNER;
+    let repoName = import.meta.env.VITE_GITHUB_REPO;
+    
+    // Try to extract from hostname/pathname with validation
+    if (!repoOwner) {
+      const hostnameOwner = window.location.hostname.split('.')[0];
+      repoOwner = hostnameOwner && hostnameOwner !== 'localhost' ? hostnameOwner : 'abdelbarisaoute';
+    }
+    
+    if (!repoName) {
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      repoName = pathParts.length > 0 && pathParts[0] !== 'admin' ? pathParts[0] : 'mysite';
+    }
+    
+    return { repoOwner, repoName };
+  };
+
+  // Upload image to GitHub repository
+  const uploadImageToGitHub = async (image: UploadedImage): Promise<boolean> => {
+    const token = localStorage.getItem('githubToken') || import.meta.env.VITE_GITHUB_TOKEN;
+    
+    if (!token) {
+      setUploadedImages(prev => prev.map(img => 
+        img.name === image.name 
+          ? { ...img, error: 'GitHub token not configured', uploading: false } 
+          : img
+      ));
+      return false;
+    }
+
+    if (!image.file) {
+      setUploadedImages(prev => prev.map(img => 
+        img.name === image.name 
+          ? { ...img, error: 'File data not available', uploading: false } 
+          : img
+      ));
+      return false;
+    }
+
+    const { repoOwner, repoName } = getRepositoryInfo();
+    
+    // Clean filename for URL-safe usage while preserving file extension
+    const cleanName = image.name.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
+    const filePath = `public/${cleanName}`;
+
+    try {
+      // Set uploading state
+      setUploadedImages(prev => prev.map(img => 
+        img.name === image.name 
+          ? { ...img, uploading: true, error: undefined } 
+          : img
+      ));
+
+      // Read file as ArrayBuffer and convert to base64
+      const arrayBuffer = await image.file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      
+      // Convert to base64 using chunked approach to avoid stack overflow
+      let binary = '';
+      const chunkSize = 8192;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        const chunk = bytes.subarray(i, i + chunkSize);
+        binary += String.fromCharCode(...chunk);
+      }
+      const base64Content = btoa(binary);
+
+      // Check if file already exists
+      let sha: string | undefined;
+      try {
+        const getResponse = await fetch(
+          `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+          {
+            headers: {
+              'Authorization': `token ${token}`,
+              'Accept': 'application/vnd.github.v3+json',
+            },
+          }
+        );
+        if (getResponse.ok) {
+          const data = await getResponse.json();
+          sha = data.sha;
+        }
+      } catch (e) {
+        // File doesn't exist, that's fine
+      }
+
+      // Upload the file
+      const response = await fetch(
+        `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: `Add image: ${cleanName}`,
+            content: base64Content,
+            sha: sha,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload to GitHub');
+      }
+
+      // Update state to show success
+      setUploadedImages(prev => prev.map(img => 
+        img.name === image.name 
+          ? { ...img, uploaded: true, uploading: false, name: cleanName } 
+          : img
+      ));
+
+      return true;
+    } catch (error) {
+      console.error('GitHub API error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setUploadedImages(prev => prev.map(img => 
+        img.name === image.name 
+          ? { ...img, error: errorMessage, uploading: false } 
+          : img
+      ));
+      return false;
+    }
+  };
+
+  // Upload all images to GitHub
+  const uploadAllToGitHub = async () => {
+    const token = localStorage.getItem('githubToken') || import.meta.env.VITE_GITHUB_TOKEN;
+    
+    if (!token) {
+      showNotification('error', 'GitHub token not configured. Please set up GitHub token in the dashboard settings.');
+      return;
+    }
+
+    const imagesToUpload = uploadedImages.filter(img => !img.uploaded && !img.uploading);
+    
+    if (imagesToUpload.length === 0) {
+      showNotification('error', 'No images to upload or all images already uploaded.');
+      return;
+    }
+
+    showNotification('success', `Uploading ${imagesToUpload.length} image(s)...`);
+
+    let successCount = 0;
+    for (const image of imagesToUpload) {
+      const success = await uploadImageToGitHub(image);
+      if (success) successCount++;
+    }
+
+    if (successCount === imagesToUpload.length) {
+      showNotification('success', `Successfully uploaded ${successCount} image(s) to GitHub! The site will rebuild automatically.`);
+    } else {
+      showNotification('error', `Uploaded ${successCount} out of ${imagesToUpload.length} image(s). Check individual errors.`);
+    }
+  };
+
   const generateImageMarkdown = (imageName: string, alt: string = ''): string => {
-    // Generate clean filename for URL
-    const cleanName = imageName.toLowerCase().replace(/[^a-z0-9.]/g, '-');
+    // Generate clean filename for URL while preserving file extension
+    const cleanName = imageName.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
     const altText = alt || imageName.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
     
     return `<img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md my-4" />`;
   };
 
-  const handleInsertImage = (image: { name: string; url: string }) => {
+  const handleInsertImage = (image: UploadedImage) => {
     const markdown = generateImageMarkdown(image.name);
     onImageInsert(markdown);
-    setShowModal(false);
+    showNotification('success', 'Image HTML inserted into article!');
   };
 
-  const handleCopyMarkdown = (image: { name: string; url: string }) => {
+  const handleCopyMarkdown = (image: UploadedImage) => {
     const markdown = generateImageMarkdown(image.name);
     navigator.clipboard.writeText(markdown);
     showNotification('success', 'Image HTML copied to clipboard!');
   };
 
-  const handleDownloadImage = (image: { name: string; url: string }) => {
+  const handleDownloadImage = (image: UploadedImage) => {
     const a = document.createElement('a');
     a.href = image.url;
     a.download = image.name;
@@ -175,21 +358,41 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
               </div>
 
               {/* Instructions */}
-              <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
-                <h3 className="font-bold mb-2">📝 Important Instructions:</h3>
+              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h3 className="font-bold mb-2">🚀 Direct GitHub Upload (Recommended)</h3>
                 <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li>After uploading, download the image files to your computer</li>
-                  <li>Place the downloaded images in the <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">public/</code> directory of your repository</li>
-                  <li>Commit and push the images to GitHub</li>
-                  <li>The images will be available after deployment</li>
+                  <li>Upload your images using the area above</li>
+                  <li>Click "Upload All to GitHub" to commit images directly to your repository</li>
+                  <li>Images will be available automatically after deployment (1-2 minutes)</li>
                   <li>Click "Insert" to add the image HTML to your article content</li>
+                </ol>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                  <strong>Note:</strong> GitHub token must be configured in dashboard settings for direct upload to work.
+                </p>
+              </div>
+
+              <div className="mt-2 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                <h3 className="font-bold mb-2">📥 Manual Download (Alternative)</h3>
+                <ol className="list-decimal list-inside space-y-1 text-sm">
+                  <li>Download images individually using the "Download" button</li>
+                  <li>Place the downloaded images in the <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">public/</code> directory of your repository</li>
+                  <li>Commit and push the images to GitHub manually</li>
                 </ol>
               </div>
 
               {/* Uploaded Images */}
               {uploadedImages.length > 0 && (
                 <div className="mt-6">
-                  <h3 className="text-xl font-bold mb-4">Uploaded Images ({uploadedImages.length})</h3>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-bold">Uploaded Images ({uploadedImages.length})</h3>
+                    <button
+                      onClick={uploadAllToGitHub}
+                      disabled={uploadedImages.every(img => img.uploaded || img.uploading)}
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      🚀 Upload All to GitHub
+                    </button>
+                  </div>
                   <div className="space-y-4">
                     {uploadedImages.map((image, index) => (
                       <div key={index} className="border dark:border-gray-600 rounded-lg p-4">
@@ -200,8 +403,28 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                             className="w-32 h-32 object-cover rounded"
                           />
                           <div className="flex-1">
-                            <p className="font-medium">{image.name}</p>
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-medium">{image.name}</p>
+                              {image.uploading && (
+                                <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
+                                  Uploading...
+                                </span>
+                              )}
+                              {image.uploaded && (
+                                <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded">
+                                  ✓ Uploaded
+                                </span>
+                              )}
+                              {image.error && (
+                                <span className="text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-1 rounded">
+                                  ✗ Error
+                                </span>
+                              )}
+                            </div>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Size: {formatFileSize(image.size)}</p>
+                            {image.error && (
+                              <p className="text-sm text-red-600 dark:text-red-400 mt-1">Error: {image.error}</p>
+                            )}
                             
                             <div className="mt-2 space-y-2">
                               <div className="text-sm">
@@ -224,12 +447,23 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                                 >
                                   Copy HTML
                                 </button>
-                                <button
-                                  onClick={() => handleDownloadImage(image)}
-                                  className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700"
-                                >
-                                  Download Image
-                                </button>
+                                {!image.uploaded && (
+                                  <>
+                                    <button
+                                      onClick={() => uploadImageToGitHub(image)}
+                                      disabled={image.uploading}
+                                      className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 disabled:bg-gray-400"
+                                    >
+                                      Upload to GitHub
+                                    </button>
+                                    <button
+                                      onClick={() => handleDownloadImage(image)}
+                                      className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700"
+                                    >
+                                      Download
+                                    </button>
+                                  </>
+                                )}
                                 <button
                                   onClick={() => handleRemoveImage(index)}
                                   className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"

@@ -4,7 +4,7 @@ This guide explains how to add images to your articles on the personal academic 
 
 ## Quick Method: Using the Admin Dashboard (Recommended)
 
-The easiest way to add images to your articles is through the built-in image upload feature in the admin dashboard.
+The easiest way to add images to your articles is through the built-in image upload feature in the admin dashboard with **direct GitHub upload**.
 
 ### Steps:
 
@@ -20,23 +20,32 @@ The easiest way to add images to your articles is through the built-in image upl
    - Supports: PNG, JPG, GIF, SVG, WebP
    - Multiple images can be uploaded at once
 
-4. **Download & Deploy**
-   - After upload, download the image files using the "Download Image" button
-   - Place the downloaded images in the `public/` directory of your repository
-   - Commit and push the images to GitHub
-   - The deployment workflow will make them available on your site
+4. **Upload Directly to GitHub (Recommended)**
+   - Click "🚀 Upload All to GitHub" to commit all images at once
+   - Or click "Upload to GitHub" for individual images
+   - Images are automatically uploaded to your repository's `public/` directory
+   - The site will automatically rebuild and deploy (1-2 minutes)
+   - **Note:** Requires GitHub token to be configured in dashboard settings
 
 5. **Insert into Article**
    - Click "Insert into Article" to automatically add the image HTML to your content
    - Or click "Copy HTML" to copy the markup and paste it manually
    - The HTML is automatically generated with proper styling
 
+### Alternative: Manual Download Method
+
+If GitHub token is not configured:
+- Click "Download" button for each image
+- Place the downloaded images in the `public/` directory of your repository
+- Commit and push the images to GitHub manually
+
 ### Benefits:
-- ✅ No manual HTML writing needed
+- ✅ Direct upload to GitHub - no manual file management needed
 - ✅ Automatic image markup generation
-- ✅ Preview of uploaded images
+- ✅ Preview of uploaded images with upload status
 - ✅ Proper styling classes pre-applied
-- ✅ Easy workflow integration
+- ✅ Batch upload support
+- ✅ Real-time upload feedback
 
 ## Manual Method: Direct Image Insertion
 
