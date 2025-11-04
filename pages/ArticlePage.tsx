@@ -2,6 +2,7 @@
 import React, { useContext } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ContentRenderer from '../components/ContentRenderer';
+import TableOfContents from '../components/TableOfContents';
 import { ArticleContext } from '../context/ArticleContext';
 
 const ArticlePage: React.FC = () => {
@@ -22,18 +23,26 @@ const ArticlePage: React.FC = () => {
   }
 
   return (
-    <article className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
-      <header className="mb-8 border-b dark:border-gray-700 pb-6">
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-          Published on {new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
-        <div className="flex justify-between items-start">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{article.title}</h1>
-        </div>
-      </header>
-      
-      <ContentRenderer content={article.content} />
-    </article>
+    <div className="flex gap-8 items-start">
+      {/* Table of Contents - Left Sidebar */}
+      <aside className="hidden lg:block w-64 flex-shrink-0">
+        <TableOfContents content={article.content} />
+      </aside>
+
+      {/* Main Article Content */}
+      <article className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm flex-1 min-w-0">
+        <header className="mb-8 border-b dark:border-gray-700 pb-6">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+            Published on {new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+          <div className="flex justify-between items-start">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{article.title}</h1>
+          </div>
+        </header>
+        
+        <ContentRenderer content={article.content} />
+      </article>
+    </div>
   );
 };
 

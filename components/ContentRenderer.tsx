@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import DOMPurify from 'dompurify';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import { generateId } from '../utils/idGenerator';
 
 interface ContentRendererProps {
   content: string;
@@ -14,9 +15,18 @@ const processLatexTextCommands = (text: string): string => {
   processed = processed.replace(/\\textit\{([^}]*)\}/g, '<em>$1</em>');
   processed = processed.replace(/\\emph\{([^}]*)\}/g, '<em>$1</em>');
   processed = processed.replace(/\\underline\{([^}]*)\}/g, '<u>$1</u>');
-  processed = processed.replace(/\\section\{([^}]*)\}/g, '<h2 class="text-2xl font-bold mt-6 mb-3">$1</h2>');
-  processed = processed.replace(/\\subsection\{([^}]*)\}/g, '<h3 class="text-xl font-bold mt-5 mb-2">$1</h3>');
-  processed = processed.replace(/\\subsubsection\{([^}]*)\}/g, '<h4 class="text-lg font-bold mt-4 mb-2">$1</h4>');
+  processed = processed.replace(/\\section\{([^}]*)\}/g, (match, title) => {
+    const id = generateId(title);
+    return `<h2 id="${id}" class="text-2xl font-bold mt-6 mb-3">${title}</h2>`;
+  });
+  processed = processed.replace(/\\subsection\{([^}]*)\}/g, (match, title) => {
+    const id = generateId(title);
+    return `<h3 id="${id}" class="text-xl font-bold mt-5 mb-2">${title}</h3>`;
+  });
+  processed = processed.replace(/\\subsubsection\{([^}]*)\}/g, (match, title) => {
+    const id = generateId(title);
+    return `<h4 id="${id}" class="text-lg font-bold mt-4 mb-2">${title}</h4>`;
+  });
   return processed;
 };
 
