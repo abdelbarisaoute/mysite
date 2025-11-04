@@ -11,6 +11,8 @@ A modern, responsive personal academic website built with React, TypeScript, and
 ## Features
 
 - 📝 Article management system with create, read, update, and delete functionality
+- 📑 **Table of Contents** - Automatically generated from article sections with smooth scrolling navigation
+- 🖼️ **Image Support** - Comprehensive guide for adding images to articles (see [IMAGE_GUIDE.md](IMAGE_GUIDE.md))
 - 🌓 Dark mode support with theme persistence
 - 🔍 Search functionality with live suggestions
 - 📱 Fully responsive design
@@ -185,6 +187,13 @@ The website includes comprehensive LaTeX rendering capabilities powered by KaTeX
 - `\subsection{Subsection Title}` for subsections
 - `\subsubsection{Subsubsection Title}` for sub-subsections
 
+**✨ Automatic Table of Contents:**
+- Articles with sections automatically display a navigable table of contents in the left sidebar
+- TOC includes all sections, subsections, and sub-subsections
+- Active section highlighting as you scroll
+- Smooth scrolling to sections when clicked
+- Hidden on mobile, visible on desktop (≥1024px screens)
+
 **Remark Blocks:**
 ```latex
 \begin{remarque}
@@ -217,6 +226,23 @@ Important: The equation $a^2 + b^2 = c^2$ is the Pythagorean theorem.
   `
 };
 ```
+
+### Adding Images to Articles:
+
+Images can be added to your articles using standard HTML `<img>` tags. For complete instructions and examples, see the comprehensive [IMAGE_GUIDE.md](IMAGE_GUIDE.md).
+
+**Quick Example:**
+```html
+<img src="/mysite/my-image.png" alt="Description" class="max-w-full h-auto rounded-lg shadow-md my-4" />
+```
+
+**Key Points:**
+- Store images in the `public/` directory
+- Reference with `/mysite/image-name.png` path
+- Use Tailwind CSS classes for styling
+- Always include descriptive `alt` text for accessibility
+
+For advanced layouts (centered images, side-by-side, with captions) and troubleshooting, consult the [IMAGE_GUIDE.md](IMAGE_GUIDE.md).
 
 ## Troubleshooting
 
