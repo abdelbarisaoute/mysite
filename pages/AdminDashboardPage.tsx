@@ -27,16 +27,81 @@ const AdminDashboardPage: React.FC = () => {
   });
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // GitHub token configuration state
+  const [showTokenSetup, setShowTokenSetup] = useState(false);
+  const [githubToken, setGithubToken] = useState('');
+  const [tokenConfigured, setTokenConfigured] = useState(false);
+  const [repoOwner, setRepoOwner] = useState('');
+  const [repoName, setRepoName] = useState('');
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/admin');
     }
+    
+    // Load saved GitHub token and repo info from localStorage
+    const savedToken = localStorage.getItem('githubToken');
+    const savedRepoOwner = localStorage.getItem('githubRepoOwner');
+    const savedRepoName = localStorage.getItem('githubRepoName');
+    
+    if (savedToken) {
+      setGithubToken(savedToken);
+      setTokenConfigured(true);
+    }
+    
+    // Initialize repo info from environment or localStorage
+    const { repoOwner: defaultOwner, repoName: defaultName } = getRepositoryInfo();
+    setRepoOwner(savedRepoOwner || defaultOwner);
+    setRepoName(savedRepoName || defaultName);
   }, [isAuthenticated, navigate]);
 
   const handleLogout = () => {
     logout();
     navigate('/admin');
+  };
+  
+  const handleSaveTokenSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate required fields
+    if (!githubToken.trim() || !repoOwner.trim() || !repoName.trim()) {
+      setMessage({ 
+        type: 'error', 
+        text: 'All fields are required.' 
+      });
+      return;
+    }
+    
+    // Save token and repo info to localStorage
+    localStorage.setItem('githubToken', githubToken.trim());
+    localStorage.setItem('githubRepoOwner', repoOwner.trim());
+    localStorage.setItem('githubRepoName', repoName.trim());
+    
+    setTokenConfigured(true);
+    setShowTokenSetup(false);
+    setMessage({ 
+      type: 'success', 
+      text: 'GitHub token configured successfully! You can now upload articles automatically.' 
+    });
+  };
+  
+  const handleRemoveToken = () => {
+    if (window.confirm('Are you sure you want to remove the GitHub token configuration?')) {
+      localStorage.removeItem('githubToken');
+      localStorage.removeItem('githubRepoOwner');
+      localStorage.removeItem('githubRepoName');
+      setGithubToken('');
+      // Reset to default values from getRepositoryInfo
+      const { repoOwner: defaultOwner, repoName: defaultName } = getRepositoryInfo();
+      setRepoOwner(defaultOwner);
+      setRepoName(defaultName);
+      setTokenConfigured(false);
+      setMessage({ 
+        type: 'success', 
+        text: 'GitHub token removed. Articles will be downloaded as files.' 
+      });
+    }
   };
 
   const resetForm = () => {
@@ -108,12 +173,13 @@ export const ${variableName}: Article = {
   };
 
   const saveToGitHub = async (article: Article): Promise<boolean> => {
-    const token = import.meta.env.VITE_GITHUB_TOKEN;
+    // Try to get token from localStorage first, then fall back to environment variable
+    const token = localStorage.getItem('githubToken') || import.meta.env.VITE_GITHUB_TOKEN;
     
     if (!token) {
       setMessage({ 
         type: 'error', 
-        text: 'GitHub token not configured. Download the file manually or set up VITE_GITHUB_TOKEN.' 
+        text: 'GitHub token not configured. Download the file manually or set up GitHub token in settings.' 
       });
       downloadArticleFile(article);
       return false;
@@ -126,7 +192,12 @@ export const ${variableName}: Article = {
     const data = encoder.encode(content);
     const base64Content = btoa(String.fromCharCode(...data));
     
-    const { repoOwner, repoName } = getRepositoryInfo();
+    // Use saved repo info if available, otherwise use default detection
+    const savedRepoOwner = localStorage.getItem('githubRepoOwner');
+    const savedRepoName = localStorage.getItem('githubRepoName');
+    const { repoOwner: defaultOwner, repoName: defaultName } = getRepositoryInfo();
+    const repoOwnerToUse = savedRepoOwner || defaultOwner;
+    const repoNameToUse = savedRepoName || defaultName;
     const filePath = `data/articles/${article.id}.ts`;
 
     try {
@@ -134,7 +205,7 @@ export const ${variableName}: Article = {
       let sha: string | undefined;
       try {
         const getResponse = await fetch(
-          `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+          `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
           {
             headers: {
               'Authorization': `token ${token}`,
@@ -156,7 +227,7 @@ export const ${variableName}: Article = {
         : `Add new article: ${article.title}`;
 
       const response = await fetch(
-        `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+        `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
         {
           method: 'PUT',
           headers: {
@@ -222,7 +293,8 @@ export const ${variableName}: Article = {
       return;
     }
 
-    const token = import.meta.env.VITE_GITHUB_TOKEN;
+    // Try to get token from localStorage first, then fall back to environment variable
+    const token = localStorage.getItem('githubToken') || import.meta.env.VITE_GITHUB_TOKEN;
     
     if (!token) {
       setMessage({ 
@@ -233,13 +305,18 @@ export const ${variableName}: Article = {
     }
 
     setIsSubmitting(true);
-    const { repoOwner, repoName } = getRepositoryInfo();
+    // Use saved repo info if available, otherwise use default detection
+    const savedRepoOwner = localStorage.getItem('githubRepoOwner');
+    const savedRepoName = localStorage.getItem('githubRepoName');
+    const { repoOwner: defaultOwner, repoName: defaultName } = getRepositoryInfo();
+    const repoOwnerToUse = savedRepoOwner || defaultOwner;
+    const repoNameToUse = savedRepoName || defaultName;
     const filePath = `data/articles/${article.id}.ts`;
 
     try {
       // Get the file SHA
       const getResponse = await fetch(
-        `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+        `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
         {
           headers: {
             'Authorization': `token ${token}`,
@@ -256,7 +333,7 @@ export const ${variableName}: Article = {
       
       // Delete the file
       const deleteResponse = await fetch(
-        `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`,
+        `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
         {
           method: 'DELETE',
           headers: {
@@ -316,6 +393,145 @@ export const ${variableName}: Article = {
           {message.text}
         </div>
       )}
+      
+      {/* GitHub Token Setup Section */}
+      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h2 className="text-2xl font-bold">GitHub Auto-Upload Settings</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {tokenConfigured 
+                ? '✅ GitHub token configured - articles will be uploaded automatically' 
+                : '⚠️ No GitHub token configured - articles will be downloaded as files'}
+            </p>
+          </div>
+          {tokenConfigured && !showTokenSetup && (
+            <button
+              onClick={() => setShowTokenSetup(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors text-sm"
+            >
+              Update Settings
+            </button>
+          )}
+          {!tokenConfigured && !showTokenSetup && (
+            <button
+              onClick={() => setShowTokenSetup(true)}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
+            >
+              Setup GitHub Token
+            </button>
+          )}
+        </div>
+        
+        {showTokenSetup && (
+          <form onSubmit={handleSaveTokenSettings} className="space-y-4 mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+            <div>
+              <label htmlFor="githubToken" className="block text-sm font-medium mb-2">
+                GitHub Personal Access Token *
+              </label>
+              <input
+                type="password"
+                id="githubToken"
+                value={githubToken}
+                onChange={(e) => setGithubToken(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
+                placeholder="Enter your GitHub Personal Access Token"
+                required
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                Create a token at{' '}
+                <a 
+                  href="https://github.com/settings/tokens" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  github.com/settings/tokens
+                </a>
+                {' '}with <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">repo</code> scope
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="repoOwner" className="block text-sm font-medium mb-2">
+                  Repository Owner *
+                </label>
+                <input
+                  type="text"
+                  id="repoOwner"
+                  value={repoOwner}
+                  onChange={(e) => setRepoOwner(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="your-github-username"
+                  required
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Your GitHub username or organization
+                </p>
+              </div>
+              
+              <div>
+                <label htmlFor="repoName" className="block text-sm font-medium mb-2">
+                  Repository Name *
+                </label>
+                <input
+                  type="text"
+                  id="repoName"
+                  value={repoName}
+                  onChange={(e) => setRepoName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  placeholder="mysite"
+                  required
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  The name of your repository
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 pt-2">
+              <button
+                type="submit"
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition-colors"
+              >
+                Save Settings
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowTokenSetup(false)}
+                className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-colors"
+              >
+                Cancel
+              </button>
+              {tokenConfigured && (
+                <button
+                  type="button"
+                  onClick={handleRemoveToken}
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded transition-colors ml-auto"
+                >
+                  Remove Token
+                </button>
+              )}
+            </div>
+          </form>
+        )}
+        
+        {!showTokenSetup && (
+          <div className="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <h3 className="text-sm font-bold mb-2">How it works:</h3>
+            <ul className="text-sm space-y-1 ml-4 list-disc">
+              <li>Setup your GitHub token once from this page</li>
+              <li>Articles will be automatically committed to your repository</li>
+              <li>Each commit triggers automatic redeployment</li>
+              <li>Your token is stored securely in your browser</li>
+            </ul>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">
+              <strong>Security Note:</strong> Your token is stored in your browser's localStorage and never sent to any third-party servers. Only use this on trusted devices. For production deployments, consider using environment variables or GitHub repository secrets.
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Create/Edit Form */}
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
@@ -457,22 +673,6 @@ export const ${variableName}: Article = {
             </p>
           )}
         </div>
-      </div>
-
-      {/* Instructions */}
-      <div className="mt-8 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-        <h3 className="text-lg font-bold mb-2">Setup Instructions</h3>
-        <p className="text-sm mb-2">
-          To enable automatic GitHub commits:
-        </p>
-        <ol className="text-sm list-decimal list-inside space-y-1 ml-2">
-          <li>Create a GitHub Personal Access Token with 'repo' scope</li>
-          <li>Add it as a repository secret named <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">VITE_GITHUB_TOKEN</code></li>
-          <li>Update the deployment workflow to include the token in the build step</li>
-        </ol>
-        <p className="text-sm mt-3 text-gray-600 dark:text-gray-400">
-          Without GitHub token configuration, articles will be downloaded as files for manual upload.
-        </p>
       </div>
     </div>
   );
