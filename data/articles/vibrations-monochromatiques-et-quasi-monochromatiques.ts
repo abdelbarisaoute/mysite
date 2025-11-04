@@ -5,147 +5,43 @@ export const vibrationsMonochromatiquesEtQuasiMonochromatiques: Article = {
   title: 'Vibrations monochromatiques et quasi monochromatiques',
   date: '2025-11-04',
   summary: 'Une exploration des vibrations monochromatiques et leur rôle fondamental en physique, incluant leurs propriétés mathématiques et leur importance dans la décomposition des signaux complexes.',
-  content: `# Vibrations monochromatiques et quasi-monochromatiques
+  content: `En physique, de nombreux phénomènes peuvent être expliqués par des oscillations ou par vibration de leur grandeur caractéristique. Le son et les ondes electromagnétiques sont modélisées par des vibrations; les premiers étant des vibrations mécaniques dans l\'air et les ondes \\textbf{EM} étant des vibrations simultanées d\'un champ électrique et d\'un champ magnétique, la lumière est également une onde électromagnétique, présentant des caractéristiques analogues à celles d’une onde mécanique, mais capable de se propager dans le vide. Contrairement au son par exemple qui ne peut se propager que dans un milieu matériel (c\'est le cas pour toutes les vibrations mécaniques). 
 
-En physique, de nombreux phénomènes peuvent être expliqués par des oscillations ou par la vibration de leur grandeur caractéristique. Le son et les ondes électromagnétiques sont modélisés par des vibrations ; les premiers étant des vibrations mécaniques dans l\'air, et les ondes **EM** étant des vibrations simultanées d\'un champ électrique et d\'un champ magnétique.
+Les \\textbf{vibrations monochromatiques} ou \\textbf{vibrations harmoniques} ont un rôle central grâce à leur simplicité mathématique et leur capacité à décomposer tout signal complexe. Ce principe est fondé sur le \\textbf{théorème de Fourier} qui stipule que tout signal ou fonction périodique peut s\'exprimer comme une superposition d\'ondes sinusoïdales. 
 
-## 1. Vibrations monochromatiques
+\\section{Vibrations monochromatiques}
 
-Une vibration monochromatique est représentée par :
+\\subsection{Définition}
 
-\$\$
-V(t) = A \\cos(\\omega t - \\phi)
-\$\$
+Une vibration monochromatique peut être exprimée par une fonction sinusoïdale, soit \$V(x)\$ cette fonction sinusoïdale:
 
-où :
-- \\(A\\) est l\'amplitude,
-- \\(\\omega\\) la pulsation,
-- \\(\\phi\\) la phase à l’origine des temps.
+\$\$V(t) = A \\cos( \\omega t -\\phi )\\quad \\text{avec} \\quad \\begin{cases}
+A : & \\text{l\'amplitude}\\\\
+\\omega : & \\text{pulsation ou fréquence angulaire} \\\\
+\\phi : & \\text{retard de phase}
+\\end{cases}\$\$
+On définit la période \$ T = \\frac{2\\pi}{\\omega} \$ et la fréquence \$ \\nu = \\frac{1}{T} \$, une autre notation courante de la fréquence est \$f\$. La fonction \$V(t)\$ ne dépend que du temps puisque l’on décrit la vibration d\'un seul point autour de son point d\'équilibre. 
 
-Une telle vibration conserve sa forme sinusoïdale lors de la dérivation et de l’intégration.  
-Elle correspond donc au mouvement périodique élémentaire dans la nature.
+On a indiqué dans l\'introduction de ce chapitre que l\'intérêt de ce type de vibrations est leur simplicité mathématique. En physique, les relations sont généralement différentielles ou intégrales, et ces vibrations gardent leurs formes sinusoïdales lors de la dérivation ou de l’intégration:
 
-### Représentation complexe
+\$\$ \\frac{dV(t)}{dt} = -A\\omega \\sin(\\omega t -\\phi ) = A \\omega \\cos\\left(\\omega t -\\phi +\\frac{\\pi}{2} \\right)\$\$ 
 
-On associe à cette vibration la forme complexe :
+\$\$ \\int V(t)dt = \\frac{A}{\\omega} \\sin(\\omega t -\\phi) = \\frac{A}{\\omega} \\cos\\left(\\omega t -\\phi -\\frac{\\pi}{2} \\right) \$\$
+Ainsi la dérivation et l\'intégration d\'une vibration monochromatique ne modifie que sa phase, ce qui explique leur rôle fondamental dans la modélisation des phénomènes oscillatoires et ondulatoires.
 
-\$\$
-\\underline{V}(t) = A e^{i\\phi} e^{-i\\omega t}
-\$\$
+\\begin{remarque}
+Ainsi, le signe négatif dans \$ ( \\omega t - \\phi ) \$ traduit simplement le fait qu’une phase plus grande implique que la vibration atteint son maximum plus tard dans le temps.
+\\end{remarque}
 
-La partie réelle donne la vibration physique :
+\\subsection{Expression complexe de la fonction de vibration}
 
-\$\$
-V(t) = \\Re\\left( \\underline{V}(t) \\right)
-\$\$
+La fonction \$V(t)\$ comme on a vu précédemment est une fonction avec trois paramètres dont deux-\$\\omega\$ et \$\\phi\$-apparaissent toujours de manière couplée , c\'est plus commode donc de représenter \$V(t)\$ sous forme complexe pour simplifier les manipulations mathématiques;
 
-Cette notation permet de simplifier les calculs :  
-- la dérivée temporelle devient une multiplication par \\(-i\\omega\\),
-- l’intégration devient une division par \\(-i\\omega\\).
+\$\$ V(t) = Re\\{\\underbar{V}(t)\\} \\quad \\text{avec} \\quad \\underbar{V}(t) = A \\exp(-i ( \\omega t -\\phi ) ) = A \\exp( i\\phi) \\exp(-i\\omega t)\$\$
 
-### Énergie
+Le coefficient \$ A e^{i\\phi} \$ est l\'amplitude complexe de la vibration, il regroupe l\'amplitude réelle et la phase initiale dans une seule grandeur complexe, le facteur \$ e^{-i\\omega t} \$ représente l\'évolution temporelle harmonique. Elle revient à exprimer positivement le retard de phase \$\\phi\$.
 
-L’énergie moyenne transportée par une vibration monochromatique est proportionnelle à :
-
-\$\$
-\\varepsilon = \\frac{1}{2} m \\omega_0^2 A^2
-\$\$
-
----
-
-## 2. Vibrations quasi-monochromatiques
-
-Les signaux réels ne sont jamais strictement monochromatiques.  
-Ils sont décrits par des vibrations **quasi monochromatiques** de la forme :
-
-\$\$
-V(t) = A(t)\\cos(\\omega_0 t - \\phi)
-\$\$
-
-où \\(A(t)\\) varie lentement dans le temps.  
-On introduit une **durée caractéristique de décroissance** \\(\\tau\\) telle que :
-
-\$\$
-A(t) = a e^{-t/\\tau}
-\$\$
-
-Cette durée est inversement liée à la largeur spectrale : plus \\(\\tau\\) est grand, plus le signal est monochromatique.
-
----
-
-## 3. Spectre temporel et transformée de Fourier
-
-La transformée de Fourier d’un signal \\(V(t)\\) est définie par :
-
-\$\$
-\\tilde{V}(\\nu) = \\int_{-\\infty}^{+\\infty} \\underline{V}(t) e^{i2\\pi\\nu t} dt
-\$\$
-
-Pour un signal tronqué de durée \\(\\tau\\) :
-
-\$\$
-A(t) =
-\\begin{cases}
-a & \\text{si } 0 < t < \\tau, \\\\
-0 & \\text{ailleurs.}
-\\end{cases}
-\$\$
-
-On obtient alors un spectre de la forme :
-
-\$\$
-|\\tilde{V}(\\nu)| = a\\tau \\, \\text{sinc} \\left[ \\pi (\\nu - \\nu_0)\\tau \\right]
-\$\$
-
-où la largeur du lobe principal vaut approximativement :
-
-\$\$
-\\Delta\\nu \\simeq \\frac{1}{\\tau}
-\$\$
-
-**Interprétation :**  
-Plus la vibration est brève dans le temps, plus son spectre est large en fréquence.  
-C’est la manifestation du **principe d’incertitude temps–fréquence**.
-
----
-
-## 4. Cas amorti : vibration quasi-monochromatique réelle
-
-Pour un signal amorti :
-
-\$\$
-A(t) = a e^{-t/\\tau}, \\quad t \\ge 0
-\$\$
-
-on obtient :
-
-\$\$
-\\tilde{V}(\\nu) = \\frac{a}{1/\\tau + i2\\pi(\\nu - \\nu_0)}
-\$\$
-
-Son module :
-
-\$\$
-|\\tilde{V}(\\nu)| = \\frac{a}{\\sqrt{(1/\\tau)^2 + [2\\pi(\\nu - \\nu_0)]^2}}
-\$\$
-
-présente un **pic de résonance** en \\(\\nu = \\nu_0\\) et une largeur à mi-hauteur :
-
-\$\$
-\\Delta\\nu = \\frac{1}{\\pi\\tau}
-\$\$
-
----
-
-### Conclusion
-
-Le passage du cas monochromatique (idéal) au cas quasi-monochromatique (réel) traduit la réalité des phénomènes physiques :  
-toute vibration de durée finie possède un spectre élargi, selon la relation fondamentale :
-
-\$\$
-\\Delta\\nu \\, \\tau \\approx 1
-\$\$
-
-Cette dualité temps–fréquence est à la base de la description des ondes dans de nombreux domaines : acoustique, optique, et mécanique quantique.
-`
+\\begin{remarque}
+Les deux conventions \$ e^{-i\\omega t} \$ et \$ e^{i\\omega t} \$ sont mathématiquement équivalentes, à condition d\'être utilisées d\'une manière cohérente dans tout le calcul. Mais physiquement, elles correspondent à deux conventions de signe opposées dans la description du temps et de la propagation. Le choix de signe est donc une convention mathématique sans effet sur les grandeurs physiques réelles comme la position, la vitesse ou l’énergie.
+\\end{remarque}`
 };
