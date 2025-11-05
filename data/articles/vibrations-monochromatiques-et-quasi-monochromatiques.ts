@@ -95,13 +95,13 @@ where \$A(t)\$ represents the temporal envelope of the vibration, which varies s
 
 \\begin{example}
 
-<div class="flex gap-4 my-4 flex-wrap">
+<div class="flex gap-4 my-4 flex-wrap items-start">
   <div class="flex-1 min-w-[200px]">
-    <img src="/mysite/ch2-2-expl-a.png" alt="ch2 2 expl a" class="w-full h-auto rounded-lg shadow-md" />
+    <img src="/mysite/ch2-2-expl-a.png" alt="ch2 2 expl a" class="w-full h-64 object-cover rounded-lg shadow-md" />
     <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 1(b) -Truncated Monochromatic Vibration</p>
   </div>
   <div class="flex-1 min-w-[200px]">
-    <img src="/mysite/ch2-2-expl-b.png" alt="ch2 2 expl b" class="w-full h-auto rounded-lg shadow-md" />
+    <img src="/mysite/ch2-2-expl-b.png" alt="ch2 2 expl b" class="w-full h-64 object-cover rounded-lg shadow-md" />
     <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic"> Figure 2(b) –Damped vibration</p>
   </div>
 </div>
@@ -200,13 +200,13 @@ From this, we deduce the condition:
 \\tan(\\pi x) = \\pi x.
 \$\$
 
-<div class="flex gap-4 my-4 flex-wrap">
+<div class="flex gap-4 my-4 flex-wrap items-start">
   <div class="flex-1 min-w-[270px]">
-    <img src="/mysite/ch2-3-expl-sinc.png" alt="ch2 3 expl sinc" class="w-full h-auto rounded-lg shadow-md" />
+    <img src="/mysite/ch2-3-expl-sinc.png" alt="ch2 3 expl sinc" class="w-full h-64 object-cover rounded-lg shadow-md" />
     <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 3(a) –The sinc function(normalized sinc function)</p>
   </div>
   <div class="flex-1 min-w-[130px]">
-    <img src="/mysite/ch2-3-expl-tan.png" alt="ch2 3 expl tan" class="w-full h-auto rounded-lg shadow-md" />
+    <img src="/mysite/ch2-3-expl-tan.png" alt="ch2 3 expl tan" class="w-full h-64 object-cover rounded-lg shadow-md" />
     <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 3(b) –Solutions for the equation \$\\tan(\\pi x)=\\pi x\$</p>
   </div>
 </div>

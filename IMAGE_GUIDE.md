@@ -152,11 +152,17 @@ You can also add images in subdirectories:
 
 #### Side-by-Side Images
 ```html
-<div class="flex gap-4 my-4 flex-wrap">
-  <img src="/mysite/before.png" alt="Before" class="flex-1 min-w-[200px] h-auto rounded-lg shadow-md" />
-  <img src="/mysite/after.png" alt="After" class="flex-1 min-w-[200px] h-auto rounded-lg shadow-md" />
+<div class="flex gap-4 my-4 flex-wrap items-start">
+  <div class="flex-1 min-w-[200px]">
+    <img src="/mysite/before.png" alt="Before" class="w-full h-64 object-cover rounded-lg shadow-md" />
+  </div>
+  <div class="flex-1 min-w-[200px]">
+    <img src="/mysite/after.png" alt="After" class="w-full h-64 object-cover rounded-lg shadow-md" />
+  </div>
 </div>
 ```
+
+**Note:** The `h-64` class sets a fixed height (16rem/256px) and `object-cover` ensures images fill the container while maintaining their aspect ratio without distortion. This ensures both images have the same height. You can adjust the height class (`h-48`, `h-64`, `h-80`, etc.) based on your needs.
 
 ## Using External Images
 
