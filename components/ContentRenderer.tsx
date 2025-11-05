@@ -223,7 +223,7 @@ const restoreRemarkBlocks = (text: string, remarks: string[]) => {
 
     const placeholder = `__REMARK_PLACEHOLDER__${i}__REMARK_PLACEHOLDER__`;
     restored = restored.split(placeholder).join(
-      `<div class="border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20 p-4 my-3 rounded"><strong>Remark:</strong> ${inner}</div>`
+      `<div class="border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20 p-4 my-3 rounded"><strong>Remark:</strong> ${inner}</div>`
     );
   });
   return restored;
@@ -243,7 +243,7 @@ const restoreExampleBlocks = (text: string, examples: Array<{ content: string; t
     const titleHeader = `<strong>${titleText}</strong>`;
 
     const placeholder = `__EXAMPLE_PLACEHOLDER__${i}__EXAMPLE_PLACEHOLDER__`;
-    const exampleHTML = `<div class="border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20 p-4 my-3 rounded">${titleHeader} ${inner}</div>`;
+    const exampleHTML = `<div class="border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20 p-4 my-3 rounded">${titleHeader} ${inner}</div>`;
     restored = restored.split(placeholder).join(exampleHTML);
   });
   return restored;

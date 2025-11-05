@@ -26,10 +26,10 @@ This will render as a green box with:
 
 ## Features
 
-- **Green color scheme**: Example boxes use green borders and background (border-green-500, bg-green-50) to distinguish them from blue remark boxes
+- **Blue color scheme**: Example boxes use blue borders and background (border-blue-500, bg-blue-50) to distinguish them from green remark boxes
 - **Math support**: Full KaTeX math rendering inside examples
 - **Text formatting**: All LaTeX text commands (\textbf, \textit, \emph, etc.) work inside examples
-- **Dark mode**: Automatically adjusts styling for dark mode (dark:bg-green-900/20)
+- **Dark mode**: Automatically adjusts styling for dark mode (dark:bg-blue-900/20)
 
 ## Examples
 
@@ -52,6 +52,6 @@ A tuning fork produces a quasi-monochromatic vibration that is very close to a p
 | Feature | Remark Box | Example Box |
 |---------|-----------|-------------|
 | Syntax | `\begin{remark}...\end{remark}` | `\begin{example}...\end{example}` |
-| Color | Blue (border-blue-500) | Green (border-green-500) |
+| Color | Green (border-green-500) | Blue (border-blue-500) |
 | Title Support | No | Yes (optional) |
 | Use Case | Notes, observations | Concrete examples, applications |
