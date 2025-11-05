@@ -86,7 +86,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
   };
 
   return (
-    <nav className="sticky top-6 hidden lg:block max-h-[calc(100vh-3rem)] overflow-y-auto">
+    <nav className="max-h-[calc(100vh-3rem)] overflow-y-auto">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wide">
           Table of Contents
