@@ -3,9 +3,10 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
-import { Article } from '../types';
+import { Article, Annex } from '../types';
 import ArticlePreview from '../components/ArticlePreview';
 import ImageUpload from '../components/ImageUpload';
+import { annexData } from '../data/annex';
 
 // Helper function to get repository information
 const getRepositoryInfo = () => {
@@ -34,6 +35,11 @@ const AdminDashboardPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   
+  // Annex editing state
+  const [showAnnexForm, setShowAnnexForm] = useState(false);
+  const [annexFormData, setAnnexFormData] = useState<Annex>(annexData);
+  const [showAnnexPreview, setShowAnnexPreview] = useState(true);
+  
   // GitHub token configuration state
   const [showTokenSetup, setShowTokenSetup] = useState(false);
   const [githubToken, setGithubToken] = useState('');
@@ -60,6 +66,17 @@ const AdminDashboardPage: React.FC = () => {
     const { repoOwner: defaultOwner, repoName: defaultName } = getRepositoryInfo();
     setRepoOwner(savedRepoOwner || defaultOwner);
     setRepoName(savedRepoName || defaultName);
+    
+    // Load saved annex from localStorage
+    const savedAnnex = localStorage.getItem('annex');
+    if (savedAnnex) {
+      try {
+        const parsedAnnex = JSON.parse(savedAnnex);
+        setAnnexFormData(parsedAnnex);
+      } catch (e) {
+        console.error('Failed to parse saved annex:', e);
+      }
+    }
   }, [isAuthenticated, navigate]);
 
   const handleLogout = () => {
@@ -372,6 +389,134 @@ export const ${variableName}: Article = {
     }
 
     setIsSubmitting(false);
+  };
+
+  const saveAnnexToGitHub = async (annex: Annex): Promise<boolean> => {
+    const token = localStorage.getItem('githubToken') || import.meta.env.VITE_GITHUB_TOKEN;
+    
+    if (!token) {
+      setMessage({ 
+        type: 'error', 
+        text: 'GitHub token not configured. Annex saved locally only.' 
+      });
+      return false;
+    }
+
+    // Proper escaping for TypeScript string literals
+    const escapeForString = (str: string): string => {
+      return str
+        .replace(/\\/g, '\\\\')   // Escape backslashes first
+        .replace(/'/g, "\\'");     // Escape single quotes
+    };
+
+    // Proper escaping for TypeScript template literal
+    const escapeForTemplate = (str: string): string => {
+      return str
+        .replace(/\\/g, '\\\\')   // Escape backslashes first
+        .replace(/`/g, '\\`')      // Escape backticks
+        .replace(/\$/g, '\\$')     // Escape dollar signs for template literals
+        .replace(/\r?\n/g, '\\n'); // Preserve newlines
+    };
+
+    const content = `import { Annex } from '../types';
+
+export const annexData: Annex = {
+  id: '${escapeForString(annex.id)}',
+  title: '${escapeForString(annex.title)}',
+  content: \`${escapeForTemplate(annex.content)}\`
+};
+`;
+    
+    const encoder = new TextEncoder();
+    const data = encoder.encode(content);
+    const base64Content = btoa(String.fromCharCode(...data));
+    
+    const savedRepoOwner = localStorage.getItem('githubRepoOwner');
+    const savedRepoName = localStorage.getItem('githubRepoName');
+    const { repoOwner: defaultOwner, repoName: defaultName } = getRepositoryInfo();
+    const repoOwnerToUse = savedRepoOwner || defaultOwner;
+    const repoNameToUse = savedRepoName || defaultName;
+    const filePath = 'data/annex.ts';
+
+    try {
+      let sha: string | undefined;
+      try {
+        const getResponse = await fetch(
+          `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
+          {
+            headers: {
+              'Authorization': `token ${token}`,
+              'Accept': 'application/vnd.github.v3+json',
+            },
+          }
+        );
+        if (getResponse.ok) {
+          const data = await getResponse.json();
+          sha = data.sha;
+        }
+      } catch (e) {
+        // File doesn't exist
+      }
+
+      const response = await fetch(
+        `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: `Update annex: ${annex.title}`,
+            content: base64Content,
+            sha: sha,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to save to GitHub');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('GitHub API error:', error);
+      setMessage({ 
+        type: 'error', 
+        text: `Failed to save to repository: ${error instanceof Error ? error.message : 'Unknown error'}. Annex saved locally only.` 
+      });
+      return false;
+    }
+  };
+
+  const handleAnnexSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage(null);
+    setIsSubmitting(true);
+
+    // Save to localStorage first
+    localStorage.setItem('annex', JSON.stringify(annexFormData));
+
+    // Try to save to GitHub
+    const success = await saveAnnexToGitHub(annexFormData);
+    
+    setIsSubmitting(false);
+
+    if (success) {
+      setMessage({ 
+        type: 'success', 
+        text: `Annex "${annexFormData.title}" has been updated and committed to GitHub! ${DEPLOYMENT_INFO}` 
+      });
+    } else {
+      setMessage({ 
+        type: 'success', 
+        text: `Annex "${annexFormData.title}" has been saved locally. Changes will be visible immediately but won't be committed to GitHub.` 
+      });
+    }
+    
+    setShowAnnexForm(false);
   };
 
   if (!isAuthenticated) {
@@ -724,6 +869,114 @@ export const ${variableName}: Article = {
             </p>
           )}
         </div>
+      </div>
+
+      {/* Annex Editor */}
+      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mt-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-2xl font-bold">Annex Editor</h2>
+          <div className="flex gap-2">
+            {showAnnexForm && (
+              <button
+                onClick={() => setShowAnnexPreview(!showAnnexPreview)}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
+                {showAnnexPreview ? 'Hide Preview' : 'Show Preview'}
+              </button>
+            )}
+            {!showAnnexForm && (
+              <button
+                onClick={() => setShowAnnexForm(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+              >
+                Edit Annex
+              </button>
+            )}
+          </div>
+        </div>
+
+        {showAnnexForm && (
+          <div className={`grid ${showAnnexPreview ? 'grid-cols-2' : 'grid-cols-1'} gap-6`}>
+            {/* Editor Panel */}
+            <div className="space-y-4">
+              <form onSubmit={handleAnnexSubmit} id="annex-form">
+                <div className="mb-4">
+                  <label htmlFor="annex-title" className="block text-sm font-medium mb-2">
+                    Title *
+                  </label>
+                  <input
+                    type="text"
+                    id="annex-title"
+                    value={annexFormData.title}
+                    onChange={(e) => setAnnexFormData({ ...annexFormData, title: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                    required
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="annex-content" className="block text-sm font-medium mb-2">
+                    Content * (Supports Markdown, LaTeX, and Tables)
+                  </label>
+                  <textarea
+                    id="annex-content"
+                    value={annexFormData.content}
+                    onChange={(e) => setAnnexFormData({ ...annexFormData, content: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
+                    rows={20}
+                    required
+                  />
+                  <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-xs">
+                    <p className="font-semibold mb-1">💡 Features:</p>
+                    <div className="space-y-1">
+                      <p>• <strong>Tables:</strong> Use Markdown table syntax (| Header | ... |)</p>
+                      <p>• <strong>Math:</strong> $inline$ or $$display$$ formulas</p>
+                      <p>• <strong>Sections:</strong> \section{"{}"}, \subsection{"{}"}</p>
+                      <p>• <strong>Special blocks:</strong> \begin{"{remarque}"} ... \end{"{remarque}"}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded transition-colors"
+                  >
+                    {isSubmitting ? 'Saving...' : 'Save Annex'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAnnexForm(false)}
+                    className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Preview Panel */}
+            {showAnnexPreview && (
+              <div className="border-l border-gray-300 dark:border-gray-600 pl-6">
+                <h3 className="text-xl font-bold mb-4">Preview</h3>
+                <ArticlePreview
+                  title={annexFormData.title}
+                  date=""
+                  summary=""
+                  content={annexFormData.content}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {!showAnnexForm && (
+          <div className="text-gray-600 dark:text-gray-400">
+            <p className="mb-2">Current annex title: <strong>{annexFormData.title}</strong></p>
+            <p className="text-sm">Click "Edit Annex" to modify the annex content with tables and formulas.</p>
+          </div>
+        )}
       </div>
     </div>
   );
