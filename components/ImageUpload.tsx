@@ -12,6 +12,7 @@ interface UploadedImage {
   uploaded?: boolean;
   uploading?: boolean;
   error?: string;
+  caption?: string;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
@@ -19,6 +20,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
   const [uploadedImages, setUploadedImages] = useState<Array<UploadedImage>>([]);
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [selectedLayout, setSelectedLayout] = useState<'single' | 'double'>('single');
+  const [selectedImages, setSelectedImages] = useState<number[]>([]);
 
   // Get base path from vite config or default to '/mysite/'
   const basePath = import.meta.env.BASE_URL || '/mysite/';
@@ -255,24 +258,100 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
     }
   };
 
-  const generateImageMarkdown = (imageName: string, alt: string = ''): string => {
+  const generateImageMarkdown = (imageName: string, caption: string = '', alt: string = ''): string => {
     // Generate clean filename for URL while preserving file extension
     const cleanName = imageName.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
     const altText = alt || imageName.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
     
-    return `<img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md my-4" />`;
+    if (caption) {
+      // Image with caption wrapped in a div
+      return `<div class="my-4">
+  <img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md" />
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${caption}</p>
+</div>`;
+    } else {
+      // Image without caption
+      return `<img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md my-4" />`;
+    }
+  };
+
+  const generateDoubleImageMarkdown = (image1: UploadedImage, image2: UploadedImage): string => {
+    const cleanName1 = image1.name.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
+    const cleanName2 = image2.name.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
+    const altText1 = image1.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+    const altText2 = image2.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+    
+    return `<div class="flex gap-4 my-4 flex-wrap">
+  <div class="flex-1 min-w-[200px]">
+    <img src="${basePath}${cleanName1}" alt="${altText1}" class="w-full h-auto rounded-lg shadow-md" />
+    ${image1.caption ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${image1.caption}</p>` : ''}
+  </div>
+  <div class="flex-1 min-w-[200px]">
+    <img src="${basePath}${cleanName2}" alt="${altText2}" class="w-full h-auto rounded-lg shadow-md" />
+    ${image2.caption ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${image2.caption}</p>` : ''}
+  </div>
+</div>`;
   };
 
   const handleInsertImage = (image: UploadedImage) => {
-    const markdown = generateImageMarkdown(image.name);
+    const markdown = generateImageMarkdown(image.name, image.caption);
     onImageInsert(markdown);
     showNotification('success', 'Image HTML inserted into article!');
   };
 
+  const handleInsertSelectedImages = () => {
+    if (selectedLayout === 'single') {
+      if (selectedImages.length === 0) {
+        showNotification('error', 'Please select at least one image');
+        return;
+      }
+      // Insert selected images one by one
+      selectedImages.forEach(index => {
+        const image = uploadedImages[index];
+        const markdown = generateImageMarkdown(image.name, image.caption);
+        onImageInsert(markdown + '\n\n');
+      });
+      showNotification('success', `${selectedImages.length} image(s) inserted into article!`);
+    } else {
+      // Double layout
+      if (selectedImages.length < 2) {
+        showNotification('error', 'Please select exactly 2 images for side-by-side layout');
+        return;
+      }
+      const image1 = uploadedImages[selectedImages[0]];
+      const image2 = uploadedImages[selectedImages[1]];
+      const markdown = generateDoubleImageMarkdown(image1, image2);
+      onImageInsert(markdown);
+      showNotification('success', '2 images inserted side-by-side into article!');
+    }
+    setSelectedImages([]);
+  };
+
   const handleCopyMarkdown = (image: UploadedImage) => {
-    const markdown = generateImageMarkdown(image.name);
+    const markdown = generateImageMarkdown(image.name, image.caption);
     navigator.clipboard.writeText(markdown);
     showNotification('success', 'Image HTML copied to clipboard!');
+  };
+
+  const handleToggleImageSelection = (index: number) => {
+    setSelectedImages(prev => {
+      if (prev.includes(index)) {
+        return prev.filter(i => i !== index);
+      } else {
+        if (selectedLayout === 'double' && prev.length >= 2) {
+          // For double layout, only allow 2 selections
+          showNotification('error', 'Only 2 images can be selected for side-by-side layout');
+          return prev;
+        }
+        return [...prev, index];
+      }
+    });
+  };
+
+  const handleUpdateCaption = (index: number, caption: string) => {
+    setUploadedImages(prev => prev.map((img, i) => 
+      i === index ? { ...img, caption } : img
+    ));
   };
 
   const handleDownloadImage = (image: UploadedImage) => {
@@ -388,19 +467,90 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                 <div className="mt-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold">Uploaded Images ({uploadedImages.length})</h3>
-                    <button
-                      type="button"
-                      onClick={uploadAllToGitHub}
-                      disabled={uploadedImages.every(img => img.uploaded || img.uploading)}
-                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                    >
-                      🚀 Upload All to GitHub
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={uploadAllToGitHub}
+                        disabled={uploadedImages.every(img => img.uploaded || img.uploading)}
+                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      >
+                        🚀 Upload All to GitHub
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Layout Selector */}
+                  <div className="mb-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                    <h4 className="font-bold mb-2">📐 Insert Layout Options</h4>
+                    <div className="flex gap-4 items-center">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="layout"
+                          value="single"
+                          checked={selectedLayout === 'single'}
+                          onChange={() => setSelectedLayout('single')}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm">Single Image(s)</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="layout"
+                          value="double"
+                          checked={selectedLayout === 'double'}
+                          onChange={() => setSelectedLayout('double')}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm">Two Images Side-by-Side</span>
+                      </label>
+                    </div>
+                    {selectedImages.length > 0 && (
+                      <div className="mt-2">
+                        <button
+                          type="button"
+                          onClick={handleInsertSelectedImages}
+                          className="px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition-colors"
+                        >
+                          📥 Insert {selectedImages.length} Selected Image(s) ({selectedLayout === 'double' ? 'Side-by-Side' : 'Individual'})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedImages([])}
+                          className="ml-2 px-3 py-2 bg-gray-500 text-white text-sm rounded-md hover:bg-gray-600 transition-colors"
+                        >
+                          Clear Selection
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                      {selectedLayout === 'single' 
+                        ? 'Select one or more images to insert them individually with captions.' 
+                        : 'Select exactly 2 images to insert them side-by-side.'}
+                    </p>
+                  </div>
+
                   <div className="space-y-4">
                     {uploadedImages.map((image, index) => (
-                      <div key={index} className="border dark:border-gray-600 rounded-lg p-4">
+                      <div 
+                        key={index} 
+                        className={`border rounded-lg p-4 transition-colors ${
+                          selectedImages.includes(index) 
+                            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/10 dark:border-purple-400' 
+                            : 'border-gray-300 dark:border-gray-600'
+                        }`}
+                      >
                         <div className="flex gap-4">
+                          {/* Checkbox for selection */}
+                          <div className="flex items-start pt-2">
+                            <input
+                              type="checkbox"
+                              checked={selectedImages.includes(index)}
+                              onChange={() => handleToggleImageSelection(index)}
+                              className="w-5 h-5 cursor-pointer"
+                            />
+                          </div>
                           <img
                             src={image.url}
                             alt={image.name}
@@ -430,11 +580,25 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                               <p className="text-sm text-red-600 dark:text-red-400 mt-1">Error: {image.error}</p>
                             )}
                             
+                            {/* Caption Input */}
+                            <div className="mt-2">
+                              <label className="block text-sm font-medium mb-1">
+                                Caption (optional):
+                              </label>
+                              <input
+                                type="text"
+                                value={image.caption || ''}
+                                onChange={(e) => handleUpdateCaption(index, e.target.value)}
+                                placeholder="Enter a caption for this image..."
+                                className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                              />
+                            </div>
+                            
                             <div className="mt-2 space-y-2">
                               <div className="text-sm">
-                                <p className="font-medium mb-1">Image HTML:</p>
+                                <p className="font-medium mb-1">Image HTML Preview:</p>
                                 <code className="block bg-gray-100 dark:bg-gray-700 p-2 rounded text-xs overflow-x-auto">
-                                  {generateImageMarkdown(image.name)}
+                                  {generateImageMarkdown(image.name, image.caption)}
                                 </code>
                               </div>
                               
