@@ -402,12 +402,21 @@ export const ${variableName}: Article = {
       return false;
     }
 
+    // Proper escaping for TypeScript template literal
+    const escapeForTemplate = (str: string): string => {
+      return str
+        .replace(/\\/g, '\\\\')   // Escape backslashes first
+        .replace(/`/g, '\\`')      // Escape backticks
+        .replace(/\$/g, '\\$')     // Escape dollar signs for template literals
+        .replace(/\r?\n/g, '\\n'); // Preserve newlines
+    };
+
     const content = `import { Annex } from '../types';
 
 export const annexData: Annex = {
-  id: '${annex.id}',
+  id: '${annex.id.replace(/'/g, "\\'")}',
   title: '${annex.title.replace(/'/g, "\\'")}',
-  content: \`${annex.content.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`
+  content: \`${escapeForTemplate(annex.content)}\`
 };
 `;
     

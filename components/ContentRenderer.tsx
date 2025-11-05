@@ -70,17 +70,26 @@ const extractMarkdownTables = (text: string) => {
   const placeholder = '__TABLE_PLACEHOLDER__';
   
   // Match Markdown tables (header, separator, rows)
-  const tableRegex = /(\|.+\|)\n\s*(\|[\s:|-]+\|)\n((?:\|.+\|\n?)*)/gm;
+  const tableRegex = /(\|[^|\n]+(?:\|[^|\n]+)*\|)\n\s*(\|[\s:|-]+\|)\n((?:\|[^|\n]+(?:\|[^|\n]+)*\|\n?)*)/gm;
   
   const processed = text.replace(tableRegex, (match, header, separator, rows) => {
-    // Parse header
-    const headerCells = header.split('|').filter(cell => cell.trim()).map(cell => cell.trim());
+    // Parse header - sanitize each cell
+    const headerCells = header.split('|').filter(cell => cell.trim()).map(cell => 
+      DOMPurify.sanitize(cell.trim(), { ALLOWED_TAGS: [] })
+    );
     
     // Parse rows
     const rowLines = rows.trim().split('\n').filter(line => line.trim());
-    const rowsData = rowLines.map(row => 
-      row.split('|').filter(cell => cell.trim()).map(cell => cell.trim())
-    );
+    const rowsData = rowLines.map(row => {
+      const cells = row.split('|').filter(cell => cell.trim()).map(cell => 
+        DOMPurify.sanitize(cell.trim(), { ALLOWED_TAGS: [] })
+      );
+      // Ensure row has same number of columns as header
+      while (cells.length < headerCells.length) {
+        cells.push('');
+      }
+      return cells.slice(0, headerCells.length);
+    });
     
     // Build HTML table
     const tableHTML = `
