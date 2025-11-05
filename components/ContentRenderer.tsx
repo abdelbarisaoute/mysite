@@ -8,6 +8,9 @@ interface ContentRendererProps {
   content: string;
 }
 
+// Regex pattern for matching math expressions (used consistently across functions)
+const MATH_EXPRESSION_REGEX = /(\$\$[\s\S]*?\$\$|\$[^$]*?\$|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\])/g;
+
 // --- Helper: process LaTeX text commands like \textbf, \section, etc.
 const processLatexTextCommands = (text: string): string => {
   let processed = text;
@@ -46,7 +49,7 @@ const extractMathExpressions = (text: string) => {
   const mathExpressions: string[] = [];
   const placeholder = '__MATH_PLACEHOLDER__';
   const processed = text.replace(
-    /(\$\$[\s\S]*?\$\$|\$[^$]*?\$|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\])/g,
+    MATH_EXPRESSION_REGEX,
     (match) => {
       mathExpressions.push(match);
       return `${placeholder}${mathExpressions.length - 1}${placeholder}`;
@@ -58,7 +61,7 @@ const extractMathExpressions = (text: string) => {
 // --- Helper: render inline and display math using KaTeX ---
 const renderMathToHTML = (text: string): string => {
   return text.replace(
-    /(\$\$[\s\S]*?\$\$|\$[^$]*?\$|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\])/g,
+    MATH_EXPRESSION_REGEX,
     (match) => {
       try {
         let latex = match;
