@@ -97,7 +97,7 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              MySite
+              PiPhy
             </Link>
           </div>
           <div className="flex items-center space-x-2 md:space-x-4">
