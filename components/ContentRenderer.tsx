@@ -57,7 +57,7 @@ const extractRemarkBlocks = (text: string) => {
   const remarks: string[] = [];
   const placeholder = '__REMARK_PLACEHOLDER__';
   // Support both \begin{remark} and \begin{remarque}
-  const processed = text.replace(/\\begin\{remark(?:ue)?\}([\s\S]*?)\\end\{remark(?:ue)?\}/g, (match, content) => {
+  const processed = text.replace(/\\begin\{(remark|remarque)\}([\s\S]*?)\\end\{\1\}/g, (match, type, content) => {
     remarks.push(content.trim());
     return `${placeholder}${remarks.length - 1}${placeholder}`;
   });
@@ -247,6 +247,7 @@ const processParagraphs = (text: string): string => {
           trimmed.startsWith('<div') ||
           trimmed.startsWith('__MATH_PLACEHOLDER__') ||
           trimmed.startsWith('__LIST_PLACEHOLDER__') ||
+          trimmed.startsWith('__REMARK_PLACEHOLDER__') ||
           trimmed.startsWith('__TABLE_PLACEHOLDER__')) {
         return trimmed;
       }
