@@ -5,7 +5,7 @@ import { AnnexPart } from '../types';
 interface TOCItem {
   id: string;
   title: string;
-  level: number; // 2 for section, 3 for subsection, 4 for subsubsection
+  level: number; // 1 for part, 2 for section, 3 for subsection, 4 for subsubsection
   partTitle: string; // The title of the part this section belongs to
 }
 
@@ -20,9 +20,8 @@ const AnnexTableOfContents: React.FC<AnnexTableOfContentsProps> = ({ parts }) =>
   // Extract sections, subsections, and subsubsections from all parts
   const allTocItems = useMemo(() => {
     const items: TOCItem[] = [];
-    let itemCounter = 0;
     
-    parts.forEach((part, partIndex) => {
+    parts.forEach((part) => {
       // Add the part title itself as a main item
       items.push({
         id: generateId(part.title),
