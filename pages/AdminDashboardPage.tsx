@@ -609,6 +609,7 @@ ${partsCode}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         <button
+          type="button"
           onClick={handleLogout}
           className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition-colors"
         >
@@ -639,6 +640,7 @@ ${partsCode}
           </div>
           {tokenConfigured && !showTokenSetup && (
             <button
+              type="button"
               onClick={() => setShowTokenSetup(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors text-sm"
             >
@@ -647,6 +649,7 @@ ${partsCode}
           )}
           {!tokenConfigured && !showTokenSetup && (
             <button
+              type="button"
               onClick={() => setShowTokenSetup(true)}
               className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
             >
@@ -774,6 +777,7 @@ ${partsCode}
           <div className="flex gap-2">
             {showCreateForm && (
               <button
+                type="button"
                 onClick={() => setShowPreview(!showPreview)}
                 className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors"
               >
@@ -782,6 +786,7 @@ ${partsCode}
             )}
             {!showCreateForm && (
               <button
+                type="button"
                 onClick={() => setShowCreateForm(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
               >
@@ -927,12 +932,14 @@ ${partsCode}
                 </div>
                 <div className="flex gap-2 ml-4">
                   <button
+                    type="button"
                     onClick={() => handleEdit(article)}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
                   >
                     Edit
                   </button>
                   <button
+                    type="button"
                     onClick={() => handleDelete(article)}
                     disabled={isSubmitting}
                     className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
@@ -959,6 +966,7 @@ ${partsCode}
           <div className="flex gap-2">
             {!showAnnexForm && (
               <button
+                type="button"
                 onClick={handleAddPart}
                 className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
               >
@@ -1069,12 +1077,14 @@ ${partsCode}
                     </div>
                     <div className="flex gap-2 ml-4">
                       <button
+                        type="button"
                         onClick={() => handleEditPart(index)}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
                       >
                         Edit
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleDeletePart(index)}
                         className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
                       >
@@ -1095,6 +1105,7 @@ ${partsCode}
             {annexFormData.parts && annexFormData.parts.length > 0 && (
               <div className="mt-6">
                 <button
+                  type="button"
                   onClick={handleAnnexSubmit}
                   disabled={isSubmitting}
                   className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded transition-colors"
