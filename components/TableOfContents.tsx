@@ -81,10 +81,10 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
   const handleClick = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      // Get the header height (64px = h-16) plus some padding
-      const headerOffset = 80;
+      // Header height (64px from h-16) + padding (16px) = 80px
+      const HEADER_OFFSET = 80;
       const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      const offsetPosition = elementPosition + window.pageYOffset - HEADER_OFFSET;
 
       window.scrollTo({
         top: offsetPosition,
