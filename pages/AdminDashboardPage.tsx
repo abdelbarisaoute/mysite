@@ -797,7 +797,7 @@ ${partsCode}
         </div>
 
         {showCreateForm && (
-          <div className={`grid ${showPreview ? 'grid-cols-2' : 'grid-cols-1'} gap-6`}>
+          <div className={`admin-preview-grid ${showPreview ? 'with-preview' : ''}`}>
             {/* Editor Panel */}
             <div className="space-y-4">
               <form onSubmit={handleSubmit} id="article-form">
@@ -901,7 +901,7 @@ ${partsCode}
 
             {/* Preview Panel */}
             {showPreview && (
-              <div className="border-l border-gray-300 dark:border-gray-600 pl-6">
+              <div>
                 <ArticlePreview
                   title={formData.title}
                   date={formData.date}
@@ -978,7 +978,7 @@ ${partsCode}
 
         {/* Edit Part Form */}
         {showAnnexForm && (
-          <div className={`grid ${showAnnexPreview ? 'grid-cols-2' : 'grid-cols-1'} gap-6 mb-6`}>
+          <div className={`admin-preview-grid ${showAnnexPreview ? 'with-preview' : ''} mb-6`}>
             {/* Editor Panel */}
             <div className="space-y-4">
               <form onSubmit={handlePartSubmit} id="part-form">
@@ -1043,7 +1043,7 @@ ${partsCode}
 
             {/* Preview Panel */}
             {showAnnexPreview && (
-              <div className="border-l border-gray-300 dark:border-gray-600 pl-6">
+              <div>
                 <h3 className="text-xl font-bold mb-4">Preview</h3>
                 <ArticlePreview
                   title={partFormData.title}
