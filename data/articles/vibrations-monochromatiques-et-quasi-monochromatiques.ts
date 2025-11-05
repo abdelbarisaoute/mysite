@@ -35,10 +35,6 @@ Thus, the differentiation and integration of a monochromatic vibration only modi
 The negative sign in \$(\\omega t - \\phi)\$ simply indicates that a larger phase means the vibration reaches its maximum later in time.
 \\end{remark}
 
-\\begin{example}[title = {Simple Harmonic Oscillator}]
-Consider a mass \$m\$ attached to a spring with constant \$k\$. The position can be written as \$x(t) = A \\cos(\\omega_0 t - \\phi)\$ where \$\\omega_0 = \\sqrt{k/m}\$. This is a monochromatic vibration with fixed amplitude \$A\$.
-\\end{example}
-
 \\subsection{Complex Expression of the Vibration Function}
 
 The function \$V(t)\$, as we have seen previously, is a function with three parameters, two of which—\$\\omega\$ and \$\\phi\$—always appear in a coupled form. It is therefore more convenient to represent \$V(t)\$ in complex form to simplify mathematical manipulations:
@@ -85,10 +81,6 @@ The total energy of a monochromatic vibration is \\textbf{constant} and proporti
 \\begin{remark}
 It is important to emphasize that monochromatic vibrations are an idealization. In practice, no real source can produce a strictly monochromatic vibration: every physical source generates a wave whose spectrum has a finite width, however small it may be.
 \\end{remark}
-
-\\begin{example}
-A tuning fork produces a quasi-monochromatic vibration that is very close to a pure sinusoid, but the amplitude slowly decays over time due to energy dissipation.
-\\end{example}
 
 \\section{Quasi-Monochromatic Vibrations}
 
