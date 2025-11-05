@@ -111,6 +111,9 @@ const Header: React.FC = () => {
               <NavLink to="/resume" className={navLinkClasses}>
                 Resume
               </NavLink>
+              <NavLink to="/annex" className={navLinkClasses}>
+                Annex
+              </NavLink>
             </div>
             
             <ThemeToggleButton />
@@ -187,6 +190,13 @@ const Header: React.FC = () => {
               className={mobileNavLinkClasses}
             >
               Resume
+            </NavLink>
+            <NavLink
+              to="/annex"
+              onClick={closeMobileMenu}
+              className={mobileNavLinkClasses}
+            >
+              Annex
             </NavLink>
           </div>
         )}
