@@ -239,14 +239,12 @@ const restoreExampleBlocks = (text: string, examples: Array<{ content: string; t
     const inner = DOMPurify.sanitize(rendered, { ADD_ATTR: ['class'] });
 
     // Create the title header if provided
-    const titleHeader = example.title 
-      ? `<strong>Example: ${DOMPurify.sanitize(example.title)}</strong>` 
-      : '<strong>Example:</strong>';
+    const titleText = example.title ? `Example: ${DOMPurify.sanitize(example.title)}` : 'Example:';
+    const titleHeader = `<strong>${titleText}</strong>`;
 
     const placeholder = `__EXAMPLE_PLACEHOLDER__${i}__EXAMPLE_PLACEHOLDER__`;
-    restored = restored.split(placeholder).join(
-      `<div class="border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20 p-4 my-3 rounded">${titleHeader} ${inner}</div>`
-    );
+    const exampleHTML = `<div class="border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20 p-4 my-3 rounded">${titleHeader} ${inner}</div>`;
+    restored = restored.split(placeholder).join(exampleHTML);
   });
   return restored;
 };
