@@ -61,5 +61,10 @@ In the general case of a harmonic oscillator (mechanical or electrical), two for
 
 Let us consider a mechanical harmonic oscillator—\\autoref{fig:oscillateur}—composed of a spring with stiffness \$k\$, fixed at one end to an immovable wall and at the other end to a mass \$m\$. This mass slides without friction along a horizontal support, and its motion occurs along the \$(Ox)\$ axis. The mass oscillates around its equilibrium position \$x(t) = 0\$, and it is known that the natural frequency satisfies \$\\omega_0^2 = \\frac{k}{m}\$. In this case, the quantity \$V(t)\$ can be identified with the position:
 \$\$x(t) = A \\cos(\\omega_0 t - \\phi).\$\$
+
+<img src="/mysite/ch2-1-3-harmoscill.png" alt="ch2 1 3 harmoscill" class="max-w-full h-auto rounded-lg shadow-md my-4" />
+<figcaption class="text-sm text-gray-600 mt-2 italic">
+    Figure 1 – Mouvement de l’oscillateur harmonique
+  </figcaption>
 `
 };
