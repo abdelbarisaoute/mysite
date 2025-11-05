@@ -280,13 +280,66 @@ And the modulus of the temporal spectrum is:
 \$\$
 
 <div class="my-4">
-  <img src="/mysite/ch2-3-expl-vtilde-3dplt.png" alt="ch2 3 expl vtilde 3dplt" class="max-w-full h-64 rounded-lg shadow-md" />
+  <img src="/mysite/ch2-3-expl-vtilde-3dplt.png" alt="ch2 3 expl vtilde 3dplt" class="max-w-full h-auto rounded-lg shadow-md" />
   <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 4 -3D plot of the complex temporal spectrum of the damped quasi-monochromatic vibration.</p>
 </div>
 
+Figure 4 shows the graphical representation of the complex temporal spectrum of the damped vibration.
+
+We observe that the curve oscillates in the vicinity of \$\\theta = 0\$, which corresponds to the resonance frequency.
+
+
+\\begin{itemize}
+	\\item At resonance, \$\\nu = \\nu_0\$, hence \$\\theta = 0\$:
+	\\[
+	U_R(0) = 1 - e^{-1} \\quad \\text{and} \\quad U_I(0) = 0
+	\\]
+	The spectrum is maximum and purely real at resonance.
+	
+	\\item Far from resonance, \$|\\theta| \\gg 0\$, the dominant terms are:
+
+\$\$
+	\\begin{align}
+		U_R(\\theta) &\\approx \\frac{\\theta e^{-1} \\sin(\\theta)}{1+\\theta^2} \\sim \\frac{e^{-1} \\sin(\\theta)}{\\theta} \\\\[4pt]
+		U_I(\\theta) &\\approx \\frac{\\theta - \\theta e^{-1} \\cos(\\theta)}{1+\\theta^2} \\sim \\frac{1 - e^{-1} \\cos(\\theta)}{\\theta}
+	\\end{align}
+\$\$
+	Both components decay as \$1/\\theta\$.
+
+
+
+
+
+<div class="my-4">
+  <img src="/mysite/ch2-3-expl-vtilde-curves.png" alt="ch2 3 expl vtilde curves" class="max-w-full h-auto rounded-lg shadow-md" />
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 5-Components and complex representation of \$\\tilde{\\underbar{V}}(\\nu)\$</p>
+</div>
+
+	\\item In \\autoref{fig:vtilde_curvs}, we have a representation of the components of the complex temporal spectrum \$\\tilde{\\underbar{V}}(\\nu)\$.  
+	The complex representation of \$\\tilde{\\underbar{V}}(\\nu)\$ is the projection of the curve in Figure 5 onto the complex plane.  
+	This representation allows us to visualize the phase delay \$\\phi\$. The curve should be symmetric with respect to the real component axis \$Re[\\tilde{\\underbar{V}}(\\theta)]\$ when \$\\phi\$ is zero (note that the functions \$\\tilde{\\underbar{V}}(\\nu)\$ and \$\\tilde{\\underbar{V}}(\\theta)\$ are analogous, and the difference is for simplification, as it is easier to take \$\\theta\$ as the variable rather than \$(\\nu - \\nu_0)\$).
+
+	\\item Moreover, the curve of the magnitude of the temporal spectrum of \$\\underbar{V}(\\nu)\$ is particularly important because it directly represents the amplitude of each frequency component of the signal.  
+	Its square, \$|\\tilde{\\underbar{V}}(\\nu)|^2\$, is called the \\textbf{Energy Spectral Density} (ESD), which indicates the distribution of the signal\'s energy in the frequency domain.
+\\end{itemize}
 \\end{example}
 
+\\begin{remark}
+
+As observed in the two previous examples, the temporal spectrum of a vibration does not depend on the initial phase.  
+Indeed, a phase shift \$\\phi\$ simply results in multiplying the spectrum by the complex constant \$e^{i\\phi}\$, which corresponds to a simple rotation of the spectrum in the complex plane. The magnitude and the frequency distribution—i.e., the spectral width—remain strictly unchanged.  
+
+This property could be mentioned after calculating the magnitude of the temporal spectrum, but it is more instructive to illustrate it graphically in Figure 6 to clearly understand that the phase shift has no influence on the frequency structure of the signal.  
 
 
+
+<div class="my-4">
+  <img src="/mysite/ch2-3-rem-2.4-phivals.png" alt="ch2 3 rem 2.4 phivals" class="max-w-full h-auto rounded-lg shadow-md" />
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Complex representation of \$\\tilde{\\underbar{V}}(\\nu)\$ for different values of \$\\phi\$</p>
+</div>
+
+\\end{remark}
+
+\\section{Energy Spectrum of a Quasi-Monochromatic Vibration}
 `
 };
