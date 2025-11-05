@@ -126,5 +126,105 @@ A(t) =
 \\]
 
 \\textbf{Monochromatic} vibrations thus appear as a limiting case of \\textbf{quasi-monochromatic} vibrations, when the characteristic decay time \$\\tau \\rightarrow \\infty\$. In this case, the envelope becomes constant and the vibration persists indefinitely.
-\\end{example}`
+\\end{example}
+
+\\section{Temporal Spectrum of a Quasi-Monochromatic Vibration}
+
+Thanks to Fourier\'s theorem, we know that any signal or vibration can be expressed as a superposition of sinusoidal vibrations whose frequencies are close to a characteristic angular frequency \$\\omega_0\$.
+
+The temporal spectrum is the \\textbf{frequency representation of the signal}—the vibration—obtained via the Fourier transform.
+
+The temporal spectrum of a vibration \$V(t)\$ is the function \$\\tilde{\\underbar{V}}(\\nu)\$ defined by:
+
+\\[
+\\tilde{\\underbar{V}}(\\nu) = \\int_{-\\infty}^{+\\infty} \\underbar{V}(t) e^{i 2 \\pi \\nu t} \\, dt
+\\]
+
+or in terms of angular frequency \$\\omega = 2 \\pi \\nu\$:
+
+\\[
+\\tilde{\\underbar{V}}(\\nu) = \\int_{-\\infty}^{+\\infty} \\underbar{V}(t) e^{i \\omega t} \\, dt
+\\]
+
+From a mathematical point of view, the Fourier integral is defined for any signal \$V(t)\$ integrable over \$\\mathbb{R}\$. But in physics, an infinitely long vibration does not exist; every vibration source emits over a finite duration \$\\tau\$.
+
+\\begin{example}[title={Example: Case of a Monochromatic Vibration—Truncated Sinusoidal Vibration}]
+We revisit the case of a truncated sinusoidal vibration:
+\$\$
+\\begin{aligned}
+V(t) &= A(t) \\cos(\\omega_0 t - \\phi) \\quad \\text{with} \\quad
+A(t) =
+\\begin{cases}
+a & \\text{if } 0 \\leq t \\leq \\tau,\\\\
+0 & \\text{otherwise.}
+\\end{cases}
+\\end{aligned}
+\$\$
+
+The associated complex form is:
+\$\$
+\\underbar{V}(t) = A(t)\\, e^{-i(\\omega_0 t - \\phi)}.
+\$\$
+
+We then seek the temporal spectrum over the interval \$[0, \\tau]\$:
+\$\$
+\\begin{aligned}
+\\underbar{\\tilde{V}}(\\nu)
+&= \\int_0^{\\tau} \\underbar{V}(t)\\, e^{i 2\\pi \\nu t}\\, dt \\\\
+&= \\int_0^{\\tau} a e^{i\\phi} e^{i2\\pi(\\nu - \\nu_0)t}\\, dt
+\\quad \\text{with } \\omega_0 = 2\\pi \\nu_0,\\\\
+&= a e^{i\\phi} \\left[ \\frac{e^{i2\\pi(\\nu - \\nu_0)t}}{i2\\pi(\\nu - \\nu_0)} \\right]_0^{\\tau}
+= a e^{i\\phi} \\frac{e^{i2\\pi(\\nu - \\nu_0)\\tau} - 1}{i2\\pi(\\nu - \\nu_0)}.
+\\end{aligned}
+\$\$
+
+This expression can be simplified as:
+\$\$
+\\underbar{\\tilde{V}}(\\nu)
+= a \\tau e^{i\\phi} e^{i\\pi(\\nu - \\nu_0)\\tau}
+\\frac{\\sin\\left[\\pi(\\nu - \\nu_0)\\tau\\right]}{\\pi(\\nu - \\nu_0)\\tau}.
+\$\$
+
+Here, we recognize the \\textbf{sinc function}:
+\$\$
+sinc(x) = \\frac{\\sin(\\pi x)}{\\pi x}.
+\$\$
+
+This function is even and has a main maximum at \$x = 0\$.  
+It oscillates around zero with decreasing amplitude following a \$1/x\$ law.  
+To study its extrema, we compute:
+\$\$
+\\frac{d}{dx} sinc(x)
+= \\frac{1}{\\pi} \\frac{\\pi x \\cos(\\pi x) - \\sin(\\pi x)}{x^2} = 0.
+\$\$
+From this, we deduce the condition:
+\$\$
+\\pi x \\cos(\\pi x) - \\sin(\\pi x) = 0
+\\quad \\Leftrightarrow \\quad
+\\tan(\\pi x) = \\pi x.
+\$\$
+
+The values of \$x\$ where the derivative vanishes can be determined graphically by the intersections of the curves \$y = \\tan(\\pi x)\$ and \$y\' = \\pi x\$.  
+We then obtain:
+\$\$
+x \\approx k + \\frac{1}{2} \\quad \\text{with} \\quad k \\in \\mathbb{N}^*.
+\$\$
+Thus, the secondary extrema of the \$sinc(x)\$ function appear at regular intervals of \$\\frac{1}{2}\$ around the main maximum.
+
+\\paragraph{Physical Interpretation.}
+The temporal spectrum of a truncated sinusoidal vibration is therefore a \$sinc\$ function, centered on the frequency \$\\nu_0\$.  
+The width of the main lobe \$\\Delta \\nu\$ is inversely proportional to the duration \$\\tau\$ of the vibration:
+\$\$
+\\Delta \\nu \\approx \\frac{1}{\\tau}.
+\$\$
+In other words, the shorter the vibration in time, the broader its spectrum in the frequency domain.  
+This relation illustrates the \\textbf{time–frequency uncertainty principle}:
+\$\$
+\\Delta \\nu \\cdot \\tau \\approx 1.
+\$\$
+
+Thus, the temporal truncation of a pure vibration generates a spectral broadening: a signal of finite duration cannot be strictly monochromatic.
+
+\\end{example}
+`
 };
