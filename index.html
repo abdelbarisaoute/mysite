@@ -44,12 +44,15 @@
       }
       
       /* Admin dashboard preview grid layout */
+      /* Side-by-side editor and preview panels with independent scrolling */
       .admin-preview-grid {
         display: grid;
         grid-template-columns: 1fr;
         gap: 1.5rem;
       }
       
+      /* Desktop layout: side-by-side panels with fixed height */
+      /* Height calculation: 100vh - 12rem accounts for header (~4rem), margins and padding (~8rem) */
       @media (min-width: 1024px) {
         .admin-preview-grid.with-preview {
           grid-template-columns: 1fr 1fr;
