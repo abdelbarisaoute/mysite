@@ -293,6 +293,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
   return (
     <div className="my-4">
       <button
+        type="button"
         onClick={() => setShowModal(true)}
         className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
       >
@@ -317,6 +318,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Upload Images</h2>
                 <button
+                  type="button"
                   onClick={() => setShowModal(false)}
                   className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
@@ -346,6 +348,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                 <div className="space-y-2">
                   <p className="text-lg font-medium">Drop images here or</p>
                   <button
+                    type="button"
                     onClick={() => fileInputRef.current?.click()}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                   >
@@ -386,6 +389,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold">Uploaded Images ({uploadedImages.length})</h3>
                     <button
+                      type="button"
                       onClick={uploadAllToGitHub}
                       disabled={uploadedImages.every(img => img.uploaded || img.uploading)}
                       className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -436,12 +440,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                               
                               <div className="flex gap-2 flex-wrap">
                                 <button
+                                  type="button"
                                   onClick={() => handleInsertImage(image)}
                                   className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
                                 >
                                   Insert into Article
                                 </button>
                                 <button
+                                  type="button"
                                   onClick={() => handleCopyMarkdown(image)}
                                   className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
                                 >
@@ -450,6 +456,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                                 {!image.uploaded && (
                                   <>
                                     <button
+                                      type="button"
                                       onClick={() => uploadImageToGitHub(image)}
                                       disabled={image.uploading}
                                       className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 disabled:bg-gray-400"
@@ -457,6 +464,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                                       Upload to GitHub
                                     </button>
                                     <button
+                                      type="button"
                                       onClick={() => handleDownloadImage(image)}
                                       className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700"
                                     >
@@ -465,6 +473,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                                   </>
                                 )}
                                 <button
+                                  type="button"
                                   onClick={() => handleRemoveImage(index)}
                                   className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
                                 >
@@ -482,6 +491,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
 
               <div className="mt-6 flex justify-end">
                 <button
+                  type="button"
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
                 >
