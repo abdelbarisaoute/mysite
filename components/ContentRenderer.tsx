@@ -41,6 +41,20 @@ const extractRemarkBlocks = (text: string) => {
   return { processed, remarks };
 };
 
+// --- Helper: extract math expressions to protect them during paragraph processing ---
+const extractMathExpressions = (text: string) => {
+  const mathExpressions: string[] = [];
+  const placeholder = '__MATH_PLACEHOLDER__';
+  const processed = text.replace(
+    /(\$\$[\s\S]*?\$\$|\$[^$]*?\$|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\])/g,
+    (match) => {
+      mathExpressions.push(match);
+      return `${placeholder}${mathExpressions.length - 1}${placeholder}`;
+    }
+  );
+  return { processed, mathExpressions };
+};
+
 // --- Helper: render inline and display math using KaTeX ---
 const renderMathToHTML = (text: string): string => {
   return text.replace(
@@ -73,6 +87,18 @@ const renderMathToHTML = (text: string): string => {
   );
 };
 
+// --- Helper: restore math expressions after paragraph processing ---
+const restoreMathExpressions = (text: string, mathExpressions: string[]) => {
+  let restored = text;
+  mathExpressions.forEach((mathExpr, i) => {
+    const placeholder = `__MATH_PLACEHOLDER__${i}__MATH_PLACEHOLDER__`;
+    // Render the math expression to HTML
+    const rendered = renderMathToHTML(mathExpr);
+    restored = restored.split(placeholder).join(rendered);
+  });
+  return restored;
+};
+
 // --- Helper: restore remark blocks (with KaTeX rendering inside) ---
 const restoreRemarkBlocks = (text: string, remarks: string[]) => {
   let restored = text;
@@ -90,22 +116,54 @@ const restoreRemarkBlocks = (text: string, remarks: string[]) => {
   return restored;
 };
 
+// --- Helper: convert paragraph breaks (double newlines) to HTML paragraphs ---
+const processParagraphs = (text: string): string => {
+  // Split by double newlines (or more) to identify paragraphs
+  const paragraphs = text.split(/\n\s*\n+/);
+  
+  // Wrap each paragraph in <p> tags, but skip if it's already a block-level element
+  return paragraphs
+    .map(para => {
+      const trimmed = para.trim();
+      if (!trimmed) return '';
+      
+      // Don't wrap if it's already a block element (heading, div, etc.) or placeholder
+      if (trimmed.startsWith('<h') || 
+          trimmed.startsWith('<div') ||
+          trimmed.startsWith('__MATH_PLACEHOLDER__')) {
+        return trimmed;
+      }
+      
+      // Don't add <br> for single newlines - this was causing issues with math
+      // Just wrap in <p> tags and let the browser handle text flow
+      return `<p>${trimmed}</p>`;
+    })
+    .filter(p => p)
+    .join('\n');
+};
+
 // --- Main component ---
 const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
   const renderedParts = useMemo(() => {
     // Step 1: Extract remark blocks
     const { processed: textWithoutRemarks, remarks } = extractRemarkBlocks(content);
 
-    // Step 2: Apply text formatting
-    let processed = processLatexTextCommands(textWithoutRemarks);
+    // Step 2: Extract math expressions to protect them during paragraph processing
+    const { processed: textWithoutMath, mathExpressions } = extractMathExpressions(textWithoutRemarks);
 
-    // Step 3: Render math outside of remark blocks
-    let html = renderMathToHTML(processed);
+    // Step 3: Apply text formatting
+    let processed = processLatexTextCommands(textWithoutMath);
 
-    // Step 4: Restore remarks (rendering math inside them too)
+    // Step 4: Process paragraph breaks (now safe, math is protected)
+    processed = processParagraphs(processed);
+
+    // Step 5: Restore math expressions (rendering them to HTML)
+    let html = restoreMathExpressions(processed, mathExpressions);
+
+    // Step 6: Restore remarks (rendering math inside them too)
     html = restoreRemarkBlocks(html, remarks);
 
-    // Step 5: Sanitize final output
+    // Step 7: Sanitize final output
     return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class'] }) }} />;
   }, [content]);
 
