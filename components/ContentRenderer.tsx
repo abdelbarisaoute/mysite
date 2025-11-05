@@ -64,6 +64,18 @@ const extractRemarkBlocks = (text: string) => {
   return { processed, remarks };
 };
 
+// --- Helper: extract LaTeX example environments ---
+const extractExampleBlocks = (text: string) => {
+  const examples: Array<{ content: string; title?: string }> = [];
+  const placeholder = '__EXAMPLE_PLACEHOLDER__';
+  // Support \begin{example}[title = {the title}]...\end{example}
+  const processed = text.replace(/\\begin\{example\}(?:\[title\s*=\s*\{([^}]*)\}\])?([\s\S]*?)\\end\{example\}/g, (match, title, content) => {
+    examples.push({ content: content.trim(), title: title?.trim() });
+    return `${placeholder}${examples.length - 1}${placeholder}`;
+  });
+  return { processed, examples };
+};
+
 // --- Helper: extract and convert Markdown tables to HTML ---
 const extractMarkdownTables = (text: string) => {
   const tables: string[] = [];
@@ -217,6 +229,26 @@ const restoreRemarkBlocks = (text: string, remarks: string[]) => {
   return restored;
 };
 
+// --- Helper: restore example blocks (with KaTeX rendering inside) ---
+const restoreExampleBlocks = (text: string, examples: Array<{ content: string; title?: string }>) => {
+  let restored = text;
+  examples.forEach((example, i) => {
+    // Process formatting and math inside the example
+    const processed = processLatexTextCommands(example.content);
+    const rendered = renderMathToHTML(processed);
+    const inner = DOMPurify.sanitize(rendered, { ADD_ATTR: ['class'] });
+
+    // Create the title header if provided
+    const titleText = example.title ? `Example: ${DOMPurify.sanitize(example.title)}` : 'Example:';
+    const titleHeader = `<strong>${titleText}</strong>`;
+
+    const placeholder = `__EXAMPLE_PLACEHOLDER__${i}__EXAMPLE_PLACEHOLDER__`;
+    const exampleHTML = `<div class="border-l-4 border-green-500 bg-green-50 dark:bg-green-900/20 p-4 my-3 rounded">${titleHeader} ${inner}</div>`;
+    restored = restored.split(placeholder).join(exampleHTML);
+  });
+  return restored;
+};
+
 // --- Helper: restore table blocks (with KaTeX rendering inside) ---
 const restoreTableBlocks = (text: string, tables: string[]) => {
   let restored = text;
@@ -248,6 +280,7 @@ const processParagraphs = (text: string): string => {
           trimmed.startsWith('__MATH_PLACEHOLDER__') ||
           trimmed.startsWith('__LIST_PLACEHOLDER__') ||
           trimmed.startsWith('__REMARK_PLACEHOLDER__') ||
+          trimmed.startsWith('__EXAMPLE_PLACEHOLDER__') ||
           trimmed.startsWith('__TABLE_PLACEHOLDER__')) {
         return trimmed;
       }
@@ -269,31 +302,37 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
     // Step 2: Extract remark blocks
     const { processed: textWithoutRemarks, remarks } = extractRemarkBlocks(textWithoutLists);
 
-    // Step 3: Extract Markdown tables
-    const { processed: textWithoutTables, tables } = extractMarkdownTables(textWithoutRemarks);
+    // Step 3: Extract example blocks
+    const { processed: textWithoutExamples, examples } = extractExampleBlocks(textWithoutRemarks);
 
-    // Step 4: Extract math expressions to protect them during paragraph processing
+    // Step 4: Extract Markdown tables
+    const { processed: textWithoutTables, tables } = extractMarkdownTables(textWithoutExamples);
+
+    // Step 5: Extract math expressions to protect them during paragraph processing
     const { processed: textWithoutMath, mathExpressions } = extractMathExpressions(textWithoutTables);
 
-    // Step 5: Apply text formatting
+    // Step 6: Apply text formatting
     let processed = processLatexTextCommands(textWithoutMath);
 
-    // Step 6: Process paragraph breaks (now safe, math is protected)
+    // Step 7: Process paragraph breaks (now safe, math is protected)
     processed = processParagraphs(processed);
 
-    // Step 7: Restore math expressions (rendering them to HTML)
+    // Step 8: Restore math expressions (rendering them to HTML)
     let html = restoreMathExpressions(processed, mathExpressions);
 
-    // Step 8: Restore remarks (rendering math inside them too)
+    // Step 9: Restore remarks (rendering math inside them too)
     html = restoreRemarkBlocks(html, remarks);
 
-    // Step 9: Restore table blocks (rendering math inside them too)
+    // Step 10: Restore examples (rendering math inside them too)
+    html = restoreExampleBlocks(html, examples);
+
+    // Step 11: Restore table blocks (rendering math inside them too)
     html = restoreTableBlocks(html, tables);
 
-    // Step 10: Restore list blocks (rendering math inside them too)
+    // Step 12: Restore list blocks (rendering math inside them too)
     html = restoreListBlocks(html, lists);
 
-    // Step 11: Sanitize final output
+    // Step 13: Sanitize final output
     return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class'], ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'] }) }} />;
   }, [content]);
 
