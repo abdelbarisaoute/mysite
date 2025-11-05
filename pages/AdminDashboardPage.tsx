@@ -402,6 +402,13 @@ export const ${variableName}: Article = {
       return false;
     }
 
+    // Proper escaping for TypeScript string literals
+    const escapeForString = (str: string): string => {
+      return str
+        .replace(/\\/g, '\\\\')   // Escape backslashes first
+        .replace(/'/g, "\\'");     // Escape single quotes
+    };
+
     // Proper escaping for TypeScript template literal
     const escapeForTemplate = (str: string): string => {
       return str
@@ -414,8 +421,8 @@ export const ${variableName}: Article = {
     const content = `import { Annex } from '../types';
 
 export const annexData: Annex = {
-  id: '${annex.id.replace(/'/g, "\\'")}',
-  title: '${annex.title.replace(/'/g, "\\'")}',
+  id: '${escapeForString(annex.id)}',
+  title: '${escapeForString(annex.title)}',
   content: \`${escapeForTemplate(annex.content)}\`
 };
 `;
