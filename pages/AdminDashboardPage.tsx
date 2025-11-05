@@ -7,6 +7,7 @@ import { Article, Annex, AnnexPart } from '../types';
 import ArticlePreview from '../components/ArticlePreview';
 import ImageUpload from '../components/ImageUpload';
 import { annexData } from '../data/annex';
+import { generateId } from '../utils/idGenerator';
 
 // Helper function to get repository information
 const getRepositoryInfo = () => {
@@ -570,7 +571,7 @@ ${partsCode}
     // Generate ID if creating new part
     const partId = editingPartIndex !== null 
       ? partFormData.id 
-      : partFormData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      : generateId(partFormData.title);
     
     const part: AnnexPart = {
       ...partFormData,
