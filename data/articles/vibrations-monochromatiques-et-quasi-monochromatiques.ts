@@ -97,13 +97,21 @@ where \$A(t)\$ represents the temporal envelope of the vibration, which varies s
 
 
 <div class="flex gap-4 my-4 flex-wrap">
-  <div class="flex-1 min-w-[200px]">
-    <img src="/mysite/ch2-2-expl-a.png" alt="ch2 2 expl a" class="w-full h-auto rounded-lg shadow-md" />
-    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 1(b) -Truncated Monochromatic Vibration</p>
+  <div class="flex-1 min-w-[200px] flex justify-center">
+    <img src="/mysite/ch2-2-expl-a.png" 
+         alt="ch2 2 expl a" 
+         class="h-64 w-auto rounded-lg shadow-md" />
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">
+      Figure 1(b) - Truncated Monochromatic Vibration
+    </p>
   </div>
-  <div class="flex-1 min-w-[200px]">
-    <img src="/mysite/ch2-2-expl-b.png" alt="ch2 2 expl b" class="w-full h-auto rounded-lg shadow-md" />
-    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic"> Figure 2(b) –Damped vibration</p>
+  <div class="flex-1 min-w-[200px] flex justify-center">
+    <img src="/mysite/ch2-2-expl-b.png" 
+         alt="ch2 2 expl b" 
+         class="h-64 w-auto rounded-lg shadow-md" />
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">
+      Figure 2(b) – Damped Vibration
+    </p>
   </div>
 </div>
 
