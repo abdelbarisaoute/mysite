@@ -234,6 +234,59 @@ Thus, the temporal truncation of a pure vibration generates a spectral broadenin
 
 \\end{example}
 
+\\begin{example}[title={Example: Case of a quasi-monochromatic damped vibration}]
+Let us reconsider the example in the case of a quasi-monochromatic damped vibration: 
+ 
+\$\$
+\\begin{aligned}
+V(t) & = A(t) \\cos(\\omega_0 t - \\phi) \\quad \\text{and} \\quad A(t) =
+\\begin{cases}
+a e^{-t/\\tau} & \\quad \\text{for} \\quad t \\geqslant 0 \\\\
+0 & \\quad \\text{otherwise}
+\\end{cases} \\\\
+\\underbar{V} (t) & = A(t) \\exp\\left(-i(\\omega_0 t -\\phi) \\right)
+\\end{aligned}
+\$\$
+
+We seek the temporal spectrum over the interval \$[0,\\tau]\$:
+
+\$\$
+\\begin{aligned}
+	\\tilde{\\underbar{V}}(\\nu) & = \\int^{\\tau}_{0} \\underbar{V}(t) e^{i2\\pi \\nu t} dt \\\\
+	& = \\int^{\\tau}_{0} a e^{-t/\\tau} e^{i2\\pi \\nu t - i \\omega_0 t} e^{i\\phi}dt \\\\[4pt]
+	& = a e^{i\\phi} \\int^{\\tau}_{0} e^{(2i\\pi \\nu - \\omega_0 i - 1/\\tau) t } dt \\\\[4pt]
+	& = a e^{i\\phi} \\left[ \\frac{e^{(2i\\pi \\nu - \\omega_0 i - 1/\\tau) t }}{2i\\pi \\nu - \\omega_0 i - 1/\\tau}        \\right]^{\\tau}_{0} \\\\[4pt]
+	& = ae^{i\\phi} \\frac{e^{(2i\\pi \\nu - \\omega_0 i - 1/\\tau) \\tau } - 1}{  2i\\pi \\nu - \\omega_0 i - 1/\\tau} 
+\\end{aligned}
+\$\$
+
+We set \$ \\theta = ( \\nu - \\nu_0 ) 2\\pi  \\tau \$ with \$ \\omega_0 = 2\\pi \\nu_0\$:
+
+\$\$
+\\begin{aligned}
+	\\tilde{\\underbar{V}}(\\nu) & = ae^{i\\phi}\\tau \\frac{e^{-1} e^{i\\theta}-1}{i\\theta- 1}\\\\[4pt]
+	& = a e^{i\\phi} \\tau \\frac{-(e^{-1}e^{i\\theta} - 1) (1+i\\theta) }{1+\\theta^2}\\\\[4pt]
+	& = a e^{i\\phi} \\tau \\frac{1 + i\\theta - i\\theta e^{-1}e^{i\\theta} - e^{-1}e^{i\\theta} }{1 + \\theta^2} \\\\[4pt]
+	& = \\frac{a e^{i\\phi} \\tau }{1 + \\theta^2} \\left( 1 + i\\theta - i\\theta e^{-1} (\\cos(\\theta) + i \\sin(\\theta)) - e^{-1} (\\cos(\\theta) + i \\sin(\\theta)) \\right) \\\\
+	& = a e^{i\\phi} \\tau \\left[ \\underbrace{ \\frac{\\left( 1 - e^{-1} \\cos(\\theta) + \\theta e^{-1} \\sin(\\theta) \\right)}{1 + \\theta^2}}_{U_R(\\theta)} + i \\underbrace{\\frac{\\left( \\theta - e^{-1} \\sin(\\theta) - \\theta e^{-1} \\cos(\\theta) \\right)}{1 + \\theta^2}}_{U_I(\\theta)} \\right]\\\\
+	\\tilde{\\underbar{V}}(\\nu) & = a e^{i\\phi} \\tau \\left[ U_R(\\theta) + i U_I(\\theta) \\right]
+\\end{aligned}
+\$\$
+
+And the modulus of the temporal spectrum is:
+
+\$\$
+|\\tilde{\\underbar{V}}(\\nu)| = a \\tau \\sqrt{U_R^2(\\theta) + U_I^2(\\theta)} \\quad \\text{where} \\quad |e^{i\\phi}| = 1
+\$\$
+
+<div class="my-4">
+  <img src="/mysite/ch2-3-expl-vtilde-3dplt.png" alt="ch2 3 expl vtilde 3dplt" class="max-w-full h-auto rounded-lg shadow-md" />
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 4 -3D plot of the complex temporal spectrum of the damped quasi-monochromatic vibration.</p>
+</div>
+
+\\end{example}
+
+
 
 `
 };
