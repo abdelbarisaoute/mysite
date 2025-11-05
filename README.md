@@ -167,6 +167,20 @@ Articles are now automatically discovered! Simply:
 
 The build system uses Vite's `import.meta.glob` to automatically discover all article files in the `data/articles/` directory.
 
+### Article Syntax Reference:
+
+For comprehensive documentation on all available syntax and features for writing articles, see the [SYNTAX_GUIDE.md](SYNTAX_GUIDE.md).
+
+Quick reference:
+- Text formatting: `\textbf{bold}`, `\textit{italic}`, `\underline{underlined}`
+- Sections: `\section{Title}`, `\subsection{Title}`, `\subsubsection{Title}`
+- Math: Inline `$...$` or display `$$...$$`
+- **Remark boxes (green):** `\begin{remark}...\end{remark}` or `\begin{remarque}...\end{remarque}`
+- **Example boxes (blue):** `\begin{example}...\end{example}` or `\begin{example}[title = {Title}]...\end{example}`
+- Lists: `\begin{itemize}...\end{itemize}` or `\begin{enumerate}...\end{enumerate}`
+- Tables: Standard Markdown table syntax
+- Images: HTML `<img>` tags with Tailwind classes (see [IMAGE_GUIDE.md](IMAGE_GUIDE.md))
+
 ### LaTeX and Math Support:
 
 The website includes comprehensive LaTeX rendering capabilities powered by KaTeX:
@@ -196,9 +210,20 @@ The website includes comprehensive LaTeX rendering capabilities powered by KaTeX
 
 **Remark Blocks:**
 ```latex
-\begin{remarque}
-This is a highlighted remark block that supports both math $x^2$ and formatting.
-\end{remarque}
+\begin{remark}
+This is a highlighted remark block with green styling that supports both math $x^2$ and formatting.
+\end{remark}
+```
+
+**Example Blocks:**
+```latex
+\begin{example}
+This is an example block with blue styling. Can include math and formatting.
+\end{example}
+
+\begin{example}[title = {Custom Title}]
+Example with a custom title.
+\end{example}
 ```
 
 **Example Article with LaTeX:**
