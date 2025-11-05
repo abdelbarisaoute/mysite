@@ -22,12 +22,19 @@ const AnnexPage: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <article className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-8">
+      <article className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 mb-6">
         <h1 className="text-4xl font-bold mb-6">{annex.title}</h1>
-        <div className="prose dark:prose-invert max-w-none">
-          <ContentRenderer content={annex.content} />
-        </div>
       </article>
+      
+      {/* Render each part independently */}
+      {annex.parts && annex.parts.map((part) => (
+        <article key={part.id} className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 mb-6">
+          <h2 className="text-3xl font-bold mb-4 text-blue-600 dark:text-blue-400">{part.title}</h2>
+          <div className="prose dark:prose-invert max-w-none">
+            <ContentRenderer content={part.content} />
+          </div>
+        </article>
+      ))}
     </div>
   );
 };

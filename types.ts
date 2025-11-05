@@ -6,8 +6,14 @@ export interface Article {
   content: string;
 }
 
-export interface Annex {
+export interface AnnexPart {
   id: string;
   title: string;
   content: string;
+}
+
+export interface Annex {
+  id: string;
+  title: string;
+  parts: AnnexPart[];
 }

@@ -3,11 +3,13 @@ import { Annex } from '../types';
 export const annexData: Annex = {
   id: 'main-annex',
   title: 'Annex',
-  content: `\\section{Mathematical Tables and Formulas}
+  parts: [
+    {
+      id: 'mathematical-constants',
+      title: 'Mathematical Constants',
+      content: `\\section{Mathematical Constants}
 
-This annex contains useful mathematical tables and formulas for reference.
-
-\\subsection{Common Mathematical Constants}
+This section contains common mathematical constants used in various calculations.
 
 | Constant | Symbol | Value |
 |----------|--------|-------|
@@ -16,7 +18,16 @@ This annex contains useful mathematical tables and formulas for reference.
 | Golden ratio | $\\phi$ | 1.61803398875 |
 | Square root of 2 | $\\sqrt{2}$ | 1.41421356237 |
 
-\\subsection{Trigonometric Identities}
+\\begin{remarque}
+These constants are fundamental in mathematics and appear in many formulas.
+\\end{remarque}`
+    },
+    {
+      id: 'trigonometric-identities',
+      title: 'Trigonometric Identities',
+      content: `\\section{Trigonometric Identities}
+
+Essential trigonometric identities for solving equations.
 
 **Pythagorean Identity:**
 $$\\sin^2(\\theta) + \\cos^2(\\theta) = 1$$
@@ -25,7 +36,16 @@ $$\\sin^2(\\theta) + \\cos^2(\\theta) = 1$$
 $$\\sin(\\alpha + \\beta) = \\sin(\\alpha)\\cos(\\beta) + \\cos(\\alpha)\\sin(\\beta)$$
 $$\\cos(\\alpha + \\beta) = \\cos(\\alpha)\\cos(\\beta) - \\sin(\\alpha)\\sin(\\beta)$$
 
-\\subsection{Calculus Formulas}
+**Double Angle Formulas:**
+$$\\sin(2\\theta) = 2\\sin(\\theta)\\cos(\\theta)$$
+$$\\cos(2\\theta) = \\cos^2(\\theta) - \\sin^2(\\theta)$$`
+    },
+    {
+      id: 'calculus-formulas',
+      title: 'Calculus Formulas',
+      content: `\\section{Calculus Formulas}
+
+Essential calculus formulas for derivatives and integrals.
 
 **Derivative Rules:**
 
@@ -43,6 +63,8 @@ $$\\int e^x dx = e^x + C$$
 $$\\int \\frac{1}{x} dx = \\ln|x| + C$$
 
 \\begin{remarque}
-This annex can be edited from the admin dashboard to add your own tables and formulas.
+Remember to add the constant of integration $C$ for indefinite integrals.
 \\end{remarque}`
+    }
+  ]
 };
