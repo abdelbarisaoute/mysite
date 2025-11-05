@@ -16,7 +16,7 @@ const HomePage: React.FC = () => {
       <section className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm">
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">Welcome to My Digital Space</h1>
         <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-          I am a passionate researcher and writer exploring the frontiers of science. This website is a collection of my thoughts, findings, and professional journey.
+          Personal platform illustrating my understanding of physics through original notes and visual explanations.
         </p>
       </section>
 
