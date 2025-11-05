@@ -66,5 +66,65 @@ Let us consider a mechanical harmonic oscillator—\\autoref{fig:oscillateur}—
 <figcaption class="text-sm text-gray-600 mt-2 italic">
     Figure 1 – Mouvement de l’oscillateur harmonique
   </figcaption>
+
+The kinetic and potential energies of this oscillator are respectively:
+
+\$\$\\varepsilon_k = \\frac{1}{2} m \\dot{x}^2 = \\frac{1}{2} m \\omega_0^2 A^2 \\sin^2(\\omega t - \\phi) \\quad \\text{and} \\quad \\varepsilon_p = \\frac{1}{2} k x^2 = \\frac{1}{2} k A^2 \\cos^2(\\omega_0 t - \\phi)\$\$
+
+Hence, the total energy:
+
+\$\$\\varepsilon = \\varepsilon_k + \\varepsilon_p = \\frac{1}{2} m \\omega_0^2 A^2\$\$
+
+The total energy of a monochromatic vibration is \\textbf{constant} and proportional to the square of the amplitude \$A\$, or equivalently to the square of the modulus of the complex amplitude of the vibration \$\\underbar{U} = A e^{i\\phi}\$:
+\$\$\\varepsilon \\propto A^2 = \\underbar{U} \\, \\underbar{U}^*\$\$
+
+\\begin{remark}
+It is important to emphasize that monochromatic vibrations are an idealization. In practice, no real source can produce a strictly monochromatic vibration: every physical source generates a wave whose spectrum has a finite width, however small it may be.
+\\end{remark}
+
+\\section{Quasi-Monochromatic Vibrations}
+
+A quasi-monochromatic vibration is a vibration which, unlike the ideal monochromatic vibration, does not oscillate indefinitely with a constant amplitude. Instead, it is modulated by a slow envelope, which causes its amplitude (and possibly its phase) to vary over time. These vibrations are of great interest in optics and wave physics, as they accurately describe real signals emitted by sources that are finite in time.
+
+It can be written in the form:
+\$\$V(t) = A(t) \\cos(\\omega_0 t - \\phi)\$\$
+where \$A(t)\$ represents the temporal envelope of the vibration, which varies slowly compared to the function \$\\cos(\\omega_0 t - \\phi)\$.
+
+\\textbf{Example :}
+
+
+
+
+
+<div class="flex gap-4 my-4 flex-wrap">
+  <div class="flex-1 min-w-[200px]">
+    <img src="/mysite/ch2-2-expl-a.png" alt="ch2 2 expl a" class="w-full h-auto rounded-lg shadow-md" />
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 1(b) -Truncated Monochromatic Vibration</p>
+  </div>
+  <div class="flex-1 min-w-[200px]">
+    <img src="/mysite/ch2-2-expl-b.png" alt="ch2 2 expl b" class="w-full h-auto rounded-lg shadow-md" />
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic"> Figure 2(b) –Damped vibration</p>
+  </div>
+</div>
+
+\\textbf{Truncated Monochromatic Vibration:}
+\\[
+A(t) =
+\\begin{cases}
+  a, & \\text{for } 0 \\leq t \\leq \\tau, \\quad \\text{with } \\tau \\gg \\dfrac{2\\pi}{\\omega_0},\\\\
+  0, & \\text{otherwise.}
+\\end{cases}
+\\]
+
+\\textbf{Damped Vibration:}
+\\[
+A(t) =
+\\begin{cases}
+  a\\,e^{-t/\\tau}, & \\text{for } t \\ge 0,\\ \\text{with } \\tau \\gg \\dfrac{2\\pi}{\\omega_0},\\\\
+  0, & \\text{otherwise.}
+\\end{cases}
+\\]
+
+\\textbf{Monochromatic} vibrations thus appear as a limiting case of \\textbf{quasi-monochromatic} vibrations, when the characteristic decay time \$\\tau \\rightarrow \\infty\$. In this case, the envelope becomes constant and the vibration persists indefinitely.
 `
 };
