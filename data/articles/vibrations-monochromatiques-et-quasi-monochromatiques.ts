@@ -280,7 +280,7 @@ And the modulus of the temporal spectrum is:
 \$\$
 
 <div class="my-4">
-  <img src="/mysite/ch2-3-expl-vtilde-3dplt.png" alt="ch2 3 expl vtilde 3dplt" class="max-w-full h-auto rounded-lg shadow-md" />
+  <img src="/mysite/ch2-3-expl-vtilde-3dplt.png" alt="ch2 3 expl vtilde 3dplt" class="max-w-full h-64 rounded-lg shadow-md" />
   <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 4 -3D plot of the complex temporal spectrum of the damped quasi-monochromatic vibration.</p>
 </div>
 
