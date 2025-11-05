@@ -290,13 +290,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
     const altText1 = generateAltText(image1.name);
     const altText2 = generateAltText(image2.name);
     
-    return `<div class="flex gap-4 my-4 flex-wrap">
+    return `<div class="flex gap-4 my-4 flex-wrap items-start">
   <div class="flex-1 min-w-[200px]">
-    <img src="${basePath}${cleanName1}" alt="${altText1}" class="w-full h-auto rounded-lg shadow-md" />
+    <img src="${basePath}${cleanName1}" alt="${altText1}" class="w-full h-64 object-cover rounded-lg shadow-md" />
     ${image1.caption ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${image1.caption}</p>` : ''}
   </div>
   <div class="flex-1 min-w-[200px]">
-    <img src="${basePath}${cleanName2}" alt="${altText2}" class="w-full h-auto rounded-lg shadow-md" />
+    <img src="${basePath}${cleanName2}" alt="${altText2}" class="w-full h-64 object-cover rounded-lg shadow-md" />
     ${image2.caption ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${image2.caption}</p>` : ''}
   </div>
 </div>`;

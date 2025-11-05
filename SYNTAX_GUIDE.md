@@ -384,15 +384,25 @@ Images are added using standard HTML `<img>` tags with Tailwind CSS classes for 
 
 **Side-by-Side Images:**
 ```html
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
-  <img src="/mysite/image1.png" 
-       alt="First image" 
-       class="max-w-full h-auto rounded-lg shadow-md" />
-  <img src="/mysite/image2.png" 
-       alt="Second image" 
-       class="max-w-full h-auto rounded-lg shadow-md" />
+<div class="flex gap-4 my-4 flex-wrap items-start">
+  <div class="flex-1 min-w-[200px]">
+    <img src="/mysite/image1.png" 
+         alt="First image" 
+         class="w-full h-64 object-cover rounded-lg shadow-md" />
+  </div>
+  <div class="flex-1 min-w-[200px]">
+    <img src="/mysite/image2.png" 
+         alt="Second image" 
+         class="w-full h-64 object-cover rounded-lg shadow-md" />
+  </div>
 </div>
 ```
+
+**Key Classes for Equal Heights:**
+- `h-64` - Sets a fixed height (16rem/256px) ensuring both images have the same height
+- `object-cover` - Ensures images fill the container while maintaining aspect ratio without distortion
+- `items-start` - Aligns flex items to the top
+- You can use different height classes: `h-48` (12rem), `h-64` (16rem), `h-80` (20rem), or `h-96` (24rem)
 
 **Important Notes:**
 - Always include descriptive `alt` text for accessibility
