@@ -25,7 +25,7 @@ const ArticlePage: React.FC = () => {
   return (
     <div className="flex gap-8 items-start">
       {/* Table of Contents - Left Sidebar */}
-      <aside className="hidden lg:block w-64 flex-shrink-0">
+      <aside className="hidden lg:block w-64 flex-shrink-0 self-start">
         <TableOfContents content={article.content} />
       </aside>
 
