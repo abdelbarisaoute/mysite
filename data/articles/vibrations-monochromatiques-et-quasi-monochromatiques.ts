@@ -34,5 +34,32 @@ Thus, the differentiation and integration of a monochromatic vibration only modi
 \\begin{remark}
 The negative sign in \$(\\omega t - \\phi)\$ simply indicates that a larger phase means the vibration reaches its maximum later in time.
 \\end{remark}
+
+\\subsection{Complex Expression of the Vibration Function}
+
+The function \$V(t)\$, as we have seen previously, is a function with three parameters, two of which—\$\\omega\$ and \$\\phi\$—always appear in a coupled form. It is therefore more convenient to represent \$V(t)\$ in complex form to simplify mathematical manipulations:
+
+\$\$V(t) = \\mathrm{Re}\\{\\underbar{V}(t)\\} \\quad \\text{with} \\quad \\underbar{V}(t) = A \\exp[-i(\\omega t - \\phi)] = A \\exp(i\\phi)\\exp(-i\\omega t)\$\$
+
+The coefficient \$A e^{i\\phi}\$ is the complex amplitude of the vibration; it combines the real amplitude and the initial phase into a single complex quantity. The factor \$e^{-i\\omega t}\$ represents the harmonic time evolution. This expression also makes the phase delay \$\\phi\$ appear as a positive contribution.
+
+\\begin{remark}
+The two conventions \$e^{-i\\omega t}\$ and \$e^{i\\omega t}\$ are mathematically equivalent, provided they are used consistently throughout the calculation. Physically, however, they correspond to two opposite sign conventions in the description of time and propagation. The choice of sign is therefore a mathematical convention without any effect on real physical quantities such as position, velocity, or energy.
+\\end{remark}
+
+\\subsection{Energy of a Monochromatic Vibration}
+
+Consider a monochromatic vibration represented by:
+\$\$V(t) = A \\cos(\\omega t - \\phi)\$\$
+The energy associated with this vibration depends on the physical quantity represented by \$V(t)\$.
+
+In the general case of a harmonic oscillator (mechanical or electrical), two forms of energy are distinguished:
+\\begin{itemize}
+    \\item The kinetic energy (or magnetic energy for an LC circuit) is proportional to the velocity or to the derivative of \$V(t)\$.
+    \\item The potential energy (or electric energy in a capacitor) is proportional to \$V(t)^2\$.
+\\end{itemize}
+
+Let us consider a mechanical harmonic oscillator—\\autoref{fig:oscillateur}—composed of a spring with stiffness \$k\$, fixed at one end to an immovable wall and at the other end to a mass \$m\$. This mass slides without friction along a horizontal support, and its motion occurs along the \$(Ox)\$ axis. The mass oscillates around its equilibrium position \$x(t) = 0\$, and it is known that the natural frequency satisfies \$\\omega_0^2 = \\frac{k}{m}\$. In this case, the quantity \$V(t)\$ can be identified with the position:
+\$\$x(t) = A \\cos(\\omega_0 t - \\phi).\$\$
 `
 };
