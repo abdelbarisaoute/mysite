@@ -38,15 +38,16 @@ const extractListBlocks = (text: string) => {
   const lists: Array<{ content: string; type: 'itemize' | 'enumerate' }> = [];
   const placeholder = '__LIST_PLACEHOLDER__';
   
-  let processed = text.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
-    lists.push({ content: content.trim(), type: 'itemize' });
-    return `${placeholder}${lists.length - 1}${placeholder}`;
-  });
+  const extractListType = (input: string, listType: 'itemize' | 'enumerate') => {
+    const regex = new RegExp(`\\\\begin\\{${listType}\\}([\\s\\S]*?)\\\\end\\{${listType}\\}`, 'g');
+    return input.replace(regex, (match, content) => {
+      lists.push({ content: content.trim(), type: listType });
+      return `${placeholder}${lists.length - 1}${placeholder}`;
+    });
+  };
   
-  processed = processed.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
-    lists.push({ content: content.trim(), type: 'enumerate' });
-    return `${placeholder}${lists.length - 1}${placeholder}`;
-  });
+  let processed = extractListType(text, 'itemize');
+  processed = extractListType(processed, 'enumerate');
   
   return { processed, lists };
 };
@@ -124,7 +125,8 @@ const restoreMathExpressions = (text: string, mathExpressions: string[]) => {
 const restoreListBlocks = (text: string, lists: Array<{ content: string; type: 'itemize' | 'enumerate' }>) => {
   let restored = text;
   lists.forEach((list, i) => {
-    // Split the content by \item
+    // Split the content by \item and filter out empty entries
+    // (The first element before the first \item will be empty)
     const items = list.content.split(/\\item/).filter(item => item.trim());
     
     // Process each item: apply formatting and render math
