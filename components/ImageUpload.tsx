@@ -258,10 +258,19 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
     }
   };
 
+  // Helper function to clean filename for URL-safe usage
+  const cleanFilename = (filename: string): string => {
+    return filename.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
+  };
+
+  // Helper function to generate alt text from filename
+  const generateAltText = (filename: string): string => {
+    return filename.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+  };
+
   const generateImageMarkdown = (imageName: string, caption: string = '', alt: string = ''): string => {
-    // Generate clean filename for URL while preserving file extension
-    const cleanName = imageName.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
-    const altText = alt || imageName.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+    const cleanName = cleanFilename(imageName);
+    const altText = alt || generateAltText(imageName);
     
     if (caption) {
       // Image with caption wrapped in a div
@@ -276,10 +285,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
   };
 
   const generateDoubleImageMarkdown = (image1: UploadedImage, image2: UploadedImage): string => {
-    const cleanName1 = image1.name.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
-    const cleanName2 = image2.name.toLowerCase().replace(/[^a-z0-9.-]/g, '-');
-    const altText1 = image1.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
-    const altText2 = image2.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+    const cleanName1 = cleanFilename(image1.name);
+    const cleanName2 = cleanFilename(image2.name);
+    const altText1 = generateAltText(image1.name);
+    const altText2 = generateAltText(image2.name);
     
     return `<div class="flex gap-4 my-4 flex-wrap">
   <div class="flex-1 min-w-[200px]">
@@ -313,8 +322,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
       });
       showNotification('success', `${selectedImages.length} image(s) inserted into article!`);
     } else {
-      // Double layout
-      if (selectedImages.length < 2) {
+      // Double layout - enforce exactly 2 images
+      if (selectedImages.length !== 2) {
         showNotification('error', 'Please select exactly 2 images for side-by-side layout');
         return;
       }
