@@ -90,10 +90,10 @@ It can be written in the form:
 \$\$V(t) = A(t) \\cos(\\omega_0 t - \\phi)\$\$
 where \$A(t)\$ represents the temporal envelope of the vibration, which varies slowly compared to the function \$\\cos(\\omega_0 t - \\phi)\$.
 
-\\textbf{Example :}
 
 
 
+\\begin{example}
 
 
 <div class="flex gap-4 my-4 flex-wrap">
@@ -126,5 +126,5 @@ A(t) =
 \\]
 
 \\textbf{Monochromatic} vibrations thus appear as a limiting case of \\textbf{quasi-monochromatic} vibrations, when the characteristic decay time \$\\tau \\rightarrow \\infty\$. In this case, the envelope becomes constant and the vibration persists indefinitely.
-`
+\\end{example}`
 };
