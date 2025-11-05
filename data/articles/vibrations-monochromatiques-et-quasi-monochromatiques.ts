@@ -202,11 +202,11 @@ From this, we deduce the condition:
 \$\$
 
 <div class="flex gap-4 my-4 flex-wrap">
-  <div class="flex-1 min-w-[200px]">
+  <div class="flex-1 min-w-[270px]">
     <img src="/mysite/ch2-3-expl-sinc.png" alt="ch2 3 expl sinc" class="w-full h-auto rounded-lg shadow-md" />
-    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 3(b) –The sinc function(normalized sinc function)</p>
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 3(a) –The sinc function(normalized sinc function)</p>
   </div>
-  <div class="flex-1 min-w-[200px]">
+  <div class="flex-1 min-w-[130px]">
     <img src="/mysite/ch2-3-expl-tan.png" alt="ch2 3 expl tan" class="w-full h-auto rounded-lg shadow-md" />
     <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 3(b) –Solutions for the equation \$\\tan(\\pi x)=\\pi x\$</p>
   </div>
