@@ -3,10 +3,11 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
-import { Article, Annex } from '../types';
+import { Article, Annex, AnnexPart } from '../types';
 import ArticlePreview from '../components/ArticlePreview';
 import ImageUpload from '../components/ImageUpload';
 import { annexData } from '../data/annex';
+import { generateId } from '../utils/idGenerator';
 
 // Helper function to get repository information
 const getRepositoryInfo = () => {
@@ -39,6 +40,12 @@ const AdminDashboardPage: React.FC = () => {
   const [showAnnexForm, setShowAnnexForm] = useState(false);
   const [annexFormData, setAnnexFormData] = useState<Annex>(annexData);
   const [showAnnexPreview, setShowAnnexPreview] = useState(true);
+  const [editingPartIndex, setEditingPartIndex] = useState<number | null>(null);
+  const [partFormData, setPartFormData] = useState<AnnexPart>({
+    id: '',
+    title: '',
+    content: ''
+  });
   
   // GitHub token configuration state
   const [showTokenSetup, setShowTokenSetup] = useState(false);
@@ -418,12 +425,21 @@ export const ${variableName}: Article = {
         .replace(/\r?\n/g, '\\n'); // Preserve newlines
     };
 
+    // Generate parts array code
+    const partsCode = annex.parts.map(part => `    {
+      id: '${escapeForString(part.id)}',
+      title: '${escapeForString(part.title)}',
+      content: \`${escapeForTemplate(part.content)}\`
+    }`).join(',\n');
+
     const content = `import { Annex } from '../types';
 
 export const annexData: Annex = {
   id: '${escapeForString(annex.id)}',
   title: '${escapeForString(annex.title)}',
-  content: \`${escapeForTemplate(annex.content)}\`
+  parts: [
+${partsCode}
+  ]
 };
 `;
     
@@ -517,6 +533,71 @@ export const annexData: Annex = {
     }
     
     setShowAnnexForm(false);
+  };
+
+  const handleAddPart = () => {
+    setEditingPartIndex(null);
+    setPartFormData({
+      id: '',
+      title: '',
+      content: ''
+    });
+    setShowAnnexForm(true);
+  };
+
+  const handleEditPart = (index: number) => {
+    setEditingPartIndex(index);
+    setPartFormData(annexFormData.parts[index]);
+    setShowAnnexForm(true);
+  };
+
+  const handleDeletePart = (index: number) => {
+    if (!window.confirm(`Are you sure you want to delete "${annexFormData.parts[index].title}"?`)) {
+      return;
+    }
+    const updatedParts = annexFormData.parts.filter((_, i) => i !== index);
+    const updatedAnnex = { ...annexFormData, parts: updatedParts };
+    setAnnexFormData(updatedAnnex);
+    localStorage.setItem('annex', JSON.stringify(updatedAnnex));
+    setMessage({ 
+      type: 'success', 
+      text: 'Part deleted successfully. Click "Save All Parts" to commit to GitHub.' 
+    });
+  };
+
+  const handlePartSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Generate ID if creating new part
+    const partId = editingPartIndex !== null 
+      ? partFormData.id 
+      : generateId(partFormData.title);
+    
+    const part: AnnexPart = {
+      ...partFormData,
+      id: partId
+    };
+
+    let updatedParts: AnnexPart[];
+    if (editingPartIndex !== null) {
+      // Update existing part
+      updatedParts = annexFormData.parts.map((p, i) => i === editingPartIndex ? part : p);
+    } else {
+      // Add new part
+      updatedParts = [...annexFormData.parts, part];
+    }
+
+    const updatedAnnex = { ...annexFormData, parts: updatedParts };
+    setAnnexFormData(updatedAnnex);
+    
+    setShowAnnexForm(false);
+    setEditingPartIndex(null);
+    setPartFormData({ id: '', title: '', content: '' });
+    
+    setMessage({ 
+      type: 'success', 
+      text: `Part "${part.title}" ${editingPartIndex !== null ? 'updated' : 'added'} successfully. Click "Save All Parts" to commit to GitHub.` 
+    });
   };
 
   if (!isAuthenticated) {
@@ -874,54 +955,47 @@ export const annexData: Annex = {
       {/* Annex Editor */}
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mt-8">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">Annex Editor</h2>
+          <h2 className="text-2xl font-bold">Annex Editor - Multiple Parts</h2>
           <div className="flex gap-2">
-            {showAnnexForm && (
-              <button
-                onClick={() => setShowAnnexPreview(!showAnnexPreview)}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors"
-              >
-                {showAnnexPreview ? 'Hide Preview' : 'Show Preview'}
-              </button>
-            )}
             {!showAnnexForm && (
               <button
-                onClick={() => setShowAnnexForm(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                onClick={handleAddPart}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
               >
-                Edit Annex
+                Add New Part
               </button>
             )}
           </div>
         </div>
 
+        {/* Edit Part Form */}
         {showAnnexForm && (
-          <div className={`grid ${showAnnexPreview ? 'grid-cols-2' : 'grid-cols-1'} gap-6`}>
+          <div className={`grid ${showAnnexPreview ? 'grid-cols-2' : 'grid-cols-1'} gap-6 mb-6`}>
             {/* Editor Panel */}
             <div className="space-y-4">
-              <form onSubmit={handleAnnexSubmit} id="annex-form">
+              <form onSubmit={handlePartSubmit} id="part-form">
                 <div className="mb-4">
-                  <label htmlFor="annex-title" className="block text-sm font-medium mb-2">
-                    Title *
+                  <label htmlFor="part-title" className="block text-sm font-medium mb-2">
+                    Part Title *
                   </label>
                   <input
                     type="text"
-                    id="annex-title"
-                    value={annexFormData.title}
-                    onChange={(e) => setAnnexFormData({ ...annexFormData, title: e.target.value })}
+                    id="part-title"
+                    value={partFormData.title}
+                    onChange={(e) => setPartFormData({ ...partFormData, title: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                     required
                   />
                 </div>
 
                 <div className="mb-4">
-                  <label htmlFor="annex-content" className="block text-sm font-medium mb-2">
+                  <label htmlFor="part-content" className="block text-sm font-medium mb-2">
                     Content * (Supports Markdown, LaTeX, and Tables)
                   </label>
                   <textarea
-                    id="annex-content"
-                    value={annexFormData.content}
-                    onChange={(e) => setAnnexFormData({ ...annexFormData, content: e.target.value })}
+                    id="part-content"
+                    value={partFormData.content}
+                    onChange={(e) => setPartFormData({ ...partFormData, content: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
                     rows={20}
                     required
@@ -940,14 +1014,17 @@ export const annexData: Annex = {
                 <div className="flex gap-2">
                   <button
                     type="submit"
-                    disabled={isSubmitting}
-                    className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded transition-colors"
+                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition-colors"
                   >
-                    {isSubmitting ? 'Saving...' : 'Save Annex'}
+                    {editingPartIndex !== null ? 'Update Part' : 'Add Part'}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowAnnexForm(false)}
+                    onClick={() => {
+                      setShowAnnexForm(false);
+                      setEditingPartIndex(null);
+                      setPartFormData({ id: '', title: '', content: '' });
+                    }}
                     className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-colors"
                   >
                     Cancel
@@ -961,20 +1038,71 @@ export const annexData: Annex = {
               <div className="border-l border-gray-300 dark:border-gray-600 pl-6">
                 <h3 className="text-xl font-bold mb-4">Preview</h3>
                 <ArticlePreview
-                  title={annexFormData.title}
+                  title={partFormData.title}
                   date=""
                   summary=""
-                  content={annexFormData.content}
+                  content={partFormData.content}
                 />
               </div>
             )}
           </div>
         )}
 
+        {/* Existing Parts */}
         {!showAnnexForm && (
-          <div className="text-gray-600 dark:text-gray-400">
-            <p className="mb-2">Current annex title: <strong>{annexFormData.title}</strong></p>
-            <p className="text-sm">Click "Edit Annex" to modify the annex content with tables and formulas.</p>
+          <div>
+            <div className="mb-4 text-gray-600 dark:text-gray-400">
+              <p className="mb-2">Annex title: <strong>{annexFormData.title}</strong></p>
+              <p className="text-sm mb-4">Each part is independent and will be rendered separately on the annex page.</p>
+            </div>
+            
+            <div className="space-y-4">
+              {annexFormData.parts && annexFormData.parts.map((part, index) => (
+                <div 
+                  key={part.id} 
+                  className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold mb-1">{part.title}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Part {index + 1} of {annexFormData.parts.length}</p>
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                      <button
+                        onClick={() => handleEditPart(index)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeletePart(index)}
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {(!annexFormData.parts || annexFormData.parts.length === 0) && (
+                <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+                  No parts yet. Click "Add New Part" to create the first part!
+                </p>
+              )}
+            </div>
+
+            {annexFormData.parts && annexFormData.parts.length > 0 && (
+              <div className="mt-6">
+                <button
+                  onClick={handleAnnexSubmit}
+                  disabled={isSubmitting}
+                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded transition-colors"
+                >
+                  {isSubmitting ? 'Saving...' : 'Save All Parts to GitHub'}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
