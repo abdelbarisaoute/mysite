@@ -10,7 +10,7 @@ interface ArticlePreviewProps {
 
 const ArticlePreview: React.FC<ArticlePreviewProps> = ({ title, date, summary, content }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 h-full overflow-y-auto">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-h-full overflow-y-auto">
       <div className="mb-6">
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
           Preview

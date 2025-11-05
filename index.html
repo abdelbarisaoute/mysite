@@ -42,6 +42,37 @@
           font-size: 0.85em;
         }
       }
+      
+      /* Admin dashboard preview grid layout */
+      .admin-preview-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      
+      @media (min-width: 1024px) {
+        .admin-preview-grid.with-preview {
+          grid-template-columns: 1fr 1fr;
+          height: calc(100vh - 12rem);
+        }
+        
+        .admin-preview-grid.with-preview > div {
+          overflow-y: auto;
+        }
+        
+        .admin-preview-grid.with-preview > div:first-child {
+          padding-right: 1rem;
+        }
+        
+        .admin-preview-grid.with-preview > div:last-child {
+          border-left: 1px solid #d1d5db;
+          padding-left: 1.5rem;
+        }
+        
+        .dark .admin-preview-grid.with-preview > div:last-child {
+          border-left-color: #4b5563;
+        }
+      }
     </style>
   <script type="importmap">
 {
