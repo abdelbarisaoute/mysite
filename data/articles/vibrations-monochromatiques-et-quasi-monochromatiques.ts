@@ -169,20 +169,17 @@ The associated complex form is:
 We then seek the temporal spectrum over the interval \$[0, \\tau]\$:
 \$\$
 \\begin{aligned}
-\\underbar{\\tilde{V}}(\\nu)
-&= \\int_0^{\\tau} \\underbar{V}(t)\\, e^{i 2\\pi \\nu t}\\, dt \\\\
-&= \\int_0^{\\tau} a e^{i\\phi} e^{i2\\pi(\\nu - \\nu_0)t}\\, dt
-\\quad \\text{with } \\omega_0 = 2\\pi \\nu_0,\\\\
-&= a e^{i\\phi} \\left[ \\frac{e^{i2\\pi(\\nu - \\nu_0)t}}{i2\\pi(\\nu - \\nu_0)} \\right]_0^{\\tau}
-= a e^{i\\phi} \\frac{e^{i2\\pi(\\nu - \\nu_0)\\tau} - 1}{i2\\pi(\\nu - \\nu_0)}.
+\\tilde{\\underbar{V}}(\\nu) &= \\int_0^{\\tau} \\underbar{V}(t)\\, e^{i 2\\pi \\nu t}\\, dt \\\\
+                           &= \\int_0^{\\tau} a e^{i\\phi} e^{i2\\pi(\\nu - \\nu_0)t}\\, dt \\quad \\text{avec} \\omega_0 = 2\\pi \\nu_0,\\\\
+                           &= a e^{i\\phi} \\left[ \\frac{e^{i2\\pi(\\nu - \\nu_0)t}}{i2\\pi(\\nu - \\nu_0)} \\right]_0^{\\tau}\\\\
+                           &= a e^{i\\phi} \\frac{e^{i2\\pi(\\nu - \\nu_0)\\tau} - 1}{i2\\pi(\\nu - \\nu_0)}.
 \\end{aligned}
 \$\$
 
 This expression can be simplified as:
+
 \$\$
-\\underbar{\\tilde{V}}(\\nu)
-= a \\tau e^{i\\phi} e^{i\\pi(\\nu - \\nu_0)\\tau}
-\\frac{\\sin\\left[\\pi(\\nu - \\nu_0)\\tau\\right]}{\\pi(\\nu - \\nu_0)\\tau}.
+\\tilde{\\underbar{V}}(\\nu)= a \\tau e^{i\\phi} e^{i\\pi(\\nu - \\nu_0)\\tau}\\frac{\\sin\\left[\\pi(\\nu - \\nu_0)\\tau\\right]}{\\pi(\\nu - \\nu_0)\\tau}
 \$\$
 
 Here, we recognize the \\textbf{sinc function}:
@@ -203,6 +200,17 @@ From this, we deduce the condition:
 \\quad \\Leftrightarrow \\quad
 \\tan(\\pi x) = \\pi x.
 \$\$
+
+<div class="flex gap-4 my-4 flex-wrap">
+  <div class="flex-1 min-w-[200px]">
+    <img src="/mysite/ch2-3-expl-sinc.png" alt="ch2 3 expl sinc" class="w-full h-auto rounded-lg shadow-md" />
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 3(b) –The sinc function(normalized sinc function)</p>
+  </div>
+  <div class="flex-1 min-w-[200px]">
+    <img src="/mysite/ch2-3-expl-tan.png" alt="ch2 3 expl tan" class="w-full h-auto rounded-lg shadow-md" />
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 3(b) –Solutions for the equation \$\\tan(\\pi x)=\\pi x\$</p>
+  </div>
+</div>
 
 The values of \$x\$ where the derivative vanishes can be determined graphically by the intersections of the curves \$y = \\tan(\\pi x)\$ and \$y\' = \\pi x\$.  
 We then obtain:
@@ -226,5 +234,7 @@ This relation illustrates the \\textbf{time–frequency uncertainty principle}:
 Thus, the temporal truncation of a pure vibration generates a spectral broadening: a signal of finite duration cannot be strictly monochromatic.
 
 \\end{example}
+
+
 `
 };
