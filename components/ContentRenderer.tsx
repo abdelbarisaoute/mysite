@@ -37,7 +37,7 @@ const processLatexTextCommands = (text: string): string => {
 const extractRemarkBlocks = (text: string) => {
   const remarks: string[] = [];
   const placeholder = '__REMARK_PLACEHOLDER__';
-  const processed = text.replace(/\\begin\{remarque\}([\s\S]*?)\\end\{remarque\}/g, (match, content) => {
+  const processed = text.replace(/\\begin\{remark\}([\s\S]*?)\\end\{remark\}/g, (match, content) => {
     remarks.push(content.trim());
     return `${placeholder}${remarks.length - 1}${placeholder}`;
   });
