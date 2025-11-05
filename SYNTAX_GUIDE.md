@@ -161,6 +161,63 @@ x(t) = A \cos(\omega_0 t - \phi) \quad \text{where} \quad \omega_0 = \sqrt{\frac
 $$
 ```
 
+### Aligned Equations
+
+Use `\begin{aligned}...\end{aligned}` inside display math mode to align multiple equations at specific points:
+
+**Basic Syntax:**
+```latex
+$$
+\begin{aligned}
+x &= a + b \\
+y &= c + d
+\end{aligned}
+$$
+```
+
+**Key Features:**
+- `&` marks the alignment point (usually before `=`, `<`, `>`, etc.)
+- `\\` creates a line break for the next equation
+- Must be used inside display math mode (`$$...$$` or `\[...\]`)
+- Equations are aligned vertically at the `&` symbol
+
+**Multi-step Derivation:**
+```latex
+$$
+\begin{aligned}
+f(x) &= x^2 + 2x + 1 \\
+     &= (x+1)^2 \\
+     &= (x+1)(x+1)
+\end{aligned}
+$$
+```
+
+**System of Equations:**
+```latex
+$$
+\begin{aligned}
+2x + 3y &= 7 \\
+x - y &= 1
+\end{aligned}
+$$
+```
+
+**With Text Annotations:**
+```latex
+$$
+\begin{aligned}
+E &= mc^2 & \text{(Einstein's equation)} \\
+F &= ma   & \text{(Newton's second law)}
+\end{aligned}
+$$
+```
+
+**Tips:**
+- Use double backslashes (`\\`) in TypeScript strings: `\\begin{aligned}...\\end{aligned}`
+- Remember to escape backslashes: `\\\\` for line breaks
+- Align at the relation symbol for best visual results
+- Can be combined with other LaTeX commands like `\text{}`, `\frac{}`, etc.
+
 ---
 
 ## Special Boxes
@@ -371,6 +428,15 @@ Inline math like $E = mc^2$ is easy. Display equations are centered:
 
 $$
 \\int_0^\\infty x^2 e^{-x} dx = 2
+$$
+
+Multi-step derivations can use aligned equations:
+
+$$
+\\begin{aligned}
+(x+1)^2 &= x^2 + 2x + 1 \\\\
+        &= x(x+2) + 1
+\\end{aligned}
 $$
 
 \\begin{remark}
