@@ -33,6 +33,24 @@ const processLatexTextCommands = (text: string): string => {
   return processed;
 };
 
+// --- Helper: extract LaTeX list environments (itemize, enumerate) ---
+const extractListBlocks = (text: string) => {
+  const lists: Array<{ content: string; type: 'itemize' | 'enumerate' }> = [];
+  const placeholder = '__LIST_PLACEHOLDER__';
+  
+  let processed = text.replace(/\\begin\{itemize\}([\s\S]*?)\\end\{itemize\}/g, (match, content) => {
+    lists.push({ content: content.trim(), type: 'itemize' });
+    return `${placeholder}${lists.length - 1}${placeholder}`;
+  });
+  
+  processed = processed.replace(/\\begin\{enumerate\}([\s\S]*?)\\end\{enumerate\}/g, (match, content) => {
+    lists.push({ content: content.trim(), type: 'enumerate' });
+    return `${placeholder}${lists.length - 1}${placeholder}`;
+  });
+  
+  return { processed, lists };
+};
+
 // --- Helper: extract LaTeX remark environments ---
 const extractRemarkBlocks = (text: string) => {
   const remarks: string[] = [];
@@ -102,6 +120,31 @@ const restoreMathExpressions = (text: string, mathExpressions: string[]) => {
   return restored;
 };
 
+// --- Helper: restore list blocks (with KaTeX rendering inside) ---
+const restoreListBlocks = (text: string, lists: Array<{ content: string; type: 'itemize' | 'enumerate' }>) => {
+  let restored = text;
+  lists.forEach((list, i) => {
+    // Split the content by \item
+    const items = list.content.split(/\\item/).filter(item => item.trim());
+    
+    // Process each item: apply formatting and render math
+    const processedItems = items.map(item => {
+      const processed = processLatexTextCommands(item.trim());
+      const rendered = renderMathToHTML(processed);
+      return DOMPurify.sanitize(rendered, { ADD_ATTR: ['class'] });
+    });
+    
+    // Build the HTML list
+    const listTag = list.type === 'itemize' ? 'ul' : 'ol';
+    const listClass = list.type === 'itemize' ? 'list-disc list-inside my-3' : 'list-decimal list-inside my-3';
+    const listHTML = `<${listTag} class="${listClass}">${processedItems.map(item => `<li class="mb-1">${item}</li>`).join('')}</${listTag}>`;
+    
+    const placeholder = `__LIST_PLACEHOLDER__${i}__LIST_PLACEHOLDER__`;
+    restored = restored.split(placeholder).join(listHTML);
+  });
+  return restored;
+};
+
 // --- Helper: restore remark blocks (with KaTeX rendering inside) ---
 const restoreRemarkBlocks = (text: string, remarks: string[]) => {
   let restored = text;
@@ -133,7 +176,8 @@ const processParagraphs = (text: string): string => {
       // Don't wrap if it's already a block element (heading, div, etc.) or placeholder
       if (trimmed.startsWith('<h') || 
           trimmed.startsWith('<div') ||
-          trimmed.startsWith('__MATH_PLACEHOLDER__')) {
+          trimmed.startsWith('__MATH_PLACEHOLDER__') ||
+          trimmed.startsWith('__LIST_PLACEHOLDER__')) {
         return trimmed;
       }
       
@@ -148,25 +192,31 @@ const processParagraphs = (text: string): string => {
 // --- Main component ---
 const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
   const renderedParts = useMemo(() => {
-    // Step 1: Extract remark blocks
-    const { processed: textWithoutRemarks, remarks } = extractRemarkBlocks(content);
+    // Step 1: Extract list blocks (itemize, enumerate)
+    const { processed: textWithoutLists, lists } = extractListBlocks(content);
 
-    // Step 2: Extract math expressions to protect them during paragraph processing
+    // Step 2: Extract remark blocks
+    const { processed: textWithoutRemarks, remarks } = extractRemarkBlocks(textWithoutLists);
+
+    // Step 3: Extract math expressions to protect them during paragraph processing
     const { processed: textWithoutMath, mathExpressions } = extractMathExpressions(textWithoutRemarks);
 
-    // Step 3: Apply text formatting
+    // Step 4: Apply text formatting
     let processed = processLatexTextCommands(textWithoutMath);
 
-    // Step 4: Process paragraph breaks (now safe, math is protected)
+    // Step 5: Process paragraph breaks (now safe, math is protected)
     processed = processParagraphs(processed);
 
-    // Step 5: Restore math expressions (rendering them to HTML)
+    // Step 6: Restore math expressions (rendering them to HTML)
     let html = restoreMathExpressions(processed, mathExpressions);
 
-    // Step 6: Restore remarks (rendering math inside them too)
+    // Step 7: Restore remarks (rendering math inside them too)
     html = restoreRemarkBlocks(html, remarks);
 
-    // Step 7: Sanitize final output
+    // Step 8: Restore list blocks (rendering math inside them too)
+    html = restoreListBlocks(html, lists);
+
+    // Step 9: Sanitize final output
     return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class'] }) }} />;
   }, [content]);
 
