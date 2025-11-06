@@ -1,5 +1,8 @@
 export const resumeContent = `# Abdelbari Saoutelhak
-abdelbarisaoutelhak@gmail.com | linkedin.com/in/abdelbari-saoutelhak
+
+<p align="center">
+  abdelbarisaoutelhak@gmail.com | <a href="https://linkedin.com/in/abdelbari-saoutelhak">linkedin.com/in/abdelbari-saoutelhak</a>
+</p>
 
 ---
 
