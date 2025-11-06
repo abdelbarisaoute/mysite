@@ -4,6 +4,8 @@ export const resumeContent = `
 # Abdelbari Saoutelhak
 abdelbarisaoutelhak@gmail.com | linkedin.com/in/abdelbari-saoutelhak
 
+</div>
+
 ---
 
 ## Profile
@@ -72,5 +74,5 @@ Comprehensive self-training on **Blender**, with specialization in modeling, lig
 - **English:** Fluent
 - **Turkish:** Intermediate
 
-</div>
+
 `;
