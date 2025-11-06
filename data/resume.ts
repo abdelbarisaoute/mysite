@@ -1,4 +1,7 @@
-export const resumeContent = `# Abdelbari Saoutelhak
+export const resumeContent = `
+<div style="text-align:center; max-width:800px; margin:0 auto;">
+
+# Abdelbari Saoutelhak
 abdelbarisaoutelhak@gmail.com | linkedin.com/in/abdelbari-saoutelhak
 
 ---
@@ -69,4 +72,5 @@ Comprehensive self-training on **Blender**, with specialization in modeling, lig
 - **English:** Fluent
 - **Turkish:** Intermediate
 
+</div>
 `;
