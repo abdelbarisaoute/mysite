@@ -14,15 +14,6 @@ Physics undergraduate student with practical experience in Raman spectroscopy on
 ## Education
 **Faculty of Sciences of Montpellier, Bachelor’s Degree in Physics**
 *Sept 2024 – May 2025*
-- **Courses:** Computational Physics, Analysis and Linear Algebra, Electrostatics and Electromagnetism, Newtonian Dynamics.
-
-**Self-Taught 3D Training, Mastery of Blender Tools**
-*Sept 2020 – Aug 2024*
-- **Courses:** 3D Animation, 3D Modeling, 3D Texturing.
-
-**Faculty of Sciences of Ben M'sik, Casablanca, Morocco — Bachelor’s Degree in Physics**
-*Sept 2019 – May 2020*
-- **Courses:** Analysis I, Algebra I, Thermodynamics I, Geometric Optics.
 
 ---
 
@@ -34,15 +25,6 @@ Physics undergraduate student with practical experience in Raman spectroscopy on
 - Analysis of spectra (RBM, G, D, 2D, PL) to identify doping, mechanical strain, electronic interactions, and thermal effects
 - Use of lasers (785, 633, 532 nm) to explore resonance regimes
 - Writing of a scientific report; deepened understanding of chirality and electronic transitions
-
-**3D Generalist Artist – Freelance (Independent)**
-*Sept 2020 – Aug 2024*
-
-Comprehensive self-training on **Blender**, with specialization in modeling, lighting, and realistic rendering. Produced visuals for an advertising campaign, managing all stages from concept to final rendering.
-- **3D Modeling:** environments, objects (hard surface), interior/exterior scenes
-- **Lighting:** advanced control of Cycles/Eevee, HDRI, shadows, reflections, and atmosphere
-- **Texturing:** UV unwrapping, procedural shading via the Shader Editor
-- Strong sense of realism, visual composition, adherence to deadlines, and adaptability to client feedback
 
 ---
 
