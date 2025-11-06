@@ -335,7 +335,7 @@ This property could be mentioned after calculating the magnitude of the temporal
 
 <div class="my-4">
   <img src="/mysite/ch2-3-rem-2.4-phivals.png" alt="ch2 3 rem 2.4 phivals" class="max-w-full h-auto rounded-lg shadow-md" />
-  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Complex representation of \$\\tilde{\\underbar{V}}(\\nu)\$ for different values of \$\\phi\$</p>
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 6-Complex representation of \$\\tilde{\\underbar{V}}(\\nu)\$ for different values of \$\\phi\$</p>
 </div>
 
 \\end{remark}
