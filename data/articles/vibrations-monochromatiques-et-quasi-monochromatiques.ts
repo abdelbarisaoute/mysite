@@ -147,7 +147,7 @@ or in terms of angular frequency \$\\omega = 2 \\pi \\nu\$:
 
 From a mathematical point of view, the Fourier integral is defined for any signal \$V(t)\$ integrable over \$\\mathbb{R}\$. But in physics, an infinitely long vibration does not exist; every vibration source emits over a finite duration \$\\tau\$.
 
-\\begin{example}[title={Example: Case of a Monochromatic Vibration—Truncated Sinusoidal Vibration}]
+\\begin{example}[title={Case of a Monochromatic Vibration—Truncated Sinusoidal Vibration}]
 We revisit the case of a truncated sinusoidal vibration:
 \$\$
 \\begin{aligned}
@@ -218,7 +218,7 @@ x \\approx k + \\frac{1}{2} \\quad \\text{with} \\quad k \\in \\mathbb{N}^*.
 \$\$
 Thus, the secondary extrema of the \$sinc(x)\$ function appear at regular intervals of \$\\frac{1}{2}\$ around the main maximum.
 
-\\paragraph{Physical Interpretation.}
+\\textbf{Physical Interpretation.}
 The temporal spectrum of a truncated sinusoidal vibration is therefore a \$sinc\$ function, centered on the frequency \$\\nu_0\$.  
 The width of the main lobe \$\\Delta \\nu\$ is inversely proportional to the duration \$\\tau\$ of the vibration:
 \$\$
@@ -234,7 +234,7 @@ Thus, the temporal truncation of a pure vibration generates a spectral broadenin
 
 \\end{example}
 
-\\begin{example}[title={Example: Case of a quasi-monochromatic damped vibration}]
+\\begin{example}[title={Case of a quasi-monochromatic damped vibration}]
 Let us reconsider the example in the case of a quasi-monochromatic damped vibration: 
  
 \$\$
