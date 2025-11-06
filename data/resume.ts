@@ -1,10 +1,5 @@
-export const resumeContent = `
-<div style="text-align:center; max-width:800px; margin:0 auto;">
-
-# Abdelbari Saoutelhak
+export const resumeContent = `# Abdelbari Saoutelhak
 abdelbarisaoutelhak@gmail.com | linkedin.com/in/abdelbari-saoutelhak
-
-</div>
 
 ---
 
