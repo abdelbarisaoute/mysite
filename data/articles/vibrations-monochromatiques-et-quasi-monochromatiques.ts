@@ -279,10 +279,12 @@ And the modulus of the temporal spectrum is:
 |\\tilde{\\underbar{V}}(\\nu)| = a \\tau \\sqrt{U_R^2(\\theta) + U_I^2(\\theta)} \\quad \\text{where} \\quad |e^{i\\phi}| = 1
 \$\$
 
+
 <div class="my-4">
-  <img src="/mysite/ch2-3-expl-vtilde-3dplt.png" alt="ch2 3 expl vtilde 3dplt" class="max-w-80 h-auto mx-auto block my-6" />
+  <img src="/mysite/ch2-3-expl-vtilde-3dplt.png" alt="ch2 3 expl vtilde 3dplt" class="max-w-100 h-auto mx-auto block my-6" />
   <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 4 -3D plot of the complex temporal spectrum of the damped quasi-monochromatic vibration.</p>
 </div>
+
 
 Figure 4 shows the graphical representation of the complex temporal spectrum of the damped vibration.
 
