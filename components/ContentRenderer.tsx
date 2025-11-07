@@ -378,10 +378,38 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
     html = restoreListBlocks(html, lists);
 
     // Step 14: Make images clickable (wrap in links to open in new tab)
-    html = html.replace(/<img\s+([^>]*src=["']([^"']+)["'][^>]*)>/gi, (match, imgAttrs, src) => {
-      // Only wrap images that are not already inside a link
-      return `<a href="${src}" target="_blank" rel="noopener noreferrer" class="inline-block cursor-pointer hover:opacity-80 transition-opacity">${match}</a>`;
-    });
+    // Use DOMParser for more robust image wrapping
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const images = doc.querySelectorAll('img');
+      
+      images.forEach((img) => {
+        // Check if the image is already inside an anchor tag
+        if (img.parentElement?.tagName === 'A') {
+          return; // Skip if already wrapped
+        }
+        
+        const src = img.getAttribute('src');
+        const parentNode = img.parentNode;
+        
+        if (src && parentNode) {
+          const link = doc.createElement('a');
+          link.href = src;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.className = 'inline-block cursor-pointer hover:opacity-80 transition-opacity';
+          
+          parentNode.insertBefore(link, img);
+          link.appendChild(img);
+        }
+      });
+      
+      html = doc.body.innerHTML;
+    } catch (error) {
+      console.error('Error processing images:', error);
+      // If there's an error, keep the original html with images as-is
+    }
 
     // Step 15: Sanitize final output
     return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'id', 'target', 'rel'], ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'a'] }) }} />;
