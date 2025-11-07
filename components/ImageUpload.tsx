@@ -347,7 +347,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
       ? `Figure #: ${image2.caption}` 
       : `Figure #`;
     
-    return `<div class="flex gap-4 my-4 flex-wrap items-start">
+    return `<div class="flex gap-4 my-4 flex-wrap justify-center items-start">
   <div class="flex-1 min-w-[200px]" ${sanitizedLabel1 ? `id="${sanitizedLabel1}"` : ''}>
     <img src="${basePath}${cleanName1}" alt="${altText1}" class="w-full h-64 object-cover rounded-lg shadow-md" />
     <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${figCaption1}</p>
