@@ -316,10 +316,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
     
     if (caption || sanitizedLabel) {
       // Image with caption and label wrapped in a div
-      // Note: Figure number will be auto-assigned based on order in text
+      // Note: Figure number will be auto-assigned based on order in the text
       const figCaption = caption 
-        ? `Figure 1: ${caption}` 
-        : `Figure 1`;
+        ? `Figure #: ${caption}` 
+        : `Figure #`;
       
       return `<div class="my-4" ${sanitizedLabel ? `id="${sanitizedLabel}"` : ''}>
   <img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md" />
@@ -339,13 +339,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
     const sanitizedLabel1 = image1.label ? sanitizeLabel(image1.label) : '';
     const sanitizedLabel2 = image2.label ? sanitizeLabel(image2.label) : '';
     
-    // Note: Figure numbers will be auto-assigned based on order in text
+    // Note: Figure numbers will be auto-assigned based on order in the text
     const figCaption1 = image1.caption 
-      ? `Figure 1: ${image1.caption}` 
-      : `Figure 1`;
+      ? `Figure #: ${image1.caption}` 
+      : `Figure #`;
     const figCaption2 = image2.caption 
-      ? `Figure 2: ${image2.caption}` 
-      : `Figure 2`;
+      ? `Figure #: ${image2.caption}` 
+      : `Figure #`;
     
     return `<div class="flex gap-4 my-4 flex-wrap items-start">
   <div class="flex-1 min-w-[200px]" ${sanitizedLabel1 ? `id="${sanitizedLabel1}"` : ''}>
@@ -676,7 +676,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
                                 className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white font-mono"
                               />
                               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                Use this label to reference the figure: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">\autoref{"{"}label{"}"}</code> or <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">\ref{"{"}label{"}"}</code>. Figure numbers are automatically assigned based on order in text.
+                                Use this label to reference the figure: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">\autoref{"{"}label{"}"}</code> or <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">\ref{"{"}label{"}"}</code>. Figure numbers are automatically assigned based on order in the text.
                               </p>
                             </div>
                             

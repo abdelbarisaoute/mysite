@@ -16,7 +16,7 @@ const extractFigureInfo = (text: string): Map<string, number> => {
   const figureMap = new Map<string, number>();
   // Match divs with id attributes (our figure labels) in order of appearance
   // This regex looks for a div with an id, followed by content that includes a paragraph with "Figure X"
-  const figureRegex = /<div[^>]*\sid="([^"]+)"[^>]*>[\s\S]*?<p[^>]*>Figure\s+\d+[^<]*<\/p>/gi;
+  const figureRegex = /<div[^>]*id="([^"]+)"[^>]*>[\s\S]*?<p[^>]*>Figure\s+\d+[^<]*<\/p>/gi;
   let match;
   let figureNumber = 1;
   while ((match = figureRegex.exec(text)) !== null) {
