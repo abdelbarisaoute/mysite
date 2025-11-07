@@ -162,7 +162,7 @@ You can also add images in subdirectories:
 
 #### Side-by-Side Images
 ```html
-<div class="flex gap-4 my-4 flex-wrap items-start">
+<div class="flex gap-4 my-4 flex-wrap justify-center items-start">
   <div class="flex-1 min-w-[200px]">
     <img src="/mysite/before.png" alt="Before" class="w-full h-64 object-cover rounded-lg shadow-md" />
   </div>

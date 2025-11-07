@@ -96,7 +96,7 @@ where \$A(t)\$ represents the temporal envelope of the vibration, which varies s
 \\begin{example}
 
 <div id="fig:quasi-mono-examples" class="my-4">
-  <div class="flex gap-4 flex-wrap items-start">
+  <div class="flex gap-4 flex-wrap justify-center items-start">
     <div class="flex-1 min-w-[200px]">
       <img src="/mysite/ch2-2-expl-a.png" alt="ch2 2 expl a" class="w-full h-64 object-cover rounded-lg shadow-md" />
       <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">(a)</p>
@@ -204,7 +204,7 @@ From this, we deduce the condition:
 \$\$
 
 <div id="fig:sinc-analysis" class="my-4">
-  <div class="flex gap-4 flex-wrap items-start">
+  <div class="flex gap-4 flex-wrap justify-center items-start">
     <div class="flex-1 min-w-[270px]">
       <img src="/mysite/ch2-3-expl-sinc.png" alt="ch2 3 expl sinc" class="w-full h-64 object-cover rounded-lg shadow-md" />
       <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">(a)</p>
