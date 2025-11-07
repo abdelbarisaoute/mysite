@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { generateId } from '../utils/idGenerator';
 
 interface ImageUploadProps {
   onImageInsert: (markdown: string) => void;
@@ -91,6 +92,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
     }
   };
 
+  // Helper function to sanitize label for use in HTML attributes
+  const sanitizeLabel = (label: string): string => {
+    // Only allow alphanumeric, dash, underscore, and colon
+    return label.replace(/[^a-zA-Z0-9_:-]/g, '');
+  };
+
   const handleFiles = (files: File[]) => {
     const imageFiles = files.filter(file => file.type.startsWith('image/'));
     
@@ -103,8 +110,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
-        // Generate a label from the filename
-        const baseLabel = file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        // Generate a label from the filename using the existing utility
+        const baseLabel = generateId(file.name.replace(/\.[^.]+$/, ''));
         const label = `fig:${baseLabel}`;
         
         const newImage: UploadedImage = {
@@ -313,6 +320,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
   const generateImageMarkdown = (imageName: string, caption: string = '', alt: string = '', label?: string, figureNumber?: number): string => {
     const cleanName = cleanFilename(imageName);
     const altText = alt || generateAltText(imageName);
+    const sanitizedLabel = label ? sanitizeLabel(label) : '';
     
     // Determine the figure caption with number
     const figCaption = caption 
@@ -321,7 +329,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
     
     if (caption || figureNumber) {
       // Image with caption and label wrapped in a div
-      return `<div class="my-4" ${label ? `id="${label}"` : ''}>
+      return `<div class="my-4" ${sanitizedLabel ? `id="${sanitizedLabel}"` : ''}>
   <img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md" />
   <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${figCaption}</p>
 </div>`;
@@ -336,6 +344,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
     const cleanName2 = cleanFilename(image2.name);
     const altText1 = generateAltText(image1.name);
     const altText2 = generateAltText(image2.name);
+    const sanitizedLabel1 = image1.label ? sanitizeLabel(image1.label) : '';
+    const sanitizedLabel2 = image2.label ? sanitizeLabel(image2.label) : '';
     
     const figCaption1 = image1.caption 
       ? `Figure ${image1.figureNumber || 1}: ${image1.caption}` 
@@ -345,11 +355,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
       : `Figure ${image2.figureNumber || 2}`;
     
     return `<div class="flex gap-4 my-4 flex-wrap items-start">
-  <div class="flex-1 min-w-[200px]" ${image1.label ? `id="${image1.label}"` : ''}>
+  <div class="flex-1 min-w-[200px]" ${sanitizedLabel1 ? `id="${sanitizedLabel1}"` : ''}>
     <img src="${basePath}${cleanName1}" alt="${altText1}" class="w-full h-64 object-cover rounded-lg shadow-md" />
     <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${figCaption1}</p>
   </div>
-  <div class="flex-1 min-w-[200px]" ${image2.label ? `id="${image2.label}"` : ''}>
+  <div class="flex-1 min-w-[200px]" ${sanitizedLabel2 ? `id="${sanitizedLabel2}"` : ''}>
     <img src="${basePath}${cleanName2}" alt="${altText2}" class="w-full h-64 object-cover rounded-lg shadow-md" />
     <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${figCaption2}</p>
   </div>

@@ -25,6 +25,12 @@ const extractFigureInfo = (text: string): Map<string, number> => {
   return figureMap;
 };
 
+// --- Helper: sanitize label for use in HTML attributes ---
+const sanitizeLabel = (label: string): string => {
+  // Only allow alphanumeric, dash, underscore, and colon
+  return label.replace(/[^a-zA-Z0-9_:-]/g, '');
+};
+
 // --- Helper: process LaTeX text commands like \textbf, \section, etc.
 const processLatexTextCommands = (text: string, figureMap?: Map<string, number>): string => {
   let processed = text;
@@ -47,20 +53,22 @@ const processLatexTextCommands = (text: string, figureMap?: Map<string, number>)
   
   // Process \autoref{label} - creates a link with "Figure X" text
   processed = processed.replace(/\\autoref\{([^}]*)\}/g, (match, label) => {
-    if (figureMap && figureMap.has(label)) {
-      const figNum = figureMap.get(label);
-      return `<a href="#${label}" class="text-blue-600 dark:text-blue-400 hover:underline">Figure ${figNum}</a>`;
+    const sanitizedLabel = sanitizeLabel(label);
+    if (figureMap && figureMap.has(sanitizedLabel)) {
+      const figNum = figureMap.get(sanitizedLabel);
+      return `<a href="#${sanitizedLabel}" class="text-blue-600 dark:text-blue-400 hover:underline">Figure ${figNum}</a>`;
     }
-    return `<a href="#${label}" class="text-blue-600 dark:text-blue-400 hover:underline">Figure</a>`;
+    return `<a href="#${sanitizedLabel}" class="text-blue-600 dark:text-blue-400 hover:underline">Figure</a>`;
   });
   
   // Process \ref{label} - creates a link with just the number
   processed = processed.replace(/\\ref\{([^}]*)\}/g, (match, label) => {
-    if (figureMap && figureMap.has(label)) {
-      const figNum = figureMap.get(label);
-      return `<a href="#${label}" class="text-blue-600 dark:text-blue-400 hover:underline">${figNum}</a>`;
+    const sanitizedLabel = sanitizeLabel(label);
+    if (figureMap && figureMap.has(sanitizedLabel)) {
+      const figNum = figureMap.get(sanitizedLabel);
+      return `<a href="#${sanitizedLabel}" class="text-blue-600 dark:text-blue-400 hover:underline">${figNum}</a>`;
     }
-    return `<a href="#${label}" class="text-blue-600 dark:text-blue-400 hover:underline">${label}</a>`;
+    return `<a href="#${sanitizedLabel}" class="text-blue-600 dark:text-blue-400 hover:underline">${sanitizedLabel}</a>`;
   });
   
   return processed;
