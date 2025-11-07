@@ -15,7 +15,8 @@ const MATH_EXPRESSION_REGEX = /(\$\$[\s\S]*?\$\$|\$[^$]*?\$|\\\([\s\S]*?\\\)|\\\
 const extractFigureInfo = (text: string): Map<string, number> => {
   const figureMap = new Map<string, number>();
   // Match divs with id attributes (our figure labels) in order of appearance
-  const figureRegex = /<div[^>]+id="([^"]+)"[^>]*>[\s\S]*?<p[^>]*>Figure\s+\d+[^<]*<\/p>/gi;
+  // This regex looks for a div with an id, followed by content that includes a paragraph with "Figure X"
+  const figureRegex = /<div[^>]*\sid="([^"]+)"[^>]*>[\s\S]*?<p[^>]*>Figure\s+\d+[^<]*<\/p>/gi;
   let match;
   let figureNumber = 1;
   while ((match = figureRegex.exec(text)) !== null) {
@@ -238,7 +239,7 @@ const restoreMathExpressions = (text: string, mathExpressions: string[]) => {
 };
 
 // --- Helper: restore list blocks (with KaTeX rendering inside) ---
-const restoreListBlocks = (text: string, lists: Array<{ content: string; type: 'itemize' | 'enumerate' }>) => {
+const restoreListBlocks = (text: string, lists: Array<{ content: string; type: 'itemize' | 'enumerate' }>, figureMap?: Map<string, number>) => {
   let restored = text;
   lists.forEach((list, i) => {
     // Split the content by \item and filter out empty entries
@@ -247,9 +248,9 @@ const restoreListBlocks = (text: string, lists: Array<{ content: string; type: '
     
     // Process each item: apply formatting and render math
     const processedItems = items.map(item => {
-      const processed = processLatexTextCommands(item.trim());
+      const processed = processLatexTextCommands(item.trim(), figureMap);
       const rendered = renderMathToHTML(processed);
-      return DOMPurify.sanitize(rendered, { ADD_ATTR: ['class'] });
+      return DOMPurify.sanitize(rendered, { ADD_ATTR: ['class', 'href'], ADD_TAGS: ['a'] });
     });
     
     // Build the HTML list
@@ -264,13 +265,13 @@ const restoreListBlocks = (text: string, lists: Array<{ content: string; type: '
 };
 
 // --- Helper: restore remark blocks (with KaTeX rendering inside) ---
-const restoreRemarkBlocks = (text: string, remarks: string[]) => {
+const restoreRemarkBlocks = (text: string, remarks: string[], figureMap?: Map<string, number>) => {
   let restored = text;
   remarks.forEach((content, i) => {
     // Process formatting and math inside the remark
-    const processed = processLatexTextCommands(content);
+    const processed = processLatexTextCommands(content, figureMap);
     const rendered = renderMathToHTML(processed);
-    const inner = DOMPurify.sanitize(rendered, { ADD_ATTR: ['class'] });
+    const inner = DOMPurify.sanitize(rendered, { ADD_ATTR: ['class', 'href'], ADD_TAGS: ['a'] });
 
     const placeholder = `__REMARK_PLACEHOLDER__${i}__REMARK_PLACEHOLDER__`;
     restored = restored.split(placeholder).join(
@@ -281,13 +282,13 @@ const restoreRemarkBlocks = (text: string, remarks: string[]) => {
 };
 
 // --- Helper: restore example blocks (with KaTeX rendering inside) ---
-const restoreExampleBlocks = (text: string, examples: Array<{ content: string; title?: string }>) => {
+const restoreExampleBlocks = (text: string, examples: Array<{ content: string; title?: string }>, figureMap?: Map<string, number>) => {
   let restored = text;
   examples.forEach((example, i) => {
     // Process formatting and math inside the example
-    const processed = processLatexTextCommands(example.content);
+    const processed = processLatexTextCommands(example.content, figureMap);
     const rendered = renderMathToHTML(processed);
-    const inner = DOMPurify.sanitize(rendered, { ADD_ATTR: ['class'] });
+    const inner = DOMPurify.sanitize(rendered, { ADD_ATTR: ['class', 'href'], ADD_TAGS: ['a'] });
 
     // Create the title header if provided
     const titleText = example.title ? `Example: ${DOMPurify.sanitize(example.title)}` : 'Example:';
@@ -378,16 +379,16 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
     let html = restoreMathExpressions(processed, mathExpressions);
 
     // Step 11: Restore remarks (rendering math inside them too)
-    html = restoreRemarkBlocks(html, remarks);
+    html = restoreRemarkBlocks(html, remarks, figureMap);
 
     // Step 12: Restore examples (rendering math inside them too)
-    html = restoreExampleBlocks(html, examples);
+    html = restoreExampleBlocks(html, examples, figureMap);
 
     // Step 13: Restore table blocks (rendering math inside them too)
     html = restoreTableBlocks(html, tables);
 
     // Step 14: Restore list blocks (rendering math inside them too)
-    html = restoreListBlocks(html, lists);
+    html = restoreListBlocks(html, lists, figureMap);
 
     // Step 15: Make images clickable (wrap in links to open in new tab)
     // Use DOMParser for more robust image wrapping
