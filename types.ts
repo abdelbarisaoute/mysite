@@ -17,3 +17,16 @@ export interface Annex {
   title: string;
   parts: AnnexPart[];
 }
+
+export interface ResumeSection {
+  id: string;
+  title: string;
+  content: string;
+}
+
+export interface Resume {
+  id: string;
+  name: string;
+  contact: string;
+  sections: ResumeSection[];
+}
