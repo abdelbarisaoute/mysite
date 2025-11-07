@@ -62,10 +62,10 @@ In the general case of a harmonic oscillator (mechanical or electrical), two for
 Let us consider a mechanical harmonic oscillator—\\autoref{fig:oscillateur}—composed of a spring with stiffness \$k\$, fixed at one end to an immovable wall and at the other end to a mass \$m\$. This mass slides without friction along a horizontal support, and its motion occurs along the \$(Ox)\$ axis. The mass oscillates around its equilibrium position \$x(t) = 0\$, and it is known that the natural frequency satisfies \$\\omega_0^2 = \\frac{k}{m}\$. In this case, the quantity \$V(t)\$ can be identified with the position:
 \$\$x(t) = A \\cos(\\omega_0 t - \\phi).\$\$
 
-<img src="/mysite/ch2-1-3-harmoscill.png" alt="ch2 1 3 harmoscill" class="max-w-full h-auto rounded-lg shadow-md my-4" />
-<figcaption class="text-sm text-gray-600 mt-2 italic">
-    Figure 1 – Mouvement de l’oscillateur harmonique
-  </figcaption>
+<div id="fig:oscillateur" class="my-4">
+  <img src="/mysite/ch2-1-3-harmoscill.png" alt="ch2 1 3 harmoscill" class="max-w-full h-auto rounded-lg shadow-md" />
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 1 – Mouvement de l'oscillateur harmonique</p>
+</div>
 
 The kinetic and potential energies of this oscillator are respectively:
 
@@ -95,15 +95,18 @@ where \$A(t)\$ represents the temporal envelope of the vibration, which varies s
 
 \\begin{example}
 
-<div class="flex gap-4 my-4 flex-wrap items-start">
-  <div class="flex-1 min-w-[200px]">
-    <img src="/mysite/ch2-2-expl-a.png" alt="ch2 2 expl a" class="w-full h-64 object-cover rounded-lg shadow-md" />
-    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 1(b) -Truncated Monochromatic Vibration</p>
+<div id="fig:quasi-mono-examples" class="my-4">
+  <div class="flex gap-4 flex-wrap items-start">
+    <div class="flex-1 min-w-[200px]">
+      <img src="/mysite/ch2-2-expl-a.png" alt="ch2 2 expl a" class="w-full h-64 object-cover rounded-lg shadow-md" />
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">(a)</p>
+    </div>
+    <div class="flex-1 min-w-[200px]">
+      <img src="/mysite/ch2-2-expl-b.png" alt="ch2 2 expl b" class="w-full h-64 object-cover rounded-lg shadow-md" />
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">(b)</p>
+    </div>
   </div>
-  <div class="flex-1 min-w-[200px]">
-    <img src="/mysite/ch2-2-expl-b.png" alt="ch2 2 expl b" class="w-full h-64 object-cover rounded-lg shadow-md" />
-    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic"> Figure 2(b) –Damped vibration</p>
-  </div>
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 2 – (a) Truncated Monochromatic Vibration (b) Damped vibration</p>
 </div>
 
 \\textbf{Truncated Monochromatic Vibration:}
@@ -200,15 +203,18 @@ From this, we deduce the condition:
 \\tan(\\pi x) = \\pi x.
 \$\$
 
-<div class="flex gap-4 my-4 flex-wrap items-start">
-  <div class="flex-1 min-w-[270px]">
-    <img src="/mysite/ch2-3-expl-sinc.png" alt="ch2 3 expl sinc" class="w-full h-64 object-cover rounded-lg shadow-md" />
-    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 3(a) –The sinc function(normalized sinc function)</p>
+<div id="fig:sinc-analysis" class="my-4">
+  <div class="flex gap-4 flex-wrap items-start">
+    <div class="flex-1 min-w-[270px]">
+      <img src="/mysite/ch2-3-expl-sinc.png" alt="ch2 3 expl sinc" class="w-full h-64 object-cover rounded-lg shadow-md" />
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">(a)</p>
+    </div>
+    <div class="flex-1 min-w-[130px]">
+      <img src="/mysite/ch2-3-expl-tan.png" alt="ch2 3 expl tan" class="w-full h-64 object-cover rounded-lg shadow-md" />
+      <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">(b)</p>
+    </div>
   </div>
-  <div class="flex-1 min-w-[130px]">
-    <img src="/mysite/ch2-3-expl-tan.png" alt="ch2 3 expl tan" class="w-full h-64 object-cover rounded-lg shadow-md" />
-    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 3(b) –Solutions for the equation \$\\tan(\\pi x)=\\pi x\$</p>
-  </div>
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 3 – (a) The sinc function (normalized sinc function) (b) Solutions for the equation \$\\tan(\\pi x)=\\pi x\$</p>
 </div>
 
 The values of \$x\$ where the derivative vanishes can be determined graphically by the intersections of the curves \$y = \\tan(\\pi x)\$ and \$y\' = \\pi x\$.  
@@ -280,9 +286,9 @@ And the modulus of the temporal spectrum is:
 \$\$
 
 
-<div class="my-4">
+<div id="fig:vtilde-3d" class="my-4">
   <img src="/mysite/ch2-3-expl-vtilde-3dplt.png" alt="ch2 3 expl vtilde 3dplt" class="max-w-100 h-auto mx-auto block my-6" />
-  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 4 -3D plot of the complex temporal spectrum of the damped quasi-monochromatic vibration.</p>
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 4 – 3D plot of the complex temporal spectrum of the damped quasi-monochromatic vibration.</p>
 </div>
 
 
@@ -312,9 +318,9 @@ We observe that the curve oscillates in the vicinity of \$\\theta = 0\$, which c
 
 
 
-<div class="my-4">
+<div id="fig:vtilde_curvs" class="my-4">
   <img src="/mysite/ch2-3-expl-vtilde-curves.png" alt="ch2 3 expl vtilde curves" class="max-w-full h-auto rounded-lg shadow-md" />
-  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 5-Components and complex representation of \$\\tilde{\\underbar{V}}(\\nu)\$</p>
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 5 – Components and complex representation of \$\\tilde{\\underbar{V}}(\\nu)\$</p>
 </div>
 
 	\\item In \\autoref{fig:vtilde_curvs}, we have a representation of the components of the complex temporal spectrum \$\\tilde{\\underbar{V}}(\\nu)\$.  
@@ -335,9 +341,9 @@ This property could be mentioned after calculating the magnitude of the temporal
 
 
 
-<div class="my-4">
+<div id="fig:vtilde-phi" class="my-4">
   <img src="/mysite/ch2-3-rem-2.4-phivals.png" alt="ch2 3 rem 2.4 phivals" class="max-w-full h-auto rounded-lg shadow-md" />
-  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 6-Complex representation of \$\\tilde{\\underbar{V}}(\\nu)\$ for different values of \$\\phi\$</p>
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 6 – Complex representation of \$\\tilde{\\underbar{V}}(\\nu)\$ for different values of \$\\phi\$</p>
 </div>
 
 \\end{remark}
