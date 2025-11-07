@@ -2,6 +2,12 @@
 
 This guide explains how to add images to your articles on the personal academic website.
 
+## 🎯 Key Features
+
+- **Clickable Images**: All images in articles are automatically clickable - click any image to view it in full size in a new tab
+- **Automatic Formatting**: Images are styled with responsive classes for optimal display
+- **Multiple Upload Methods**: Upload via admin dashboard or manually add to repository
+
 ## Quick Method: Using the Admin Dashboard (Recommended)
 
 The easiest way to add images to your articles is through the built-in image upload feature in the admin dashboard with **direct GitHub upload**.
@@ -46,6 +52,7 @@ If GitHub token is not configured:
 - ✅ Proper styling classes pre-applied
 - ✅ Batch upload support
 - ✅ Real-time upload feedback
+- ✅ **Images are automatically clickable** - users can click to view full size in a new tab
 
 ## Manual Method: Direct Image Insertion
 
@@ -53,7 +60,10 @@ If you prefer to manually add images or are working directly with article files:
 
 ## Overview
 
-Images can be embedded in article content using standard HTML `<img>` tags. The website's content renderer will display them properly within your articles.
+Images can be embedded in article content using standard HTML `<img>` tags. The website's content renderer will:
+- Display images properly within your articles
+- **Automatically make images clickable** - clicking an image opens it in full size in a new tab
+- Apply responsive styling for optimal viewing on all devices
 
 ## Step-by-Step Guide
 
@@ -163,6 +173,18 @@ You can also add images in subdirectories:
 ```
 
 **Note:** The `h-64` class sets a fixed height (16rem/256px) and `object-cover` ensures images fill the container while maintaining their aspect ratio without distortion. This ensures both images have the same height. You can adjust the height class (`h-48`, `h-64`, `h-80`, etc.) based on your needs.
+
+## Image Interaction
+
+### Clickable Images (Automatic Feature)
+
+**All images in articles are automatically clickable!** This feature:
+- Opens the image in full size in a new browser tab when clicked
+- Provides a better viewing experience for detailed images
+- No additional configuration needed - works automatically for all images
+- Visual indicator: cursor changes to pointer when hovering over images
+
+Simply add your images normally, and they will automatically become clickable.
 
 ## Using External Images
 
