@@ -11,8 +11,22 @@ interface ContentRendererProps {
 // Regex pattern for matching math expressions (used consistently across functions)
 const MATH_EXPRESSION_REGEX = /(\$\$[\s\S]*?\$\$|\$[^$]*?\$|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\])/g;
 
+// --- Helper: extract figure information from the content ---
+const extractFigureInfo = (text: string): Map<string, number> => {
+  const figureMap = new Map<string, number>();
+  // Match divs with id attributes (our figure labels)
+  const figureRegex = /<div[^>]+id="([^"]+)"[^>]*>[\s\S]*?<p[^>]*>Figure\s+(\d+)[^<]*<\/p>/gi;
+  let match;
+  while ((match = figureRegex.exec(text)) !== null) {
+    const label = match[1];
+    const figNum = parseInt(match[2], 10);
+    figureMap.set(label, figNum);
+  }
+  return figureMap;
+};
+
 // --- Helper: process LaTeX text commands like \textbf, \section, etc.
-const processLatexTextCommands = (text: string): string => {
+const processLatexTextCommands = (text: string, figureMap?: Map<string, number>): string => {
   let processed = text;
   processed = processed.replace(/\\textbf\{([^}]*)\}/g, '<strong>$1</strong>');
   processed = processed.replace(/\\textit\{([^}]*)\}/g, '<em>$1</em>');
@@ -30,6 +44,25 @@ const processLatexTextCommands = (text: string): string => {
     const id = generateId(title);
     return `<h4 id="${id}" class="text-lg font-bold mt-4 mb-2">${title}</h4>`;
   });
+  
+  // Process \autoref{label} - creates a link with "Figure X" text
+  processed = processed.replace(/\\autoref\{([^}]*)\}/g, (match, label) => {
+    if (figureMap && figureMap.has(label)) {
+      const figNum = figureMap.get(label);
+      return `<a href="#${label}" class="text-blue-600 dark:text-blue-400 hover:underline">Figure ${figNum}</a>`;
+    }
+    return `<a href="#${label}" class="text-blue-600 dark:text-blue-400 hover:underline">Figure</a>`;
+  });
+  
+  // Process \ref{label} - creates a link with just the number
+  processed = processed.replace(/\\ref\{([^}]*)\}/g, (match, label) => {
+    if (figureMap && figureMap.has(label)) {
+      const figNum = figureMap.get(label);
+      return `<a href="#${label}" class="text-blue-600 dark:text-blue-400 hover:underline">${figNum}</a>`;
+    }
+    return `<a href="#${label}" class="text-blue-600 dark:text-blue-400 hover:underline">${label}</a>`;
+  });
+  
   return processed;
 };
 
@@ -311,29 +344,33 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
     // Step 5: Extract math expressions to protect them during paragraph processing
     const { processed: textWithoutMath, mathExpressions } = extractMathExpressions(textWithoutTables);
 
-    // Step 6: Apply text formatting
-    let processed = processLatexTextCommands(textWithoutMath);
+    // Step 6: Extract figure information for cross-references
+    // We need to do this before processing LaTeX commands to find figure labels
+    const figureMap = extractFigureInfo(textWithoutMath);
 
-    // Step 7: Process paragraph breaks (now safe, math is protected)
+    // Step 7: Apply text formatting (including \autoref and \ref)
+    let processed = processLatexTextCommands(textWithoutMath, figureMap);
+
+    // Step 8: Process paragraph breaks (now safe, math is protected)
     processed = processParagraphs(processed);
 
-    // Step 8: Restore math expressions (rendering them to HTML)
+    // Step 9: Restore math expressions (rendering them to HTML)
     let html = restoreMathExpressions(processed, mathExpressions);
 
-    // Step 9: Restore remarks (rendering math inside them too)
+    // Step 10: Restore remarks (rendering math inside them too)
     html = restoreRemarkBlocks(html, remarks);
 
-    // Step 10: Restore examples (rendering math inside them too)
+    // Step 11: Restore examples (rendering math inside them too)
     html = restoreExampleBlocks(html, examples);
 
-    // Step 11: Restore table blocks (rendering math inside them too)
+    // Step 12: Restore table blocks (rendering math inside them too)
     html = restoreTableBlocks(html, tables);
 
-    // Step 12: Restore list blocks (rendering math inside them too)
+    // Step 13: Restore list blocks (rendering math inside them too)
     html = restoreListBlocks(html, lists);
 
-    // Step 13: Sanitize final output
-    return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class'], ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'] }) }} />;
+    // Step 14: Sanitize final output
+    return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'id'], ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'] }) }} />;
   }, [content]);
 
   return <div className="prose dark:prose-invert max-w-none text-lg leading-relaxed overflow-x-auto">{renderedParts}</div>;

@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 interface ImageUploadProps {
   onImageInsert: (markdown: string) => void;
+  articleId?: string;
 }
 
 interface UploadedImage {
@@ -13,18 +14,52 @@ interface UploadedImage {
   uploading?: boolean;
   error?: string;
   caption?: string;
+  label?: string;
+  figureNumber?: number;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
+const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<Array<UploadedImage>>([]);
   const [showModal, setShowModal] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedLayout, setSelectedLayout] = useState<'single' | 'double'>('single');
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
+  const [nextFigureNumber, setNextFigureNumber] = useState(1);
 
   // Get base path from vite config or default to '/mysite/'
   const basePath = import.meta.env.BASE_URL || '/mysite/';
+
+  // Load images from localStorage on mount
+  useEffect(() => {
+    const storageKey = articleId ? `uploadedImages_${articleId}` : 'uploadedImages_global';
+    const savedImages = localStorage.getItem(storageKey);
+    if (savedImages) {
+      try {
+        const parsed = JSON.parse(savedImages);
+        setUploadedImages(parsed);
+        // Calculate next figure number based on existing images
+        const maxFigNum = parsed.reduce((max: number, img: UploadedImage) => 
+          Math.max(max, img.figureNumber || 0), 0);
+        setNextFigureNumber(maxFigNum + 1);
+      } catch (e) {
+        console.error('Failed to parse saved images:', e);
+      }
+    }
+  }, [articleId]);
+
+  // Save images to localStorage whenever they change
+  useEffect(() => {
+    if (uploadedImages.length > 0) {
+      const storageKey = articleId ? `uploadedImages_${articleId}` : 'uploadedImages_global';
+      // Don't save File objects to localStorage (they can't be serialized)
+      const imagesToSave = uploadedImages.map(img => ({
+        ...img,
+        file: undefined
+      }));
+      localStorage.setItem(storageKey, JSON.stringify(imagesToSave));
+    }
+  }, [uploadedImages, articleId]);
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
@@ -68,15 +103,22 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
+        // Generate a label from the filename
+        const baseLabel = file.name.replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const label = `fig:${baseLabel}`;
+        
         const newImage: UploadedImage = {
           name: file.name,
           url: result,
           size: file.size,
           file: file,
           uploaded: false,
-          uploading: false
+          uploading: false,
+          label: label,
+          figureNumber: nextFigureNumber
         };
         setUploadedImages(prev => [...prev, newImage]);
+        setNextFigureNumber(prev => prev + 1);
       };
       reader.readAsDataURL(file);
     });
@@ -268,15 +310,20 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
     return filename.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
   };
 
-  const generateImageMarkdown = (imageName: string, caption: string = '', alt: string = ''): string => {
+  const generateImageMarkdown = (imageName: string, caption: string = '', alt: string = '', label?: string, figureNumber?: number): string => {
     const cleanName = cleanFilename(imageName);
     const altText = alt || generateAltText(imageName);
     
-    if (caption) {
-      // Image with caption wrapped in a div
-      return `<div class="my-4">
+    // Determine the figure caption with number
+    const figCaption = caption 
+      ? `Figure ${figureNumber || 1}: ${caption}` 
+      : `Figure ${figureNumber || 1}`;
+    
+    if (caption || figureNumber) {
+      // Image with caption and label wrapped in a div
+      return `<div class="my-4" ${label ? `id="${label}"` : ''}>
   <img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md" />
-  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${caption}</p>
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${figCaption}</p>
 </div>`;
     } else {
       // Image without caption
@@ -290,20 +337,27 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
     const altText1 = generateAltText(image1.name);
     const altText2 = generateAltText(image2.name);
     
+    const figCaption1 = image1.caption 
+      ? `Figure ${image1.figureNumber || 1}: ${image1.caption}` 
+      : `Figure ${image1.figureNumber || 1}`;
+    const figCaption2 = image2.caption 
+      ? `Figure ${image2.figureNumber || 2}: ${image2.caption}` 
+      : `Figure ${image2.figureNumber || 2}`;
+    
     return `<div class="flex gap-4 my-4 flex-wrap items-start">
-  <div class="flex-1 min-w-[200px]">
+  <div class="flex-1 min-w-[200px]" ${image1.label ? `id="${image1.label}"` : ''}>
     <img src="${basePath}${cleanName1}" alt="${altText1}" class="w-full h-64 object-cover rounded-lg shadow-md" />
-    ${image1.caption ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${image1.caption}</p>` : ''}
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${figCaption1}</p>
   </div>
-  <div class="flex-1 min-w-[200px]">
+  <div class="flex-1 min-w-[200px]" ${image2.label ? `id="${image2.label}"` : ''}>
     <img src="${basePath}${cleanName2}" alt="${altText2}" class="w-full h-64 object-cover rounded-lg shadow-md" />
-    ${image2.caption ? `<p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${image2.caption}</p>` : ''}
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${figCaption2}</p>
   </div>
 </div>`;
   };
 
   const handleInsertImage = (image: UploadedImage) => {
-    const markdown = generateImageMarkdown(image.name, image.caption);
+    const markdown = generateImageMarkdown(image.name, image.caption, '', image.label, image.figureNumber);
     onImageInsert(markdown);
     showNotification('success', 'Image HTML inserted into article!');
   };
@@ -317,7 +371,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
       // Insert selected images one by one
       selectedImages.forEach(index => {
         const image = uploadedImages[index];
-        const markdown = generateImageMarkdown(image.name, image.caption);
+        const markdown = generateImageMarkdown(image.name, image.caption, '', image.label, image.figureNumber);
         onImageInsert(markdown + '\n\n');
       });
       showNotification('success', `${selectedImages.length} image(s) inserted into article!`);
@@ -337,7 +391,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
   };
 
   const handleCopyMarkdown = (image: UploadedImage) => {
-    const markdown = generateImageMarkdown(image.name, image.caption);
+    const markdown = generateImageMarkdown(image.name, image.caption, '', image.label, image.figureNumber);
     navigator.clipboard.writeText(markdown);
     showNotification('success', 'Image HTML copied to clipboard!');
   };
@@ -360,6 +414,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
   const handleUpdateCaption = (index: number, caption: string) => {
     setUploadedImages(prev => prev.map((img, i) => 
       i === index ? { ...img, caption } : img
+    ));
+  };
+
+  const handleUpdateLabel = (index: number, label: string) => {
+    setUploadedImages(prev => prev.map((img, i) => 
+      i === index ? { ...img, label } : img
     ));
   };
 
@@ -568,6 +628,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <p className="font-medium">{image.name}</p>
+                              <span className="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded">
+                                Figure {image.figureNumber || 1}
+                              </span>
                               {image.uploading && (
                                 <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
                                   Uploading...
@@ -589,6 +652,23 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                               <p className="text-sm text-red-600 dark:text-red-400 mt-1">Error: {image.error}</p>
                             )}
                             
+                            {/* Label Input */}
+                            <div className="mt-2">
+                              <label className="block text-sm font-medium mb-1">
+                                Label (for referencing):
+                              </label>
+                              <input
+                                type="text"
+                                value={image.label || ''}
+                                onChange={(e) => handleUpdateLabel(index, e.target.value)}
+                                placeholder="e.g., fig:my-image"
+                                className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white font-mono"
+                              />
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Use this label to reference the image: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">\autoref{"{"}label{"}"}</code> or <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">\ref{"{"}label{"}"}</code>
+                              </p>
+                            </div>
+                            
                             {/* Caption Input */}
                             <div className="mt-2">
                               <label className="block text-sm font-medium mb-1">
@@ -607,7 +687,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert }) => {
                               <div className="text-sm">
                                 <p className="font-medium mb-1">Image HTML Preview:</p>
                                 <code className="block bg-gray-100 dark:bg-gray-700 p-2 rounded text-xs overflow-x-auto">
-                                  {generateImageMarkdown(image.name, image.caption)}
+                                  {generateImageMarkdown(image.name, image.caption, '', image.label, image.figureNumber)}
                                 </code>
                               </div>
                               

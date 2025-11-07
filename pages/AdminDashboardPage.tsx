@@ -871,6 +871,7 @@ ${partsCode}
                   
                   {/* Image Upload Component */}
                   <ImageUpload 
+                    articleId={formData.id || 'new-article'}
                     onImageInsert={(markdown) => {
                       setFormData({ 
                         ...formData, 
