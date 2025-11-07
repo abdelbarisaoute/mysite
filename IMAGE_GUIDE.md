@@ -50,6 +50,7 @@ If GitHub token is not configured:
 - ✅ Automatic image markup generation
 - ✅ Preview of uploaded images with upload status
 - ✅ Proper styling classes pre-applied
+- ✅ **Images are automatically centered** - `mx-auto block` classes included
 - ✅ Batch upload support
 - ✅ Real-time upload feedback
 - ✅ **Images are automatically clickable** - users can click to view full size in a new tab
@@ -129,10 +130,9 @@ You can also add images in subdirectories:
 - **`rounded-lg`**: Adds rounded corners
 - **`shadow-md`**: Adds subtle shadow
 - **`my-4`**: Adds vertical margin (spacing)
+- **`mx-auto block`**: Centers the image horizontally (automatically included in images uploaded via admin dashboard)
 
 #### Additional Styling Options:
-- **`mx-auto`**: Centers the image horizontally
-- **`block`**: Makes image a block element (needed with `mx-auto`)
 - **`w-1/2`** or **`w-3/4`**: Controls width (50% or 75% of container)
 
 ### 5. Examples
@@ -152,13 +152,14 @@ You can also add images in subdirectories:
 <img src="/mysite/icon.png" alt="Quantum state icon" class="block mx-auto w-1/2 h-auto my-4" />
 ```
 
-#### Image with Caption
+#### Image with Caption (Admin Dashboard Format)
 ```html
 <div class="my-4">
-  <img src="/mysite/experiment.jpg" alt="Experimental setup" class="max-w-full h-auto rounded-lg shadow-md" />
+  <img src="/mysite/experiment.jpg" alt="Experimental setup" class="max-w-full h-auto rounded-lg shadow-md mx-auto block" />
   <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure 1: Experimental setup for measuring quantum entanglement</p>
 </div>
 ```
+**Note:** Images uploaded via the admin dashboard automatically include `mx-auto block` classes for centering.
 
 #### Side-by-Side Images
 ```html

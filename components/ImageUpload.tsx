@@ -322,12 +322,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
         : `Figure #`;
       
       return `<div class="my-4" ${sanitizedLabel ? `id="${sanitizedLabel}"` : ''}>
-  <img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md" />
+  <img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md mx-auto block" />
   <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${figCaption}</p>
 </div>`;
     } else {
       // Image without caption
-      return `<img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md my-4" />`;
+      return `<img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md mx-auto block my-4" />`;
     }
   };
 
