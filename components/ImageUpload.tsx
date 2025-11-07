@@ -534,6 +534,17 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
                 </ol>
               </div>
 
+              <div className="mt-2 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                <h3 className="font-bold mb-2">🔢 How Figure Numbering Works</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li><strong>Automatic numbering:</strong> Figures are numbered 1, 2, 3, etc. based on their order in the article text</li>
+                  <li><strong>Labels for referencing:</strong> Use labels (e.g., <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">fig:experiment</code>) to reference figures in your text</li>
+                  <li><strong>Cross-references:</strong> Use <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{`\\autoref{fig:experiment}`}</code> to create clickable links like "Figure 2"</li>
+                  <li><strong>Just numbers:</strong> Use <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{`\\ref{fig:experiment}`}</code> to show just the number "2"</li>
+                  <li><strong>Insert order matters:</strong> Insert images in the order you want them numbered in your article</li>
+                </ul>
+              </div>
+
               {/* Uploaded Images */}
               {uploadedImages.length > 0 && (
                 <div className="mt-6">
