@@ -377,8 +377,14 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
     // Step 13: Restore list blocks (rendering math inside them too)
     html = restoreListBlocks(html, lists);
 
-    // Step 14: Sanitize final output
-    return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'id'], ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td'] }) }} />;
+    // Step 14: Make images clickable (wrap in links to open in new tab)
+    html = html.replace(/<img\s+([^>]*src=["']([^"']+)["'][^>]*)>/gi, (match, imgAttrs, src) => {
+      // Only wrap images that are not already inside a link
+      return `<a href="${src}" target="_blank" rel="noopener noreferrer" class="inline-block cursor-pointer hover:opacity-80 transition-opacity">${match}</a>`;
+    });
+
+    // Step 15: Sanitize final output
+    return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'id', 'target', 'rel'], ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'a'] }) }} />;
   }, [content]);
 
   return <div className="prose dark:prose-invert max-w-none text-lg leading-relaxed overflow-x-auto">{renderedParts}</div>;
