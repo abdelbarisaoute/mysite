@@ -16,7 +16,6 @@ interface UploadedImage {
   error?: string;
   caption?: string;
   label?: string;
-  figureNumber?: number;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) => {
@@ -26,7 +25,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedLayout, setSelectedLayout] = useState<'single' | 'double'>('single');
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
-  const [nextFigureNumber, setNextFigureNumber] = useState(1);
 
   // Get base path from vite config or default to '/mysite/'
   const basePath = import.meta.env.BASE_URL || '/mysite/';
@@ -39,10 +37,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
       try {
         const parsed = JSON.parse(savedImages);
         setUploadedImages(parsed);
-        // Calculate next figure number based on existing images
-        const maxFigNum = parsed.reduce((max: number, img: UploadedImage) => 
-          Math.max(max, img.figureNumber || 0), 0);
-        setNextFigureNumber(maxFigNum + 1);
       } catch (e) {
         console.error('Failed to parse saved images:', e);
       }
@@ -121,11 +115,9 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
           file: file,
           uploaded: false,
           uploading: false,
-          label: label,
-          figureNumber: nextFigureNumber
+          label: label
         };
         setUploadedImages(prev => [...prev, newImage]);
-        setNextFigureNumber(prev => prev + 1);
       };
       reader.readAsDataURL(file);
     });
@@ -317,18 +309,18 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
     return filename.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
   };
 
-  const generateImageMarkdown = (imageName: string, caption: string = '', alt: string = '', label?: string, figureNumber?: number): string => {
+  const generateImageMarkdown = (imageName: string, caption: string = '', alt: string = '', label?: string): string => {
     const cleanName = cleanFilename(imageName);
     const altText = alt || generateAltText(imageName);
     const sanitizedLabel = label ? sanitizeLabel(label) : '';
     
-    // Determine the figure caption with number
-    const figCaption = caption 
-      ? `Figure ${figureNumber || 1}: ${caption}` 
-      : `Figure ${figureNumber || 1}`;
-    
-    if (caption || figureNumber) {
+    if (caption || sanitizedLabel) {
       // Image with caption and label wrapped in a div
+      // Note: Figure number will be auto-assigned based on order in the text
+      const figCaption = caption 
+        ? `Figure #: ${caption}` 
+        : `Figure #`;
+      
       return `<div class="my-4" ${sanitizedLabel ? `id="${sanitizedLabel}"` : ''}>
   <img src="${basePath}${cleanName}" alt="${altText}" class="max-w-full h-auto rounded-lg shadow-md" />
   <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${figCaption}</p>
@@ -347,12 +339,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
     const sanitizedLabel1 = image1.label ? sanitizeLabel(image1.label) : '';
     const sanitizedLabel2 = image2.label ? sanitizeLabel(image2.label) : '';
     
+    // Note: Figure numbers will be auto-assigned based on order in the text
     const figCaption1 = image1.caption 
-      ? `Figure ${image1.figureNumber || 1}: ${image1.caption}` 
-      : `Figure ${image1.figureNumber || 1}`;
+      ? `Figure #: ${image1.caption}` 
+      : `Figure #`;
     const figCaption2 = image2.caption 
-      ? `Figure ${image2.figureNumber || 2}: ${image2.caption}` 
-      : `Figure ${image2.figureNumber || 2}`;
+      ? `Figure #: ${image2.caption}` 
+      : `Figure #`;
     
     return `<div class="flex gap-4 my-4 flex-wrap items-start">
   <div class="flex-1 min-w-[200px]" ${sanitizedLabel1 ? `id="${sanitizedLabel1}"` : ''}>
@@ -367,7 +360,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
   };
 
   const handleInsertImage = (image: UploadedImage) => {
-    const markdown = generateImageMarkdown(image.name, image.caption, '', image.label, image.figureNumber);
+    const markdown = generateImageMarkdown(image.name, image.caption, '', image.label);
     onImageInsert(markdown);
     showNotification('success', 'Image HTML inserted into article!');
   };
@@ -381,7 +374,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
       // Insert selected images one by one
       selectedImages.forEach(index => {
         const image = uploadedImages[index];
-        const markdown = generateImageMarkdown(image.name, image.caption, '', image.label, image.figureNumber);
+        const markdown = generateImageMarkdown(image.name, image.caption, '', image.label);
         onImageInsert(markdown + '\n\n');
       });
       showNotification('success', `${selectedImages.length} image(s) inserted into article!`);
@@ -401,7 +394,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
   };
 
   const handleCopyMarkdown = (image: UploadedImage) => {
-    const markdown = generateImageMarkdown(image.name, image.caption, '', image.label, image.figureNumber);
+    const markdown = generateImageMarkdown(image.name, image.caption, '', image.label);
     navigator.clipboard.writeText(markdown);
     showNotification('success', 'Image HTML copied to clipboard!');
   };
@@ -541,6 +534,17 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
                 </ol>
               </div>
 
+              <div className="mt-2 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                <h3 className="font-bold mb-2">🔢 How Figure Numbering Works</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li><strong>Automatic numbering:</strong> Figures are numbered 1, 2, 3, etc. based on their order in the article text</li>
+                  <li><strong>Labels for referencing:</strong> Use labels (e.g., <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">fig:experiment</code>) to reference figures in your text</li>
+                  <li><strong>Cross-references:</strong> Use <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{`\\autoref{fig:experiment}`}</code> to create clickable links like "Figure 2"</li>
+                  <li><strong>Just numbers:</strong> Use <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{`\\ref{fig:experiment}`}</code> to show just the number "2"</li>
+                  <li><strong>Insert order matters:</strong> Insert images in the order you want them numbered in your article</li>
+                </ul>
+              </div>
+
               {/* Uploaded Images */}
               {uploadedImages.length > 0 && (
                 <div className="mt-6">
@@ -638,9 +642,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <p className="font-medium">{image.name}</p>
-                              <span className="text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 px-2 py-1 rounded">
-                                Figure {image.figureNumber || 1}
-                              </span>
                               {image.uploading && (
                                 <span className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
                                   Uploading...
@@ -675,7 +676,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
                                 className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white font-mono"
                               />
                               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                Use this label to reference the image: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">\autoref{"{"}label{"}"}</code> or <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">\ref{"{"}label{"}"}</code>
+                                Use this label to reference the figure: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">\autoref{"{"}label{"}"}</code> or <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">\ref{"{"}label{"}"}</code>. Figure numbers are automatically assigned based on order in the text.
                               </p>
                             </div>
                             
@@ -691,13 +692,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
                                 placeholder="Enter a caption for this image..."
                                 className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
                               />
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Caption will be prefixed with "Figure X:" where X is auto-numbered based on order in text.
+                              </p>
                             </div>
                             
                             <div className="mt-2 space-y-2">
                               <div className="text-sm">
-                                <p className="font-medium mb-1">Image HTML Preview:</p>
+                                <p className="font-medium mb-1">Image HTML Preview (Figure # will be auto-numbered):</p>
                                 <code className="block bg-gray-100 dark:bg-gray-700 p-2 rounded text-xs overflow-x-auto">
-                                  {generateImageMarkdown(image.name, image.caption, '', image.label, image.figureNumber)}
+                                  {generateImageMarkdown(image.name, image.caption, '', image.label)}
                                 </code>
                               </div>
                               

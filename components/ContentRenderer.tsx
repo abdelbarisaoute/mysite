@@ -11,16 +11,18 @@ interface ContentRendererProps {
 // Regex pattern for matching math expressions (used consistently across functions)
 const MATH_EXPRESSION_REGEX = /(\$\$[\s\S]*?\$\$|\$[^$]*?\$|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\])/g;
 
-// --- Helper: extract figure information from the content ---
+// --- Helper: extract figure information from the content and renumber sequentially ---
 const extractFigureInfo = (text: string): Map<string, number> => {
   const figureMap = new Map<string, number>();
-  // Match divs with id attributes (our figure labels)
-  const figureRegex = /<div[^>]+id="([^"]+)"[^>]*>[\s\S]*?<p[^>]*>Figure\s+(\d+)[^<]*<\/p>/gi;
+  // Match divs with id attributes (our figure labels) in order of appearance
+  // This regex looks for a div with an id, followed by content that includes a paragraph with "Figure X"
+  const figureRegex = /<div[^>]*id="([^"]+)"[^>]*>[\s\S]*?<p[^>]*>Figure\s+\d+[^<]*<\/p>/gi;
   let match;
+  let figureNumber = 1;
   while ((match = figureRegex.exec(text)) !== null) {
     const label = match[1];
-    const figNum = parseInt(match[2], 10);
-    figureMap.set(label, figNum);
+    figureMap.set(label, figureNumber);
+    figureNumber++;
   }
   return figureMap;
 };
@@ -29,6 +31,15 @@ const extractFigureInfo = (text: string): Map<string, number> => {
 const sanitizeLabel = (label: string): string => {
   // Only allow alphanumeric, dash, underscore, and colon
   return label.replace(/[^a-zA-Z0-9_:-]/g, '');
+};
+
+// --- Helper: renumber figures in content based on order of appearance ---
+const renumberFigures = (text: string): string => {
+  let figureNumber = 1;
+  // Replace figure numbers in captions with sequential numbers
+  return text.replace(/<p([^>]*)>Figure\s+\d+([^<]*)<\/p>/gi, (match, attrs, rest) => {
+    return `<p${attrs}>Figure ${figureNumber++}${rest}</p>`;
+  });
 };
 
 // --- Helper: process LaTeX text commands like \textbf, \section, etc.
@@ -228,7 +239,7 @@ const restoreMathExpressions = (text: string, mathExpressions: string[]) => {
 };
 
 // --- Helper: restore list blocks (with KaTeX rendering inside) ---
-const restoreListBlocks = (text: string, lists: Array<{ content: string; type: 'itemize' | 'enumerate' }>) => {
+const restoreListBlocks = (text: string, lists: Array<{ content: string; type: 'itemize' | 'enumerate' }>, figureMap?: Map<string, number>) => {
   let restored = text;
   lists.forEach((list, i) => {
     // Split the content by \item and filter out empty entries
@@ -237,9 +248,9 @@ const restoreListBlocks = (text: string, lists: Array<{ content: string; type: '
     
     // Process each item: apply formatting and render math
     const processedItems = items.map(item => {
-      const processed = processLatexTextCommands(item.trim());
+      const processed = processLatexTextCommands(item.trim(), figureMap);
       const rendered = renderMathToHTML(processed);
-      return DOMPurify.sanitize(rendered, { ADD_ATTR: ['class'] });
+      return DOMPurify.sanitize(rendered, { ADD_ATTR: ['class', 'href'], ADD_TAGS: ['a'] });
     });
     
     // Build the HTML list
@@ -254,13 +265,13 @@ const restoreListBlocks = (text: string, lists: Array<{ content: string; type: '
 };
 
 // --- Helper: restore remark blocks (with KaTeX rendering inside) ---
-const restoreRemarkBlocks = (text: string, remarks: string[]) => {
+const restoreRemarkBlocks = (text: string, remarks: string[], figureMap?: Map<string, number>) => {
   let restored = text;
   remarks.forEach((content, i) => {
     // Process formatting and math inside the remark
-    const processed = processLatexTextCommands(content);
+    const processed = processLatexTextCommands(content, figureMap);
     const rendered = renderMathToHTML(processed);
-    const inner = DOMPurify.sanitize(rendered, { ADD_ATTR: ['class'] });
+    const inner = DOMPurify.sanitize(rendered, { ADD_ATTR: ['class', 'href'], ADD_TAGS: ['a'] });
 
     const placeholder = `__REMARK_PLACEHOLDER__${i}__REMARK_PLACEHOLDER__`;
     restored = restored.split(placeholder).join(
@@ -271,13 +282,13 @@ const restoreRemarkBlocks = (text: string, remarks: string[]) => {
 };
 
 // --- Helper: restore example blocks (with KaTeX rendering inside) ---
-const restoreExampleBlocks = (text: string, examples: Array<{ content: string; title?: string }>) => {
+const restoreExampleBlocks = (text: string, examples: Array<{ content: string; title?: string }>, figureMap?: Map<string, number>) => {
   let restored = text;
   examples.forEach((example, i) => {
     // Process formatting and math inside the example
-    const processed = processLatexTextCommands(example.content);
+    const processed = processLatexTextCommands(example.content, figureMap);
     const rendered = renderMathToHTML(processed);
-    const inner = DOMPurify.sanitize(rendered, { ADD_ATTR: ['class'] });
+    const inner = DOMPurify.sanitize(rendered, { ADD_ATTR: ['class', 'href'], ADD_TAGS: ['a'] });
 
     // Create the title header if provided
     const titleText = example.title ? `Example: ${DOMPurify.sanitize(example.title)}` : 'Example:';
@@ -352,32 +363,34 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
     // Step 5: Extract math expressions to protect them during paragraph processing
     const { processed: textWithoutMath, mathExpressions } = extractMathExpressions(textWithoutTables);
 
-    // Step 6: Extract figure information for cross-references
-    // We need to do this before processing LaTeX commands to find figure labels
-    const figureMap = extractFigureInfo(textWithoutMath);
+    // Step 6: Renumber figures based on their order of appearance
+    let processed = renumberFigures(textWithoutMath);
 
-    // Step 7: Apply text formatting (including \autoref and \ref)
-    let processed = processLatexTextCommands(textWithoutMath, figureMap);
+    // Step 7: Extract figure information for cross-references (after renumbering)
+    const figureMap = extractFigureInfo(processed);
 
-    // Step 8: Process paragraph breaks (now safe, math is protected)
+    // Step 8: Apply text formatting (including \autoref and \ref)
+    processed = processLatexTextCommands(processed, figureMap);
+
+    // Step 9: Process paragraph breaks (now safe, math is protected)
     processed = processParagraphs(processed);
 
-    // Step 9: Restore math expressions (rendering them to HTML)
+    // Step 10: Restore math expressions (rendering them to HTML)
     let html = restoreMathExpressions(processed, mathExpressions);
 
-    // Step 10: Restore remarks (rendering math inside them too)
-    html = restoreRemarkBlocks(html, remarks);
+    // Step 11: Restore remarks (rendering math inside them too)
+    html = restoreRemarkBlocks(html, remarks, figureMap);
 
-    // Step 11: Restore examples (rendering math inside them too)
-    html = restoreExampleBlocks(html, examples);
+    // Step 12: Restore examples (rendering math inside them too)
+    html = restoreExampleBlocks(html, examples, figureMap);
 
-    // Step 12: Restore table blocks (rendering math inside them too)
+    // Step 13: Restore table blocks (rendering math inside them too)
     html = restoreTableBlocks(html, tables);
 
-    // Step 13: Restore list blocks (rendering math inside them too)
-    html = restoreListBlocks(html, lists);
+    // Step 14: Restore list blocks (rendering math inside them too)
+    html = restoreListBlocks(html, lists, figureMap);
 
-    // Step 14: Make images clickable (wrap in links to open in new tab)
+    // Step 15: Make images clickable (wrap in links to open in new tab)
     // Use DOMParser for more robust image wrapping
     try {
       const parser = new DOMParser();
@@ -411,7 +424,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
       // If there's an error, keep the original html with images as-is
     }
 
-    // Step 15: Sanitize final output
+    // Step 16: Sanitize final output
     return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'id', 'target', 'rel', 'href'], ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'a'] }) }} />;
   }, [content]);
 
