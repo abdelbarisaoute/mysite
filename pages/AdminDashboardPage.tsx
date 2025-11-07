@@ -1,4 +1,3 @@
-
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -8,6 +7,9 @@ import ArticlePreview from '../components/ArticlePreview';
 import ImageUpload from '../components/ImageUpload';
 import { annexData } from '../data/annex';
 import { generateId } from '../utils/idGenerator';
+import TabNavigation from '../components/admin/TabNavigation';
+import GitHubSettings from '../components/admin/GitHubSettings';
+import ResumeEditor from '../components/admin/ResumeEditor';
 
 // Helper function to get repository information
 const getRepositoryInfo = () => {
@@ -23,6 +25,15 @@ const AdminDashboardPage: React.FC = () => {
   const { isAuthenticated, logout } = useContext(AuthContext);
   const { articles } = useContext(ArticleContext);
   const navigate = useNavigate();
+  
+  // Tab state
+  const [activeTab, setActiveTab] = useState('resume');
+  
+  // Message state
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Articles state
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [formData, setFormData] = useState({
@@ -32,8 +43,6 @@ const AdminDashboardPage: React.FC = () => {
     summary: '',
     content: '',
   });
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   
   // Annex editing state
@@ -46,33 +55,11 @@ const AdminDashboardPage: React.FC = () => {
     title: '',
     content: ''
   });
-  
-  // GitHub token configuration state
-  const [showTokenSetup, setShowTokenSetup] = useState(false);
-  const [githubToken, setGithubToken] = useState('');
-  const [tokenConfigured, setTokenConfigured] = useState(false);
-  const [repoOwner, setRepoOwner] = useState('');
-  const [repoName, setRepoName] = useState('');
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/admin');
     }
-    
-    // Load saved GitHub token and repo info from localStorage
-    const savedToken = localStorage.getItem('githubToken');
-    const savedRepoOwner = localStorage.getItem('githubRepoOwner');
-    const savedRepoName = localStorage.getItem('githubRepoName');
-    
-    if (savedToken) {
-      setGithubToken(savedToken);
-      setTokenConfigured(true);
-    }
-    
-    // Initialize repo info from environment or localStorage
-    const { repoOwner: defaultOwner, repoName: defaultName } = getRepositoryInfo();
-    setRepoOwner(savedRepoOwner || defaultOwner);
-    setRepoName(savedRepoName || defaultName);
     
     // Load saved annex from localStorage
     const savedAnnex = localStorage.getItem('annex');
@@ -90,50 +77,15 @@ const AdminDashboardPage: React.FC = () => {
     logout();
     navigate('/admin');
   };
-  
-  const handleSaveTokenSettings = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate required fields
-    if (!githubToken.trim() || !repoOwner.trim() || !repoName.trim()) {
-      setMessage({ 
-        type: 'error', 
-        text: 'All fields are required.' 
-      });
-      return;
-    }
-    
-    // Save token and repo info to localStorage
-    localStorage.setItem('githubToken', githubToken.trim());
-    localStorage.setItem('githubRepoOwner', repoOwner.trim());
-    localStorage.setItem('githubRepoName', repoName.trim());
-    
-    setTokenConfigured(true);
-    setShowTokenSetup(false);
-    setMessage({ 
-      type: 'success', 
-      text: 'GitHub token configured successfully! You can now upload articles automatically.' 
-    });
-  };
-  
-  const handleRemoveToken = () => {
-    if (window.confirm('Are you sure you want to remove the GitHub token configuration?')) {
-      localStorage.removeItem('githubToken');
-      localStorage.removeItem('githubRepoOwner');
-      localStorage.removeItem('githubRepoName');
-      setGithubToken('');
-      // Reset to default values from getRepositoryInfo
-      const { repoOwner: defaultOwner, repoName: defaultName } = getRepositoryInfo();
-      setRepoOwner(defaultOwner);
-      setRepoName(defaultName);
-      setTokenConfigured(false);
-      setMessage({ 
-        type: 'success', 
-        text: 'GitHub token removed. Articles will be downloaded as files.' 
-      });
-    }
-  };
 
+  const tabs = [
+    { id: 'resume', label: '📄 Resume', icon: '📄' },
+    { id: 'articles', label: '📝 Articles', icon: '📝' },
+    { id: 'annex', label: '📋 Annex', icon: '📋' },
+    { id: 'settings', label: '⚙️ Settings', icon: '⚙️' },
+  ];
+
+  // Article functions
   const resetForm = () => {
     setFormData({
       id: '',
@@ -168,13 +120,12 @@ const AdminDashboardPage: React.FC = () => {
       )
       .join('');
 
-    // Properly escape the content for TypeScript template literal
     const escapeForTemplate = (str: string): string => {
       return str
-        .replace(/\\/g, '\\\\')  // Escape backslashes first
-        .replace(/`/g, '\\`')     // Escape backticks
-        .replace(/\$/g, '\\$')    // Escape dollar signs
-        .replace(/'/g, "\\'");    // Escape single quotes
+        .replace(/\\/g, '\\\\')
+        .replace(/`/g, '\\`')
+        .replace(/\$/g, '\\$')
+        .replace(/'/g, "\\'");
     };
 
     return `import { Article } from '../../types';
@@ -203,7 +154,6 @@ export const ${variableName}: Article = {
   };
 
   const saveToGitHub = async (article: Article): Promise<boolean> => {
-    // Try to get token from localStorage first, then fall back to environment variable
     const token = localStorage.getItem('githubToken') || import.meta.env.VITE_GITHUB_TOKEN;
     
     if (!token) {
@@ -216,13 +166,10 @@ export const ${variableName}: Article = {
     }
 
     const content = generateArticleContent(article);
-    
-    // Use TextEncoder for proper UTF-8 encoding
     const encoder = new TextEncoder();
     const data = encoder.encode(content);
     const base64Content = btoa(String.fromCharCode(...data));
     
-    // Use saved repo info if available, otherwise use default detection
     const savedRepoOwner = localStorage.getItem('githubRepoOwner');
     const savedRepoName = localStorage.getItem('githubRepoName');
     const { repoOwner: defaultOwner, repoName: defaultName } = getRepositoryInfo();
@@ -231,7 +178,6 @@ export const ${variableName}: Article = {
     const filePath = `data/articles/${article.id}.ts`;
 
     try {
-      // Check if file exists (for updates)
       let sha: string | undefined;
       try {
         const getResponse = await fetch(
@@ -248,10 +194,9 @@ export const ${variableName}: Article = {
           sha = data.sha;
         }
       } catch (e) {
-        // File doesn't exist, that's fine for new articles
+        // File doesn't exist
       }
 
-      // Create or update the file
       const commitMessage = editingArticle 
         ? `Update article: ${article.title}`
         : `Add new article: ${article.title}`;
@@ -295,7 +240,6 @@ export const ${variableName}: Article = {
     setMessage(null);
     setIsSubmitting(true);
 
-    // Generate ID from title if creating new article
     const articleId = editingArticle ? formData.id : generateArticleId(formData.title);
     
     const article: Article = {
@@ -304,7 +248,6 @@ export const ${variableName}: Article = {
       date: formData.date || new Date().toISOString().split('T')[0],
     };
 
-    // Save to GitHub
     const success = await saveToGitHub(article);
     
     setIsSubmitting(false);
@@ -323,7 +266,6 @@ export const ${variableName}: Article = {
       return;
     }
 
-    // Try to get token from localStorage first, then fall back to environment variable
     const token = localStorage.getItem('githubToken') || import.meta.env.VITE_GITHUB_TOKEN;
     
     if (!token) {
@@ -335,7 +277,6 @@ export const ${variableName}: Article = {
     }
 
     setIsSubmitting(true);
-    // Use saved repo info if available, otherwise use default detection
     const savedRepoOwner = localStorage.getItem('githubRepoOwner');
     const savedRepoName = localStorage.getItem('githubRepoName');
     const { repoOwner: defaultOwner, repoName: defaultName } = getRepositoryInfo();
@@ -344,7 +285,6 @@ export const ${variableName}: Article = {
     const filePath = `data/articles/${article.id}.ts`;
 
     try {
-      // Get the file SHA
       const getResponse = await fetch(
         `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
         {
@@ -361,7 +301,6 @@ export const ${variableName}: Article = {
 
       const data = await getResponse.json();
       
-      // Delete the file
       const deleteResponse = await fetch(
         `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
         {
@@ -398,6 +337,7 @@ export const ${variableName}: Article = {
     setIsSubmitting(false);
   };
 
+  // Annex functions
   const saveAnnexToGitHub = async (annex: Annex): Promise<boolean> => {
     const token = localStorage.getItem('githubToken') || import.meta.env.VITE_GITHUB_TOKEN;
     
@@ -409,23 +349,20 @@ export const ${variableName}: Article = {
       return false;
     }
 
-    // Proper escaping for TypeScript string literals
     const escapeForString = (str: string): string => {
       return str
-        .replace(/\\/g, '\\\\')   // Escape backslashes first
-        .replace(/'/g, "\\'");     // Escape single quotes
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'");
     };
 
-    // Proper escaping for TypeScript template literal
     const escapeForTemplate = (str: string): string => {
       return str
-        .replace(/\\/g, '\\\\')   // Escape backslashes first
-        .replace(/`/g, '\\`')      // Escape backticks
-        .replace(/\$/g, '\\$')     // Escape dollar signs for template literals
-        .replace(/\r?\n/g, '\\n'); // Preserve newlines
+        .replace(/\\/g, '\\\\')
+        .replace(/`/g, '\\`')
+        .replace(/\$/g, '\\$')
+        .replace(/\r?\n/g, '\\n');
     };
 
-    // Generate parts array code
     const partsCode = annex.parts.map(part => `    {
       id: '${escapeForString(part.id)}',
       title: '${escapeForString(part.title)}',
@@ -512,10 +449,8 @@ ${partsCode}
     setMessage(null);
     setIsSubmitting(true);
 
-    // Save to localStorage first
     localStorage.setItem('annex', JSON.stringify(annexFormData));
 
-    // Try to save to GitHub
     const success = await saveAnnexToGitHub(annexFormData);
     
     setIsSubmitting(false);
@@ -568,7 +503,6 @@ ${partsCode}
   const handlePartSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Generate ID if creating new part
     const partId = editingPartIndex !== null 
       ? partFormData.id 
       : generateId(partFormData.title);
@@ -580,10 +514,8 @@ ${partsCode}
 
     let updatedParts: AnnexPart[];
     if (editingPartIndex !== null) {
-      // Update existing part
       updatedParts = annexFormData.parts.map((p, i) => i === editingPartIndex ? part : p);
     } else {
-      // Add new part
       updatedParts = [...annexFormData.parts, part];
     }
 
@@ -626,468 +558,190 @@ ${partsCode}
           {message.text}
         </div>
       )}
-      
-      {/* GitHub Token Setup Section */}
-      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h2 className="text-2xl font-bold">GitHub Auto-Upload Settings</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {tokenConfigured 
-                ? '✅ GitHub token configured - articles will be uploaded automatically' 
-                : '⚠️ No GitHub token configured - articles will be downloaded as files'}
-            </p>
-          </div>
-          {tokenConfigured && !showTokenSetup && (
-            <button
-              type="button"
-              onClick={() => setShowTokenSetup(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors text-sm"
-            >
-              Update Settings
-            </button>
-          )}
-          {!tokenConfigured && !showTokenSetup && (
-            <button
-              type="button"
-              onClick={() => setShowTokenSetup(true)}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
-            >
-              Setup GitHub Token
-            </button>
-          )}
-        </div>
-        
-        {showTokenSetup && (
-          <form onSubmit={handleSaveTokenSettings} className="space-y-4 mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-            <div>
-              <label htmlFor="githubToken" className="block text-sm font-medium mb-2">
-                GitHub Personal Access Token *
-              </label>
-              <input
-                type="password"
-                id="githubToken"
-                value={githubToken}
-                onChange={(e) => setGithubToken(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
-                placeholder="Enter your GitHub Personal Access Token"
-                required
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Create a token at{' '}
-                <a 
-                  href="https://github.com/settings/tokens" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  github.com/settings/tokens
-                </a>
-                {' '}with <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">repo</code> scope
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="repoOwner" className="block text-sm font-medium mb-2">
-                  Repository Owner *
-                </label>
-                <input
-                  type="text"
-                  id="repoOwner"
-                  value={repoOwner}
-                  onChange={(e) => setRepoOwner(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="your-github-username"
-                  required
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Your GitHub username or organization
-                </p>
-              </div>
-              
-              <div>
-                <label htmlFor="repoName" className="block text-sm font-medium mb-2">
-                  Repository Name *
-                </label>
-                <input
-                  type="text"
-                  id="repoName"
-                  value={repoName}
-                  onChange={(e) => setRepoName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="mysite"
-                  required
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  The name of your repository
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex gap-2 pt-2">
-              <button
-                type="submit"
-                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition-colors"
-              >
-                Save Settings
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowTokenSetup(false)}
-                className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-colors"
-              >
-                Cancel
-              </button>
-              {tokenConfigured && (
-                <button
-                  type="button"
-                  onClick={handleRemoveToken}
-                  className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded transition-colors ml-auto"
-                >
-                  Remove Token
-                </button>
-              )}
-            </div>
-          </form>
-        )}
-        
-        {!showTokenSetup && (
-          <div className="mt-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <h3 className="text-sm font-bold mb-2">How it works:</h3>
-            <ul className="text-sm space-y-1 ml-4 list-disc">
-              <li>Setup your GitHub token once from this page</li>
-              <li>Articles will be automatically committed to your repository</li>
-              <li>Each commit triggers automatic redeployment</li>
-              <li>Your token is stored securely in your browser</li>
-            </ul>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-3">
-              <strong>Security Note:</strong> Your token is stored in your browser's localStorage and never sent to any third-party servers. Only use this on trusted devices. For production deployments, consider using environment variables or GitHub repository secrets.
-            </p>
-          </div>
-        )}
-      </div>
 
-      {/* Create/Edit Form */}
-      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">
-            {editingArticle ? 'Edit Article' : 'Create New Article'}
-          </h2>
-          <div className="flex gap-2">
+      <TabNavigation tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Resume Tab */}
+      {activeTab === 'resume' && (
+        <ResumeEditor 
+          onMessage={setMessage}
+          isSubmitting={isSubmitting}
+          setIsSubmitting={setIsSubmitting}
+        />
+      )}
+
+      {/* Articles Tab */}
+      {activeTab === 'articles' && (
+        <div>
+          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">
+                {editingArticle ? 'Edit Article' : 'Create New Article'}
+              </h2>
+              <div className="flex gap-2">
+                {showCreateForm && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPreview(!showPreview)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                  >
+                    {showPreview ? 'Hide Preview' : 'Show Preview'}
+                  </button>
+                )}
+                {!showCreateForm && (
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateForm(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                  >
+                    New Article
+                  </button>
+                )}
+              </div>
+            </div>
+
             {showCreateForm && (
-              <button
-                type="button"
-                onClick={() => setShowPreview(!showPreview)}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors"
-              >
-                {showPreview ? 'Hide Preview' : 'Show Preview'}
-              </button>
-            )}
-            {!showCreateForm && (
-              <button
-                type="button"
-                onClick={() => setShowCreateForm(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
-              >
-                New Article
-              </button>
-            )}
-          </div>
-        </div>
-
-        {showCreateForm && (
-          <div className={`admin-preview-grid ${showPreview ? 'with-preview' : ''}`}>
-            {/* Editor Panel */}
-            <div className="space-y-4">
-              <form onSubmit={handleSubmit} id="article-form">
-                <div className="mb-4">
-                  <label htmlFor="title" className="block text-sm font-medium mb-2">
-                    Title *
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="date" className="block text-sm font-medium mb-2">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    id="date"
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Leave empty to use today's date
-                  </p>
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="summary" className="block text-sm font-medium mb-2">
-                    Summary *
-                  </label>
-                  <textarea
-                    id="summary"
-                    value={formData.summary}
-                    onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                    rows={3}
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="content" className="block text-sm font-medium mb-2">
-                    Content * (Supports Markdown and LaTeX)
-                  </label>
-                  <textarea
-                    id="content"
-                    value={formData.content}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
-                    rows={12}
-                    required
-                  />
-                  <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-xs">
-                    <p className="font-semibold mb-1">💡 LaTeX Support:</p>
-                    <div className="space-y-1">
-                      <p>• <strong>Inline math:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">$E = mc^2$</code></p>
-                      <p>• <strong>Display math:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">$$\int_0^\infty e^{"{-x}"} dx = 1$$</code></p>
-                      <p>• <strong>Matrices:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">$$\begin{"{pmatrix}"} a & b \\ c & d \end{"{pmatrix}"}$$</code></p>
-                      <p>• <strong>Aligned equations:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">$$\begin{"{aligned}"} x &= a \\ y &= b \end{"{aligned}"}$$</code></p>
-                      <p>• <strong>Cases:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">$$f(x) = \begin{"{cases}"} ... \end{"{cases}"}$$</code></p>
+              <div className={`admin-preview-grid ${showPreview ? 'with-preview' : ''}`}>
+                <div className="space-y-4">
+                  <form onSubmit={handleSubmit} id="article-form">
+                    <div className="mb-4">
+                      <label htmlFor="title" className="block text-sm font-medium mb-2">
+                        Title *
+                      </label>
+                      <input
+                        type="text"
+                        id="title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                        required
+                      />
                     </div>
-                    <p className="mt-2 font-semibold">📝 Markdown Support: # Headers, **bold**, *italic*, `code`, [links](url), - lists, &gt; quotes</p>
-                  </div>
-                  
-                  {/* Image Upload Component */}
-                  <ImageUpload 
-                    articleId={formData.id || 'new-article'}
-                    onImageInsert={(markdown) => {
-                      setFormData({ 
-                        ...formData, 
-                        content: formData.content + '\n\n' + markdown 
-                      });
-                    }} 
-                  />
-                </div>
 
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded transition-colors"
-                  >
-                    {isSubmitting ? 'Saving...' : (editingArticle ? 'Update Article' : 'Create Article')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Preview Panel */}
-            {showPreview && (
-              <div>
-                <ArticlePreview
-                  title={formData.title}
-                  date={formData.date}
-                  summary={formData.summary}
-                  content={formData.content}
-                />
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Existing Articles */}
-      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-        <h2 className="text-2xl font-bold mb-4">Existing Articles ({articles.length})</h2>
-        
-        <div className="space-y-4">
-          {articles.map((article) => (
-            <div 
-              key={article.id} 
-              className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-            >
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-1">{article.title}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{article.date}</p>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{article.summary}</p>
-                </div>
-                <div className="flex gap-2 ml-4">
-                  <button
-                    type="button"
-                    onClick={() => handleEdit(article)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(article)}
-                    disabled={isSubmitting}
-                    className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-          
-          {articles.length === 0 && (
-            <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-              No articles yet. Create your first article above!
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Annex Editor */}
-      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mt-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold">Annex Editor - Multiple Parts</h2>
-          <div className="flex gap-2">
-            {!showAnnexForm && (
-              <button
-                type="button"
-                onClick={handleAddPart}
-                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
-              >
-                Add New Part
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Edit Part Form */}
-        {showAnnexForm && (
-          <div className={`admin-preview-grid ${showAnnexPreview ? 'with-preview' : ''} mb-6`}>
-            {/* Editor Panel */}
-            <div className="space-y-4">
-              <form onSubmit={handlePartSubmit} id="part-form">
-                <div className="mb-4">
-                  <label htmlFor="part-title" className="block text-sm font-medium mb-2">
-                    Part Title *
-                  </label>
-                  <input
-                    type="text"
-                    id="part-title"
-                    value={partFormData.title}
-                    onChange={(e) => setPartFormData({ ...partFormData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                    required
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label htmlFor="part-content" className="block text-sm font-medium mb-2">
-                    Content * (Supports Markdown, LaTeX, and Tables)
-                  </label>
-                  <textarea
-                    id="part-content"
-                    value={partFormData.content}
-                    onChange={(e) => setPartFormData({ ...partFormData, content: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
-                    rows={20}
-                    required
-                  />
-                  <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-xs">
-                    <p className="font-semibold mb-1">💡 Features:</p>
-                    <div className="space-y-1">
-                      <p>• <strong>Tables:</strong> Use Markdown table syntax (| Header | ... |)</p>
-                      <p>• <strong>Math:</strong> $inline$ or $$display$$ formulas</p>
-                      <p>• <strong>Sections:</strong> \section{"{}"}, \subsection{"{}"}</p>
-                      <p>• <strong>Special blocks:</strong> \begin{"{remarque}"} ... \end{"{remarque}"}</p>
+                    <div className="mb-4">
+                      <label htmlFor="date" className="block text-sm font-medium mb-2">
+                        Date
+                      </label>
+                      <input
+                        type="date"
+                        id="date"
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Leave empty to use today's date
+                      </p>
                     </div>
+
+                    <div className="mb-4">
+                      <label htmlFor="summary" className="block text-sm font-medium mb-2">
+                        Summary *
+                      </label>
+                      <textarea
+                        id="summary"
+                        value={formData.summary}
+                        onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                        rows={3}
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label htmlFor="content" className="block text-sm font-medium mb-2">
+                        Content * (Supports LaTeX syntax)
+                      </label>
+                      <textarea
+                        id="content"
+                        value={formData.content}
+                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
+                        rows={12}
+                        required
+                      />
+                      <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-xs">
+                        <p className="font-semibold mb-1">💡 LaTeX Support:</p>
+                        <div className="space-y-1">
+                          <p>• <strong>Inline math:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">$E = mc^2$</code></p>
+                          <p>• <strong>Display math:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">$$\int_0^\infty e^{"{-x}"} dx = 1$$</code></p>
+                          <p>• <strong>Bold/Italic:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">\textbf{"{}"}, \textit{"{}"}</code></p>
+                          <p>• <strong>Sections:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">\section{"{}"}, \subsection{"{}"}</code></p>
+                        </div>
+                      </div>
+                      
+                      <ImageUpload 
+                        articleId={formData.id || 'new-article'}
+                        onImageInsert={(markdown) => {
+                          setFormData({ 
+                            ...formData, 
+                            content: formData.content + '\n\n' + markdown 
+                          });
+                        }} 
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded transition-colors"
+                      >
+                        {isSubmitting ? 'Saving...' : (editingArticle ? 'Update Article' : 'Create Article')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                {showPreview && (
+                  <div>
+                    <ArticlePreview
+                      title={formData.title}
+                      date={formData.date}
+                      summary={formData.summary}
+                      content={formData.content}
+                    />
                   </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition-colors"
-                  >
-                    {editingPartIndex !== null ? 'Update Part' : 'Add Part'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAnnexForm(false);
-                      setEditingPartIndex(null);
-                      setPartFormData({ id: '', title: '', content: '' });
-                    }}
-                    className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Preview Panel */}
-            {showAnnexPreview && (
-              <div>
-                <h3 className="text-xl font-bold mb-4">Preview</h3>
-                <ArticlePreview
-                  title={partFormData.title}
-                  date=""
-                  summary=""
-                  content={partFormData.content}
-                />
+                )}
               </div>
             )}
           </div>
-        )}
 
-        {/* Existing Parts */}
-        {!showAnnexForm && (
-          <div>
-            <div className="mb-4 text-gray-600 dark:text-gray-400">
-              <p className="mb-2">Annex title: <strong>{annexFormData.title}</strong></p>
-              <p className="text-sm mb-4">Each part is independent and will be rendered separately on the annex page.</p>
-            </div>
+          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <h2 className="text-2xl font-bold mb-4">Existing Articles ({articles.length})</h2>
             
             <div className="space-y-4">
-              {annexFormData.parts && annexFormData.parts.map((part, index) => (
+              {articles.map((article) => (
                 <div 
-                  key={part.id} 
+                  key={article.id} 
                   className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-1">{part.title}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Part {index + 1} of {annexFormData.parts.length}</p>
+                      <h3 className="text-xl font-semibold mb-1">{article.title}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{article.date}</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{article.summary}</p>
                     </div>
                     <div className="flex gap-2 ml-4">
                       <button
                         type="button"
-                        onClick={() => handleEditPart(index)}
+                        onClick={() => handleEdit(article)}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
                       >
                         Edit
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDeletePart(index)}
-                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
+                        onClick={() => handleDelete(article)}
+                        disabled={isSubmitting}
+                        className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
                       >
                         Delete
                       </button>
@@ -1096,28 +750,184 @@ ${partsCode}
                 </div>
               ))}
               
-              {(!annexFormData.parts || annexFormData.parts.length === 0) && (
+              {articles.length === 0 && (
                 <p className="text-gray-500 dark:text-gray-400 text-center py-8">
-                  No parts yet. Click "Add New Part" to create the first part!
+                  No articles yet. Create your first article above!
                 </p>
               )}
             </div>
+          </div>
+        </div>
+      )}
 
-            {annexFormData.parts && annexFormData.parts.length > 0 && (
-              <div className="mt-6">
+      {/* Annex Tab */}
+      {activeTab === 'annex' && (
+        <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold">Annex Editor - Multiple Parts</h2>
+            <div className="flex gap-2">
+              {!showAnnexForm && (
                 <button
                   type="button"
-                  onClick={handleAnnexSubmit}
-                  disabled={isSubmitting}
-                  className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded transition-colors"
+                  onClick={handleAddPart}
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors"
                 >
-                  {isSubmitting ? 'Saving...' : 'Save All Parts to GitHub'}
+                  Add New Part
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        )}
-      </div>
+
+          {showAnnexForm && (
+            <div className={`admin-preview-grid ${showAnnexPreview ? 'with-preview' : ''} mb-6`}>
+              <div className="space-y-4">
+                <form onSubmit={handlePartSubmit} id="part-form">
+                  <div className="mb-4">
+                    <label htmlFor="part-title" className="block text-sm font-medium mb-2">
+                      Part Title *
+                    </label>
+                    <input
+                      type="text"
+                      id="part-title"
+                      value={partFormData.title}
+                      onChange={(e) => setPartFormData({ ...partFormData, title: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                      required
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label htmlFor="part-content" className="block text-sm font-medium mb-2">
+                      Content * (Supports LaTeX syntax)
+                    </label>
+                    <textarea
+                      id="part-content"
+                      value={partFormData.content}
+                      onChange={(e) => setPartFormData({ ...partFormData, content: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
+                      rows={20}
+                      required
+                    />
+                    <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-xs">
+                      <p className="font-semibold mb-1">💡 Features:</p>
+                      <div className="space-y-1">
+                        <p>• <strong>Tables:</strong> Use Markdown table syntax (| Header | ... |)</p>
+                        <p>• <strong>Math:</strong> $inline$ or $$display$$ formulas</p>
+                        <p>• <strong>Sections:</strong> \section{"{}"}, \subsection{"{}"}</p>
+                        <p>• <strong>Special blocks:</strong> \begin{"{remarque}"} ... \end{"{remarque}"}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition-colors"
+                    >
+                      {editingPartIndex !== null ? 'Update Part' : 'Add Part'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAnnexForm(false);
+                        setEditingPartIndex(null);
+                        setPartFormData({ id: '', title: '', content: '' });
+                      }}
+                      className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowAnnexPreview(!showAnnexPreview)}
+                      className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors ml-auto"
+                    >
+                      {showAnnexPreview ? 'Hide Preview' : 'Show Preview'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {showAnnexPreview && (
+                <div>
+                  <h3 className="text-xl font-bold mb-4">Preview</h3>
+                  <ArticlePreview
+                    title={partFormData.title}
+                    date=""
+                    summary=""
+                    content={partFormData.content}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {!showAnnexForm && (
+            <div>
+              <div className="mb-4 text-gray-600 dark:text-gray-400">
+                <p className="mb-2">Annex title: <strong>{annexFormData.title}</strong></p>
+                <p className="text-sm mb-4">Each part is independent and will be rendered separately on the annex page.</p>
+              </div>
+              
+              <div className="space-y-4">
+                {annexFormData.parts && annexFormData.parts.map((part, index) => (
+                  <div 
+                    key={part.id} 
+                    className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold mb-1">{part.title}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Part {index + 1} of {annexFormData.parts.length}</p>
+                      </div>
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          type="button"
+                          onClick={() => handleEditPart(index)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePart(index)}
+                          className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {(!annexFormData.parts || annexFormData.parts.length === 0) && (
+                  <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+                    No parts yet. Click "Add New Part" to create the first part!
+                  </p>
+                )}
+              </div>
+
+              {annexFormData.parts && annexFormData.parts.length > 0 && (
+                <div className="mt-6">
+                  <button
+                    type="button"
+                    onClick={handleAnnexSubmit}
+                    disabled={isSubmitting}
+                    className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-bold py-2 px-6 rounded transition-colors"
+                  >
+                    {isSubmitting ? 'Saving...' : 'Save All Parts to GitHub'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Settings Tab */}
+      {activeTab === 'settings' && (
+        <GitHubSettings onMessage={setMessage} />
+      )}
     </div>
   );
 };
