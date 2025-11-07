@@ -412,7 +412,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
     }
 
     // Step 15: Sanitize final output
-    return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'id', 'target', 'rel'], ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'a'] }) }} />;
+    return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'id', 'target', 'rel', 'href'], ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'a'] }) }} />;
   }, [content]);
 
   return <div className="prose dark:prose-invert max-w-none text-lg leading-relaxed overflow-x-auto">{renderedParts}</div>;
