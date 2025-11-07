@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import DOMPurify from 'dompurify';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -62,24 +62,24 @@ const processLatexTextCommands = (text: string, figureMap?: Map<string, number>)
     return `<h4 id="${id}" class="text-lg font-bold mt-4 mb-2">${title}</h4>`;
   });
   
-  // Process \autoref{label} - creates a link with "Figure X" text
+  // Process \autoref{label} - creates a link with "Figure X" text that scrolls to the figure
   processed = processed.replace(/\\autoref\{([^}]*)\}/g, (match, label) => {
     const sanitizedLabel = sanitizeLabel(label);
     if (figureMap && figureMap.has(sanitizedLabel)) {
       const figNum = figureMap.get(sanitizedLabel);
-      return `<a href="#${sanitizedLabel}" class="text-blue-600 dark:text-blue-400 hover:underline">Figure ${figNum}</a>`;
+      return `<a href="#${sanitizedLabel}" class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">Figure ${figNum}</a>`;
     }
-    return `<a href="#${sanitizedLabel}" class="text-blue-600 dark:text-blue-400 hover:underline">Figure</a>`;
+    return `<a href="#${sanitizedLabel}" class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">Figure</a>`;
   });
   
-  // Process \ref{label} - creates a link with just the number
+  // Process \ref{label} - creates a link with just the number that scrolls to the figure
   processed = processed.replace(/\\ref\{([^}]*)\}/g, (match, label) => {
     const sanitizedLabel = sanitizeLabel(label);
     if (figureMap && figureMap.has(sanitizedLabel)) {
       const figNum = figureMap.get(sanitizedLabel);
-      return `<a href="#${sanitizedLabel}" class="text-blue-600 dark:text-blue-400 hover:underline">${figNum}</a>`;
+      return `<a href="#${sanitizedLabel}" class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">${figNum}</a>`;
     }
-    return `<a href="#${sanitizedLabel}" class="text-blue-600 dark:text-blue-400 hover:underline">${sanitizedLabel}</a>`;
+    return `<a href="#${sanitizedLabel}" class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">${sanitizedLabel}</a>`;
   });
   
   return processed;
@@ -347,6 +347,11 @@ const processParagraphs = (text: string): string => {
 
 // --- Main component ---
 const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Handle clicks on figure references
+
+
   const renderedParts = useMemo(() => {
     // Step 1: Extract list blocks (itemize, enumerate)
     const { processed: textWithoutLists, lists } = extractListBlocks(content);
@@ -425,10 +430,12 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
     }
 
     // Step 16: Sanitize final output
-    return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'id', 'target', 'rel', 'href'], ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'a'] }) }} />;
+    const sanitized = DOMPurify.sanitize(html, { ADD_ATTR: ['class', 'id', 'target', 'rel', 'href'], ADD_TAGS: ['table', 'thead', 'tbody', 'tr', 'th', 'td', 'a'] });
+    
+    return <div dangerouslySetInnerHTML={{ __html: sanitized }} />;
   }, [content]);
 
-  return <div className="prose dark:prose-invert max-w-none text-lg leading-relaxed overflow-x-auto">{renderedParts}</div>;
+  return <div ref={containerRef} className="prose dark:prose-invert max-w-none text-lg leading-relaxed overflow-x-auto">{renderedParts}</div>;
 };
 
 export default ContentRenderer;
