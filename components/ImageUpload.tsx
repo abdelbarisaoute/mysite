@@ -25,6 +25,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedLayout, setSelectedLayout] = useState<'single' | 'double'>('single');
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
+  const [doubleCaptionMode, setDoubleCaptionMode] = useState<'single' | 'separate'>('separate');
 
   // Get base path from vite config or default to '/mysite/'
   const basePath = import.meta.env.BASE_URL || '/mysite/';
@@ -331,7 +332,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
     }
   };
 
-  const generateDoubleImageMarkdown = (image1: UploadedImage, image2: UploadedImage): string => {
+  const generateDoubleImageMarkdown = (image1: UploadedImage, image2: UploadedImage, captionMode: 'single' | 'separate' = 'separate'): string => {
     const cleanName1 = cleanFilename(image1.name);
     const cleanName2 = cleanFilename(image2.name);
     const altText1 = generateAltText(image1.name);
@@ -339,15 +340,35 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
     const sanitizedLabel1 = image1.label ? sanitizeLabel(image1.label) : '';
     const sanitizedLabel2 = image2.label ? sanitizeLabel(image2.label) : '';
     
-    // Note: Figure numbers will be auto-assigned based on order in the text
-    const figCaption1 = image1.caption 
-      ? `Figure #: ${image1.caption}` 
-      : `Figure #`;
-    const figCaption2 = image2.caption 
-      ? `Figure #: ${image2.caption}` 
-      : `Figure #`;
-    
-    return `<div class="flex gap-4 my-4 flex-wrap justify-center items-start">
+    if (captionMode === 'single') {
+      // Single shared caption for both images
+      const sharedCaption = image1.caption || image2.caption || '';
+      const figCaption = sharedCaption 
+        ? `Figure #: ${sharedCaption}` 
+        : `Figure #`;
+      const combinedLabel = sanitizedLabel1 || sanitizedLabel2;
+      
+      return `<div class="my-4" ${combinedLabel ? `id="${combinedLabel}"` : ''}>
+  <div class="flex gap-4 flex-wrap justify-center items-start">
+    <div class="flex-1 min-w-[200px]">
+      <img src="${basePath}${cleanName1}" alt="${altText1}" class="w-full h-64 object-cover rounded-lg shadow-md" />
+    </div>
+    <div class="flex-1 min-w-[200px]">
+      <img src="${basePath}${cleanName2}" alt="${altText2}" class="w-full h-64 object-cover rounded-lg shadow-md" />
+    </div>
+  </div>
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${figCaption}</p>
+</div>`;
+    } else {
+      // Separate captions for each image
+      const figCaption1 = image1.caption 
+        ? `Figure #: ${image1.caption}` 
+        : `Figure #`;
+      const figCaption2 = image2.caption 
+        ? `Figure #: ${image2.caption}` 
+        : `Figure #`;
+      
+      return `<div class="flex gap-4 my-4 flex-wrap justify-center items-start">
   <div class="flex-1 min-w-[200px]" ${sanitizedLabel1 ? `id="${sanitizedLabel1}"` : ''}>
     <img src="${basePath}${cleanName1}" alt="${altText1}" class="w-full h-64 object-cover rounded-lg shadow-md" />
     <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${figCaption1}</p>
@@ -357,6 +378,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
     <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">${figCaption2}</p>
   </div>
 </div>`;
+    }
   };
 
   const handleInsertImage = (image: UploadedImage) => {
@@ -386,9 +408,10 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
       }
       const image1 = uploadedImages[selectedImages[0]];
       const image2 = uploadedImages[selectedImages[1]];
-      const markdown = generateDoubleImageMarkdown(image1, image2);
+      const markdown = generateDoubleImageMarkdown(image1, image2, doubleCaptionMode);
       onImageInsert(markdown);
-      showNotification('success', '2 images inserted side-by-side into article!');
+      const captionText = doubleCaptionMode === 'single' ? 'with shared caption' : 'with separate captions';
+      showNotification('success', `2 images inserted side-by-side ${captionText} into article!`);
     }
     setSelectedImages([]);
   };
@@ -511,38 +534,51 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
                 </div>
               </div>
 
-              {/* Instructions */}
-              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                <h3 className="font-bold mb-2">🚀 Direct GitHub Upload (Recommended)</h3>
-                <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li>Upload your images using the area above</li>
-                  <li>Click "Upload All to GitHub" to commit images directly to your repository</li>
-                  <li>Images will be available automatically after deployment (1-2 minutes)</li>
-                  <li>Click "Insert" to add the image HTML to your article content</li>
-                </ol>
-                <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                  <strong>Note:</strong> GitHub token must be configured in dashboard settings for direct upload to work.
-                </p>
-              </div>
+              {/* Instructions - Improved and reorganized */}
+              <div className="mt-4 space-y-3">
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <h3 className="font-bold mb-2 flex items-center gap-2">
+                    <span className="text-xl">🚀</span>
+                    <span>Quick Start Guide</span>
+                  </h3>
+                  <ol className="list-decimal list-inside space-y-1.5 text-sm">
+                    <li><strong>Upload images:</strong> Drag & drop or click "Browse Files" above</li>
+                    <li><strong>Add captions & labels:</strong> Fill in the fields for each image below</li>
+                    <li><strong>Upload to GitHub:</strong> Click "Upload All to GitHub" (requires token in settings)</li>
+                    <li><strong>Select & insert:</strong> Check images, choose layout, and click "Insert"</li>
+                  </ol>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 pl-5">
+                    💡 <strong>Tip:</strong> Images are automatically centered and clickable in your articles
+                  </p>
+                </div>
 
-              <div className="mt-2 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
-                <h3 className="font-bold mb-2">📥 Manual Download (Alternative)</h3>
-                <ol className="list-decimal list-inside space-y-1 text-sm">
-                  <li>Download images individually using the "Download" button</li>
-                  <li>Place the downloaded images in the <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">public/</code> directory of your repository</li>
-                  <li>Commit and push the images to GitHub manually</li>
-                </ol>
-              </div>
+                <details className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
+                  <summary className="font-bold cursor-pointer flex items-center gap-2">
+                    <span className="text-xl">🔢</span>
+                    <span>Figure Numbering & Referencing</span>
+                  </summary>
+                  <ul className="list-disc list-inside space-y-1 text-sm mt-2 pl-6">
+                    <li><strong>Automatic numbering:</strong> Figures numbered 1, 2, 3... based on order in text</li>
+                    <li><strong>Labels:</strong> Use <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">fig:experiment</code> format for referencing</li>
+                    <li><strong>Cross-references:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">{`\\autoref{fig:experiment}`}</code> → "Figure 2"</li>
+                    <li><strong>Number only:</strong> <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">{`\\ref{fig:experiment}`}</code> → "2"</li>
+                  </ul>
+                </details>
 
-              <div className="mt-2 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg border border-indigo-200 dark:border-indigo-800">
-                <h3 className="font-bold mb-2">🔢 How Figure Numbering Works</h3>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                  <li><strong>Automatic numbering:</strong> Figures are numbered 1, 2, 3, etc. based on their order in the article text</li>
-                  <li><strong>Labels for referencing:</strong> Use labels (e.g., <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">fig:experiment</code>) to reference figures in your text</li>
-                  <li><strong>Cross-references:</strong> Use <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{`\\autoref{fig:experiment}`}</code> to create clickable links like "Figure 2"</li>
-                  <li><strong>Just numbers:</strong> Use <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded">{`\\ref{fig:experiment}`}</code> to show just the number "2"</li>
-                  <li><strong>Insert order matters:</strong> Insert images in the order you want them numbered in your article</li>
-                </ul>
+                <details className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                  <summary className="font-bold cursor-pointer flex items-center gap-2">
+                    <span className="text-xl">📥</span>
+                    <span>Alternative: Manual Download</span>
+                  </summary>
+                  <ol className="list-decimal list-inside space-y-1 text-sm mt-2 pl-6">
+                    <li>Click "Download" button for each image</li>
+                    <li>Place files in <code className="bg-gray-200 dark:bg-gray-700 px-1 rounded text-xs">public/</code> directory</li>
+                    <li>Commit and push to GitHub manually</li>
+                  </ol>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 pl-5">
+                    Use this if GitHub token is not configured
+                  </p>
+                </details>
               </div>
 
               {/* Uploaded Images */}
@@ -564,54 +600,98 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
 
                   {/* Layout Selector */}
                   <div className="mb-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-                    <h4 className="font-bold mb-2">📐 Insert Layout Options</h4>
-                    <div className="flex gap-4 items-center">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="layout"
-                          value="single"
-                          checked={selectedLayout === 'single'}
-                          onChange={() => setSelectedLayout('single')}
-                          className="w-4 h-4"
-                        />
-                        <span className="text-sm">Single Image(s)</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="layout"
-                          value="double"
-                          checked={selectedLayout === 'double'}
-                          onChange={() => setSelectedLayout('double')}
-                          className="w-4 h-4"
-                        />
-                        <span className="text-sm">Two Images Side-by-Side</span>
-                      </label>
+                    <h4 className="font-bold mb-3">📐 Insert Layout Options</h4>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="layout"
+                            value="single"
+                            checked={selectedLayout === 'single'}
+                            onChange={() => setSelectedLayout('single')}
+                            className="w-4 h-4"
+                          />
+                          <span className="text-sm font-medium">Single Image(s) - Individual with captions</span>
+                        </label>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 ml-6 mt-1">
+                          Each selected image will be inserted separately with its own caption
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="layout"
+                            value="double"
+                            checked={selectedLayout === 'double'}
+                            onChange={() => setSelectedLayout('double')}
+                            className="w-4 h-4"
+                          />
+                          <span className="text-sm font-medium">Two Images Side-by-Side</span>
+                        </label>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 ml-6 mt-1">
+                          Select exactly 2 images to display them next to each other
+                        </p>
+                        
+                        {selectedLayout === 'double' && (
+                          <div className="ml-6 mt-2 space-y-2">
+                            <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Caption Style:</p>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="captionMode"
+                                value="separate"
+                                checked={doubleCaptionMode === 'separate'}
+                                onChange={() => setDoubleCaptionMode('separate')}
+                                className="w-3 h-3"
+                              />
+                              <span className="text-xs">Separate captions - Each image has its own caption below it</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="captionMode"
+                                value="single"
+                                checked={doubleCaptionMode === 'single'}
+                                onChange={() => setDoubleCaptionMode('single')}
+                                className="w-3 h-3"
+                              />
+                              <span className="text-xs">Single shared caption - One caption below both images</span>
+                            </label>
+                          </div>
+                        )}
+                      </div>
                     </div>
+                    
                     {selectedImages.length > 0 && (
-                      <div className="mt-2">
-                        <button
-                          type="button"
-                          onClick={handleInsertSelectedImages}
-                          className="px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition-colors"
-                        >
-                          📥 Insert {selectedImages.length} Selected Image(s) ({selectedLayout === 'double' ? 'Side-by-Side' : 'Individual'})
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedImages([])}
-                          className="ml-2 px-3 py-2 bg-gray-500 text-white text-sm rounded-md hover:bg-gray-600 transition-colors"
-                        >
-                          Clear Selection
-                        </button>
+                      <div className="mt-4 pt-3 border-t border-purple-300 dark:border-purple-700">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={handleInsertSelectedImages}
+                            className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-md hover:bg-purple-700 transition-colors"
+                          >
+                            📥 Insert {selectedImages.length} Selected Image(s)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedImages([])}
+                            className="px-3 py-2 bg-gray-500 text-white text-sm rounded-md hover:bg-gray-600 transition-colors"
+                          >
+                            Clear Selection
+                          </button>
+                        </div>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                          {selectedLayout === 'single' 
+                            ? `${selectedImages.length} image(s) selected - will be inserted individually` 
+                            : selectedImages.length === 2
+                              ? `Ready to insert side-by-side with ${doubleCaptionMode === 'single' ? 'shared' : 'separate'} caption(s)`
+                              : `Please select exactly 2 images (currently ${selectedImages.length} selected)`}
+                        </p>
                       </div>
                     )}
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                      {selectedLayout === 'single' 
-                        ? 'Select one or more images to insert them individually with captions.' 
-                        : 'Select exactly 2 images to insert them side-by-side.'}
-                    </p>
                   </div>
 
                   <div className="space-y-4">
@@ -663,62 +743,64 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
                               <p className="text-sm text-red-600 dark:text-red-400 mt-1">Error: {image.error}</p>
                             )}
                             
-                            {/* Label Input */}
-                            <div className="mt-2">
-                              <label className="block text-sm font-medium mb-1">
-                                Label (for referencing):
-                              </label>
-                              <input
-                                type="text"
-                                value={image.label || ''}
-                                onChange={(e) => handleUpdateLabel(index, e.target.value)}
-                                placeholder="e.g., fig:my-image"
-                                className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white font-mono"
-                              />
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                Use this label to reference the figure: <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">\autoref{"{"}label{"}"}</code> or <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">\ref{"{"}label{"}"}</code>. Figure numbers are automatically assigned based on order in the text.
-                              </p>
-                            </div>
-                            
-                            {/* Caption Input */}
-                            <div className="mt-2">
-                              <label className="block text-sm font-medium mb-1">
-                                Caption (optional):
+                            {/* Caption Input - Moved to top for better UX */}
+                            <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                              <label className="block text-sm font-semibold mb-1.5">
+                                📝 Caption (optional):
                               </label>
                               <input
                                 type="text"
                                 value={image.caption || ''}
                                 onChange={(e) => handleUpdateCaption(index, e.target.value)}
-                                placeholder="Enter a caption for this image..."
-                                className="w-full px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                                placeholder="Enter a descriptive caption for this image..."
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
                               />
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                Caption will be prefixed with "Figure X:" where X is auto-numbered based on order in text.
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
+                                Will appear as <span className="font-medium">"Figure #: Your caption"</span> below the image
                               </p>
                             </div>
                             
-                            <div className="mt-2 space-y-2">
-                              <div className="text-sm">
-                                <p className="font-medium mb-1">Image HTML Preview (Figure # will be auto-numbered):</p>
-                                <code className="block bg-gray-100 dark:bg-gray-700 p-2 rounded text-xs overflow-x-auto">
+                            {/* Label Input */}
+                            <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
+                              <label className="block text-sm font-semibold mb-1.5">
+                                🔗 Label (for cross-referencing):
+                              </label>
+                              <input
+                                type="text"
+                                value={image.label || ''}
+                                onChange={(e) => handleUpdateLabel(index, e.target.value)}
+                                placeholder="e.g., fig:experiment-setup"
+                                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white font-mono"
+                              />
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
+                                Reference in text: <code className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-xs">\autoref{"{"}your-label{"}"}</code> → "Figure 2"
+                              </p>
+                            </div>
+                            
+                            <div className="mt-3 space-y-3">
+                              <details className="text-sm">
+                                <summary className="font-medium cursor-pointer text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400">
+                                  👁️ Preview Generated HTML
+                                </summary>
+                                <code className="block bg-gray-100 dark:bg-gray-700 p-2 rounded text-xs overflow-x-auto mt-2 max-h-32 overflow-y-auto">
                                   {generateImageMarkdown(image.name, image.caption, '', image.label)}
                                 </code>
-                              </div>
+                              </details>
                               
-                              <div className="flex gap-2 flex-wrap">
+                              <div className="flex gap-2 flex-wrap pt-2 border-t border-gray-200 dark:border-gray-600">
                                 <button
                                   type="button"
                                   onClick={() => handleInsertImage(image)}
-                                  className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                                  className="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 transition-colors"
                                 >
-                                  Insert into Article
+                                  ➕ Insert
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleCopyMarkdown(image)}
-                                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                                  className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
                                 >
-                                  Copy HTML
+                                  📋 Copy
                                 </button>
                                 {!image.uploaded && (
                                   <>
@@ -726,25 +808,25 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageInsert, articleId }) =
                                       type="button"
                                       onClick={() => uploadImageToGitHub(image)}
                                       disabled={image.uploading}
-                                      className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 disabled:bg-gray-400"
+                                      className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 disabled:bg-gray-400 transition-colors"
                                     >
-                                      Upload to GitHub
+                                      🚀 Upload
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => handleDownloadImage(image)}
-                                      className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700"
+                                      className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 transition-colors"
                                     >
-                                      Download
+                                      💾 Download
                                     </button>
                                   </>
                                 )}
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveImage(index)}
-                                  className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                                  className="px-3 py-1.5 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors ml-auto"
                                 >
-                                  Remove
+                                  🗑️ Remove
                                 </button>
                               </div>
                             </div>

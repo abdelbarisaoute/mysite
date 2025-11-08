@@ -26,17 +26,25 @@ The easiest way to add images to your articles is through the built-in image upl
    - Supports: PNG, JPG, GIF, SVG, WebP
    - Multiple images can be uploaded at once
 
-4. **Upload Directly to GitHub (Recommended)**
+4. **Add Captions and Labels**
+   - Enter captions for each image (optional)
+   - Add labels for cross-referencing (e.g., `fig:experiment`)
+
+5. **Upload Directly to GitHub (Recommended)**
    - Click "🚀 Upload All to GitHub" to commit all images at once
    - Or click "Upload to GitHub" for individual images
    - Images are automatically uploaded to your repository's `public/` directory
    - The site will automatically rebuild and deploy (1-2 minutes)
    - **Note:** Requires GitHub token to be configured in dashboard settings
 
-5. **Insert into Article**
-   - Click "Insert into Article" to automatically add the image HTML to your content
-   - Or click "Copy HTML" to copy the markup and paste it manually
-   - The HTML is automatically generated with proper styling
+6. **Choose Layout and Insert**
+   - Select images using checkboxes
+   - Choose between:
+     - **Single Image(s)**: Insert one or more images individually
+     - **Two Images Side-by-Side**: Select exactly 2 images
+       - Choose between **separate captions** (one per image) or a **single shared caption** (one caption below both images)
+   - Click "Insert Selected Images" to add to your article
+   - Or use individual "Insert" buttons for quick insertion
 
 ### Alternative: Manual Download Method
 
@@ -51,6 +59,8 @@ If GitHub token is not configured:
 - ✅ Preview of uploaded images with upload status
 - ✅ Proper styling classes pre-applied
 - ✅ **Images are automatically centered** - `mx-auto block` classes included
+- ✅ **Flexible caption options** - choose between single shared caption or separate captions for side-by-side images
+- ✅ **User-friendly interface** - improved layout with collapsible sections and clear instructions
 - ✅ Batch upload support
 - ✅ Real-time upload feedback
 - ✅ **Images are automatically clickable** - users can click to view full size in a new tab
@@ -161,19 +171,38 @@ You can also add images in subdirectories:
 ```
 **Note:** Images uploaded via the admin dashboard automatically include `mx-auto block` classes for centering.
 
-#### Side-by-Side Images
+#### Side-by-Side Images with Separate Captions
 ```html
 <div class="flex gap-4 my-4 flex-wrap justify-center items-start">
-  <div class="flex-1 min-w-[200px]">
+  <div class="flex-1 min-w-[200px]" id="fig:before">
     <img src="/mysite/before.png" alt="Before" class="w-full h-64 object-cover rounded-lg shadow-md" />
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure #: Before treatment</p>
   </div>
-  <div class="flex-1 min-w-[200px]">
+  <div class="flex-1 min-w-[200px]" id="fig:after">
     <img src="/mysite/after.png" alt="After" class="w-full h-64 object-cover rounded-lg shadow-md" />
+    <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure #: After treatment</p>
   </div>
 </div>
 ```
 
-**Note:** The `h-64` class sets a fixed height (16rem/256px) and `object-cover` ensures images fill the container while maintaining their aspect ratio without distortion. This ensures both images have the same height. You can adjust the height class (`h-48`, `h-64`, `h-80`, etc.) based on your needs.
+#### Side-by-Side Images with Single Shared Caption
+```html
+<div class="my-4" id="fig:comparison">
+  <div class="flex gap-4 flex-wrap justify-center items-start">
+    <div class="flex-1 min-w-[200px]">
+      <img src="/mysite/before.png" alt="Before" class="w-full h-64 object-cover rounded-lg shadow-md" />
+    </div>
+    <div class="flex-1 min-w-[200px]">
+      <img src="/mysite/after.png" alt="After" class="w-full h-64 object-cover rounded-lg shadow-md" />
+    </div>
+  </div>
+  <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center italic">Figure #: Comparison of before and after treatment</p>
+</div>
+```
+
+**Note:** 
+- The `h-64` class sets a fixed height (16rem/256px) and `object-cover` ensures images fill the container while maintaining their aspect ratio without distortion. This ensures both images have the same height. You can adjust the height class (`h-48`, `h-64`, `h-80`, etc.) based on your needs.
+- The admin dashboard now offers both caption styles when inserting side-by-side images!
 
 ## Image Interaction
 
