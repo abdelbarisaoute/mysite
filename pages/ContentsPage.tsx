@@ -1,12 +1,15 @@
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArticleContext } from '../context/ArticleContext';
 
 const ContentsPage: React.FC = () => {
   const { articles } = useContext(ArticleContext);
 
-  const sortedArticles = [...articles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const sortedArticles = useMemo(() => 
+    [...articles].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+    [articles]
+  );
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
