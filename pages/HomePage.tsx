@@ -15,30 +15,30 @@ const HomePage: React.FC = () => {
   );
 
   return (
-    <div className="space-y-12">
-      <section className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">Welcome to My Digital Space</h1>
-        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-          Personal platform illustrating my understanding of physics through original notes and visual explanations.
+    <div className="space-y-8">
+      <section className="text-center bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 p-12 rounded-xl shadow-sm">
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-3">Welcome!</h1>
+        <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
+          Explore physics concepts through clear notes and explanations.
         </p>
       </section>
 
       <section>
-        <h2 className="text-3xl font-bold mb-6 pb-2 border-b-2 border-blue-500">Latest Publications</h2>
-        <div className="space-y-8">
+        <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Latest Articles</h2>
+        <div className="space-y-4">
           {latestArticles.map((article: Article) => (
-            <article key={article.id} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-md dark:hover:bg-gray-700/40 transition-shadow">
+            <article key={article.id} className="bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm hover:shadow-md transition-all border-l-4 border-blue-500 hover:border-blue-600">
               <header>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                <h3 className="text-2xl font-bold">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <h3 className="text-xl font-bold">
                   <Link to={`/article/${article.id}`} className="text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                     {article.title}
                   </Link>
                 </h3>
               </header>
-              <p className="mt-3 text-gray-600 dark:text-gray-400">{article.summary}</p>
-              <Link to={`/article/${article.id}`} className="inline-block mt-4 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold">
-                Read more &rarr;
+              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{article.summary}</p>
+              <Link to={`/article/${article.id}`} className="inline-flex items-center mt-3 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                Read article →
               </Link>
             </article>
           ))}

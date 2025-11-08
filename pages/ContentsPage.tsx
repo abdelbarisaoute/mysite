@@ -12,23 +12,26 @@ const ContentsPage: React.FC = () => {
   );
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
-      <div className="flex justify-between items-center mb-6 pb-2 border-b-2 border-blue-500">
-        <h1 className="text-3xl font-bold">Table of Contents</h1>
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">All Articles</h1>
+        <p className="text-gray-600 dark:text-gray-400">Browse all published articles</p>
       </div>
-      <div className="space-y-6">
+      <div className="space-y-4">
         {sortedArticles.map(article => (
-          <div key={article.id}>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+          <Link 
+            key={article.id} 
+            to={`/article/${article.id}`}
+            className="block bg-white dark:bg-gray-800 p-5 rounded-lg shadow-sm hover:shadow-md transition-all border-l-4 border-blue-500 hover:border-blue-600"
+          >
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
               {new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
-            <h2 className="text-2xl font-semibold">
-              <Link to={`/article/${article.id}`} className="text-gray-800 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                {article.title}
-              </Link>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-2">
+              {article.title}
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">{article.summary}</p>
-          </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{article.summary}</p>
+          </Link>
         ))}
       </div>
     </div>

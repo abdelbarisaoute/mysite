@@ -34,8 +34,8 @@ const App: React.FC = () => {
                   <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
                 </Routes>
               </main>
-              <footer className="text-center p-4 mt-8 border-t border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-sm">
-                  <p>&copy; 2025 Abdelbari SAOUTELHAK. All rights reserved.</p>
+              <footer className="text-center p-4 mt-12 text-gray-500 dark:text-gray-400 text-sm">
+                  <p>&copy; 2025 Abdelbari SAOUTELHAK</p>
               </footer>
             </div>
           </HashRouter>

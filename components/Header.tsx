@@ -78,17 +78,17 @@ const Header: React.FC = () => {
   }, []);
 
   const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
-    `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+    `px-3 py-2 rounded-lg text-sm font-medium transition-all ${
       isActive
-        ? 'bg-gray-900 dark:bg-blue-600 text-white'
-        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100'
+        ? 'bg-blue-600 text-white shadow-sm'
+        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
     }`;
 
   const mobileNavLinkClasses = ({ isActive }: { isActive: boolean }) =>
-    `block px-3 py-2 rounded-md text-base font-medium transition-colors ${
+    `block px-3 py-2 rounded-lg text-base font-medium transition-all ${
       isActive
-        ? 'bg-gray-900 dark:bg-blue-600 text-white'
-        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+        ? 'bg-blue-600 text-white shadow-sm'
+        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
     }`;
 
   return (
