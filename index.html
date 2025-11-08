@@ -11,8 +11,11 @@
     <title>Personal Academic Website</title>
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script>
-      tailwind.config = {
-        darkMode: 'class',
+      // Configure Tailwind only if it's loaded (may be blocked by ad blockers)
+      if (typeof tailwind !== 'undefined') {
+        tailwind.config = {
+          darkMode: 'class',
+        }
       }
     </script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
