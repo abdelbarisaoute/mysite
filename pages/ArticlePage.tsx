@@ -31,13 +31,11 @@ const ArticlePage: React.FC = () => {
 
       {/* Main Article Content */}
       <article className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm flex-1 min-w-0">
-        <header className="mb-8 border-b dark:border-gray-700 pb-6">
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-            Published on {new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+        <header className="mb-8 pb-6 border-b-2 border-blue-500">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">
+            {new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
-          <div className="flex justify-between items-start">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{article.title}</h1>
-          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{article.title}</h1>
         </header>
         
         <ContentRenderer content={article.content} />

@@ -20,22 +20,24 @@ const ResumePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm">
-      <div className="mb-6 pb-2 border-b-2 border-blue-500">
-        <h1 className="text-3xl font-bold text-center">{resume.name}</h1>
+    <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-lg shadow-sm">
+      <div className="mb-8 pb-6 border-b-2 border-blue-500">
+        <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-gray-100">{resume.name}</h1>
         <div 
-          className="text-center text-gray-600 dark:text-gray-400 mt-2"
+          className="text-center text-gray-600 dark:text-gray-400 mt-3 text-sm"
           dangerouslySetInnerHTML={{ __html: resume.contact }}
         />
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         {resume.sections.map((section) => (
           <div key={section.id}>
-            <h2 className="text-2xl font-bold mb-3 border-b border-gray-300 dark:border-gray-600 pb-2">
+            <h2 className="text-xl font-bold mb-3 text-blue-600 dark:text-blue-400">
               {section.title}
             </h2>
-            <ContentRenderer content={section.content} />
+            <div className="pl-1">
+              <ContentRenderer content={section.content} />
+            </div>
           </div>
         ))}
       </div>

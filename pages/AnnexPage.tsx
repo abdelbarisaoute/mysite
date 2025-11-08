@@ -31,14 +31,14 @@ const AnnexPage: React.FC = () => {
 
       {/* Main Annex Content */}
       <div className="flex-1 min-w-0">
-        <article className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 mb-6">
-          <h1 className="text-4xl font-bold mb-6">{annex.title}</h1>
+        <article className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 sm:p-8 mb-6">
+          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">{annex.title}</h1>
         </article>
         
         {/* Render each part independently */}
         {annex.parts && annex.parts.map((part) => (
-          <article key={part.id} className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-8 mb-6">
-            <h2 id={generateId(part.title)} className="text-3xl font-bold mb-4 text-blue-600 dark:text-blue-400">{part.title}</h2>
+          <article key={part.id} className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6 sm:p-8 mb-6">
+            <h2 id={generateId(part.title)} className="text-2xl font-bold mb-4 text-blue-600 dark:text-blue-400">{part.title}</h2>
             <div className="prose dark:prose-invert max-w-none">
               <ContentRenderer content={part.content} />
             </div>
