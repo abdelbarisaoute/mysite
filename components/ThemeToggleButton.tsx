@@ -23,4 +23,4 @@ const ThemeToggleButton: React.FC = () => {
   );
 };
 
-export default ThemeToggleButton;
+export default React.memo(ThemeToggleButton);

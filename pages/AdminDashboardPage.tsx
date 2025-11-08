@@ -10,6 +10,13 @@ import { generateId } from '../utils/idGenerator';
 import TabNavigation from '../components/admin/TabNavigation';
 import GitHubSettings from '../components/admin/GitHubSettings';
 import ResumeEditor from '../components/admin/ResumeEditor';
+import { 
+  saveFileToGitHub, 
+  deleteFileFromGitHub, 
+  escapeForString, 
+  escapeForTemplate,
+  encodeToBase64
+} from '../utils/githubApi';
 
 // Helper function to get repository information
 const getRepositoryInfo = () => {
@@ -120,14 +127,6 @@ const AdminDashboardPage: React.FC = () => {
       )
       .join('');
 
-    const escapeForTemplate = (str: string): string => {
-      return str
-        .replace(/\\/g, '\\\\')
-        .replace(/`/g, '\\`')
-        .replace(/\$/g, '\\$')
-        .replace(/'/g, "\\'");
-    };
-
     return `import { Article } from '../../types';
 
 export const ${variableName}: Article = {
@@ -166,9 +165,17 @@ export const ${variableName}: Article = {
     }
 
     const content = generateArticleContent(article);
-    const encoder = new TextEncoder();
-    const data = encoder.encode(content);
-    const base64Content = btoa(String.fromCharCode(...data));
+    try {
+      // Validate base64 encoding works
+      encodeToBase64(content);
+    } catch (error) {
+      console.error('Base64 encoding error:', error);
+      setMessage({ 
+        type: 'error', 
+        text: 'Failed to encode article content. The content may contain unsupported characters.' 
+      });
+      return false;
+    }
     
     const savedRepoOwner = localStorage.getItem('githubRepoOwner');
     const savedRepoName = localStorage.getItem('githubRepoName');
@@ -177,62 +184,28 @@ export const ${variableName}: Article = {
     const repoNameToUse = savedRepoName || defaultName;
     const filePath = `data/articles/${article.id}.ts`;
 
-    try {
-      let sha: string | undefined;
-      try {
-        const getResponse = await fetch(
-          `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
-          {
-            headers: {
-              'Authorization': `token ${token}`,
-              'Accept': 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        if (getResponse.ok) {
-          const data = await getResponse.json();
-          sha = data.sha;
-        }
-      } catch (e) {
-        // File doesn't exist
-      }
+    const commitMessage = editingArticle 
+      ? `Update article: ${article.title}`
+      : `Add new article: ${article.title}`;
 
-      const commitMessage = editingArticle 
-        ? `Update article: ${article.title}`
-        : `Add new article: ${article.title}`;
+    const result = await saveFileToGitHub(
+      { token, owner: repoOwnerToUse, repo: repoNameToUse },
+      filePath,
+      content,
+      commitMessage
+    );
 
-      const response = await fetch(
-        `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `token ${token}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: commitMessage,
-            content: base64Content,
-            sha: sha,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save to GitHub');
-      }
-
-      return true;
-    } catch (error) {
-      console.error('GitHub API error:', error);
+    if (!result.success) {
+      console.error('GitHub API error:', result.error);
       setMessage({ 
         type: 'error', 
-        text: `Failed to save to repository: ${error instanceof Error ? error.message : 'Unknown error'}. Downloading file instead.` 
+        text: `Failed to save to repository: ${result.error}. Downloading file instead.` 
       });
       downloadArticleFile(article);
       return false;
     }
+
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -284,53 +257,22 @@ export const ${variableName}: Article = {
     const repoNameToUse = savedRepoName || defaultName;
     const filePath = `data/articles/${article.id}.ts`;
 
-    try {
-      const getResponse = await fetch(
-        `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
-        {
-          headers: {
-            'Authorization': `token ${token}`,
-            'Accept': 'application/vnd.github.v3+json',
-          },
-        }
-      );
+    const result = await deleteFileFromGitHub(
+      { token, owner: repoOwnerToUse, repo: repoNameToUse },
+      filePath,
+      `Delete article: ${article.title}`
+    );
 
-      if (!getResponse.ok) {
-        throw new Error('File not found in repository');
-      }
-
-      const data = await getResponse.json();
-      
-      const deleteResponse = await fetch(
-        `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `token ${token}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: `Delete article: ${article.title}`,
-            sha: data.sha,
-          }),
-        }
-      );
-
-      if (!deleteResponse.ok) {
-        const errorData = await deleteResponse.json();
-        throw new Error(errorData.message || 'Failed to delete from GitHub');
-      }
-
+    if (result.success) {
       setMessage({ 
         type: 'success', 
         text: `Article "${article.title}" has been deleted from GitHub. ${DEPLOYMENT_INFO}` 
       });
-    } catch (error) {
-      console.error('GitHub API error:', error);
+    } else {
+      console.error('GitHub API error:', result.error);
       setMessage({ 
         type: 'error', 
-        text: `Failed to delete from repository: ${error instanceof Error ? error.message : 'Unknown error'}` 
+        text: `Failed to delete from repository: ${result.error}` 
       });
     }
 
@@ -349,20 +291,6 @@ export const ${variableName}: Article = {
       return false;
     }
 
-    const escapeForString = (str: string): string => {
-      return str
-        .replace(/\\/g, '\\\\')
-        .replace(/'/g, "\\'");
-    };
-
-    const escapeForTemplate = (str: string): string => {
-      return str
-        .replace(/\\/g, '\\\\')
-        .replace(/`/g, '\\`')
-        .replace(/\$/g, '\\$')
-        .replace(/\r?\n/g, '\\n');
-    };
-
     const partsCode = annex.parts.map(part => `    {
       id: '${escapeForString(part.id)}',
       title: '${escapeForString(part.title)}',
@@ -380,9 +308,17 @@ ${partsCode}
 };
 `;
     
-    const encoder = new TextEncoder();
-    const data = encoder.encode(content);
-    const base64Content = btoa(String.fromCharCode(...data));
+    try {
+      // Validate base64 encoding works
+      encodeToBase64(content);
+    } catch (error) {
+      console.error('Base64 encoding error:', error);
+      setMessage({ 
+        type: 'error', 
+        text: 'Failed to encode annex content. The content may contain unsupported characters.' 
+      });
+      return false;
+    }
     
     const savedRepoOwner = localStorage.getItem('githubRepoOwner');
     const savedRepoName = localStorage.getItem('githubRepoName');
@@ -391,57 +327,23 @@ ${partsCode}
     const repoNameToUse = savedRepoName || defaultName;
     const filePath = 'data/annex.ts';
 
-    try {
-      let sha: string | undefined;
-      try {
-        const getResponse = await fetch(
-          `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
-          {
-            headers: {
-              'Authorization': `token ${token}`,
-              'Accept': 'application/vnd.github.v3+json',
-            },
-          }
-        );
-        if (getResponse.ok) {
-          const data = await getResponse.json();
-          sha = data.sha;
-        }
-      } catch (e) {
-        // File doesn't exist
-      }
+    const result = await saveFileToGitHub(
+      { token, owner: repoOwnerToUse, repo: repoNameToUse },
+      filePath,
+      content,
+      `Update annex: ${annex.title}`
+    );
 
-      const response = await fetch(
-        `https://api.github.com/repos/${repoOwnerToUse}/${repoNameToUse}/contents/${filePath}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `token ${token}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: `Update annex: ${annex.title}`,
-            content: base64Content,
-            sha: sha,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save to GitHub');
-      }
-
-      return true;
-    } catch (error) {
-      console.error('GitHub API error:', error);
+    if (!result.success) {
+      console.error('GitHub API error:', result.error);
       setMessage({ 
         type: 'error', 
-        text: `Failed to save to repository: ${error instanceof Error ? error.message : 'Unknown error'}. Annex saved locally only.` 
+        text: `Failed to save to repository: ${result.error}. Annex saved locally only.` 
       });
       return false;
     }
+
+    return true;
   };
 
   const handleAnnexSubmit = async (e: React.FormEvent) => {

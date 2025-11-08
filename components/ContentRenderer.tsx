@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo } from 'react';
 import DOMPurify from 'dompurify';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
@@ -347,11 +347,6 @@ const processParagraphs = (text: string): string => {
 
 // --- Main component ---
 const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Handle clicks on figure references
-
-
   const renderedParts = useMemo(() => {
     // Step 1: Extract list blocks (itemize, enumerate)
     const { processed: textWithoutLists, lists } = extractListBlocks(content);
@@ -435,7 +430,7 @@ const ContentRenderer: React.FC<ContentRendererProps> = ({ content }) => {
     return <div dangerouslySetInnerHTML={{ __html: sanitized }} />;
   }, [content]);
 
-  return <div ref={containerRef} className="prose dark:prose-invert max-w-none text-lg leading-relaxed overflow-x-auto">{renderedParts}</div>;
+  return <div className="prose dark:prose-invert max-w-none text-lg leading-relaxed overflow-x-auto">{renderedParts}</div>;
 };
 
-export default ContentRenderer;
+export default React.memo(ContentRenderer);
