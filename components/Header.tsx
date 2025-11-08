@@ -16,16 +16,16 @@ const Header: React.FC = () => {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const { articles } = useContext(ArticleContext);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = React.useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (query.trim()) {
       navigate(`/search?q=${encodeURIComponent(query.trim())}`);
       setQuery('');
       setSuggestions([]);
     }
-  };
+  }, [query, navigate]);
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newQuery = e.target.value;
     setQuery(newQuery);
 
@@ -42,7 +42,7 @@ const Header: React.FC = () => {
     } else {
       setSuggestions([]);
     }
-  };
+  }, [articles]);
 
   const handleSuggestionClick = () => {
     setQuery('');

@@ -123,4 +123,4 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
   );
 };
 
-export default TableOfContents;
+export default React.memo(TableOfContents);

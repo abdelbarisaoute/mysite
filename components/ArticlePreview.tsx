@@ -39,4 +39,4 @@ const ArticlePreview: React.FC<ArticlePreviewProps> = ({ title, date, summary, c
   );
 };
 
-export default ArticlePreview;
+export default React.memo(ArticlePreview);

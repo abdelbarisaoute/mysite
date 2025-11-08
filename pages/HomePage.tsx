@@ -1,5 +1,5 @@
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Article } from '../types';
 import { ArticleContext } from '../context/ArticleContext';
@@ -7,9 +7,12 @@ import { ArticleContext } from '../context/ArticleContext';
 const HomePage: React.FC = () => {
   const { articles } = useContext(ArticleContext);
 
-  const latestArticles = [...articles]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 3);
+  const latestArticles = useMemo(() => 
+    [...articles]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 3),
+    [articles]
+  );
 
   return (
     <div className="space-y-12">
