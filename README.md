@@ -2,25 +2,37 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Personal Academic Website
+# Personal Blog & Portfolio
 
-A modern, responsive personal academic website built with React, TypeScript, and Vite. This website includes features for displaying articles, a resume, dark mode support, and an admin panel for content management.
+A modern, responsive personal blog and portfolio website built with React, TypeScript, and Vite. This website features a clean blog design with project showcase capabilities, article management, and an intuitive admin panel for content management.
 
-> **📚 New to the admin dashboard?** Check out the comprehensive [ADMIN_GUIDE.md](ADMIN_GUIDE.md) for step-by-step instructions on accessing the admin panel, managing articles, setting up GitHub automation, and deploying your site.
+> **📚 New to the admin dashboard?** Check out the comprehensive [ADMIN_GUIDE.md](ADMIN_GUIDE.md) for step-by-step instructions on accessing the admin panel, managing articles and projects, setting up GitHub automation, and deploying your site.
 
 ## Features
 
-- 📝 Article management system with create, read, update, and delete functionality
-- 📑 **Table of Contents** - Automatically generated from article sections with smooth scrolling navigation
+### Blog & Content
+- 📝 **Article management** - Create, read, update, and delete blog posts with ease
+- 📑 **Table of Contents** - Automatically generated from article sections with smooth scrolling
 - 🖼️ **Image Support** - Comprehensive guide for adding images to articles (see [IMAGE_GUIDE.md](IMAGE_GUIDE.md))
-- 🌓 Dark mode support with theme persistence
-- 🔍 Search functionality with live suggestions
-- 📱 Fully responsive design
-- 🎨 Modern UI with Tailwind CSS
-- 🔐 Simple admin authentication
-- ⚡ Fast build times with Vite
-- 📊 KaTeX support for mathematical equations
-- 🚀 Automatic deployment to GitHub Pages
+- 📊 **LaTeX/KaTeX support** - Write mathematical equations and formatted content
+
+### Projects Showcase
+- 💻 **Project management** - Upload and showcase your projects with code samples
+- 🔗 **GitHub & Demo links** - Link to source code and live demos
+- 🏷️ **Technology tags** - Display technologies used in each project
+- 📝 **Code snippets** - Include formatted code examples in project descriptions
+
+### User Experience
+- 🌓 **Dark mode** - Theme persistence across sessions
+- 🔍 **Search functionality** - Live suggestions as you type
+- 📱 **Fully responsive** - Optimized for mobile, tablet, and desktop
+- 🎨 **Modern UI** - Clean blog-focused design with Tailwind CSS
+- 🚀 **Fast performance** - Built with Vite for lightning-fast builds
+
+### Admin & Deployment
+- 🔐 **Simple authentication** - Password-protected admin panel
+- ⚡ **Easy content management** - User-friendly interface for articles and projects
+- 🚀 **Automatic deployment** - GitHub Pages integration
 
 ## Run Locally
 
@@ -117,9 +129,15 @@ Once configured, articles are automatically committed to your repository and tri
 ```
 mysite/
 ├── components/         # Reusable React components
-├── context/           # React context providers
-├── data/              # Static data (articles, resume)
+├── context/           # React context providers (ArticleContext, ProjectContext, ThemeContext, AuthContext)
+├── data/              # Static data (articles, resume, annex)
 ├── pages/             # Page components
+│   ├── HomePage.tsx           # Blog-focused landing page
+│   ├── ContentsPage.tsx       # Blog/articles listing
+│   ├── ProjectsPage.tsx       # Projects showcase
+│   ├── ProjectDetailPage.tsx  # Individual project view
+│   ├── ArticlePage.tsx        # Article view
+│   └── AdminDashboardPage.tsx # Admin panel with tabs for articles, projects, about, settings
 ├── public/            # Static assets
 ├── .github/workflows/ # GitHub Actions workflows
 ├── index.html         # HTML template
@@ -142,9 +160,11 @@ mysite/
 ### Changing Site Content:
 
 1. **Personal Information**: Edit the content in `pages/HomePage.tsx` and `pages/ResumePage.tsx`
-2. **Articles**: Add/edit article files in `data/articles/`. New article files are automatically discovered - no need to manually update `index.ts`!
-3. **Site Title**: Change the title in `index.html` and `components/Header.tsx`
-4. **Colors/Styling**: Modify Tailwind classes or the Tailwind config in `index.html`
+2. **Blog Posts**: Use the admin panel at `#/admin` to create and manage articles
+3. **Projects**: Use the admin panel's Projects tab to showcase your work with code samples
+4. **Site Title**: Change the title in `index.html` and `components/Header.tsx`
+5. **Navigation**: Modify `components/Header.tsx` to customize menu items
+6. **Colors/Styling**: Modify Tailwind classes or the Tailwind config in `index.html`
 
 ### Adding New Articles:
 
@@ -166,6 +186,28 @@ Articles are now automatically discovered! Simply:
 3. Commit and push - the article will be automatically included!
 
 The build system uses Vite's `import.meta.glob` to automatically discover all article files in the `data/articles/` directory.
+
+### Managing Projects:
+
+The easiest way to add projects is through the admin panel:
+
+1. Navigate to `#/admin` and log in
+2. Click on the **Projects** tab
+3. Click **New Project** and fill in the details:
+   - **Title**: Your project name
+   - **Description**: Short summary (shown on the projects page)
+   - **Technologies**: Comma-separated list (e.g., React, TypeScript, Node.js)
+   - **Full Description**: Detailed explanation (supports LaTeX syntax)
+   - **Code Snippet**: Optional code sample to showcase
+   - **GitHub URL**: Link to the repository (optional)
+   - **Demo URL**: Link to live demo (optional)
+4. Click **Create Project** to save
+
+Projects are stored in localStorage and display on the `/projects` page with:
+- Technology tags
+- Links to GitHub and live demos
+- Detailed project pages with code samples
+- LaTeX rendering for technical descriptions
 
 ### Article Syntax Reference:
 
