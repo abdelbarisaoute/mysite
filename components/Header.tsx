@@ -105,14 +105,14 @@ const Header: React.FC = () => {
               <NavLink to="/" className={navLinkClasses}>
                 Home
               </NavLink>
-              <NavLink to="/contents" className={navLinkClasses}>
-                Contents
+              <NavLink to="/blog" className={navLinkClasses}>
+                Blog
               </NavLink>
-              <NavLink to="/resume" className={navLinkClasses}>
-                Resume
+              <NavLink to="/projects" className={navLinkClasses}>
+                Projects
               </NavLink>
-              <NavLink to="/annex" className={navLinkClasses}>
-                Annex
+              <NavLink to="/about" className={navLinkClasses}>
+                About
               </NavLink>
             </div>
             
@@ -179,25 +179,25 @@ const Header: React.FC = () => {
               Home
             </NavLink>
             <NavLink
-              to="/contents"
+              to="/blog"
               onClick={closeMobileMenu}
               className={mobileNavLinkClasses}
             >
-              Contents
+              Blog
             </NavLink>
             <NavLink
-              to="/resume"
+              to="/projects"
               onClick={closeMobileMenu}
               className={mobileNavLinkClasses}
             >
-              Resume
+              Projects
             </NavLink>
             <NavLink
-              to="/annex"
+              to="/about"
               onClick={closeMobileMenu}
               className={mobileNavLinkClasses}
             >
-              Annex
+              About
             </NavLink>
           </div>
         )}

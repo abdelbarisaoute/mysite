@@ -30,3 +30,15 @@ export interface Resume {
   contact: string;
   sections: ResumeSection[];
 }
+
+export interface Project {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+  technologies: string[];
+  content: string;
+  githubUrl?: string;
+  demoUrl?: string;
+  codeSnippet?: string;
+}

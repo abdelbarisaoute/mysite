@@ -2,7 +2,8 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { ArticleContext } from '../context/ArticleContext';
-import { Article, Annex, AnnexPart } from '../types';
+import { ProjectContext } from '../context/ProjectContext';
+import { Article, Annex, AnnexPart, Project } from '../types';
 import ArticlePreview from '../components/ArticlePreview';
 import ImageUpload from '../components/ImageUpload';
 import { annexData } from '../data/annex';
@@ -31,10 +32,11 @@ const DEPLOYMENT_INFO = 'The site will automatically rebuild within 1-2 minutes.
 const AdminDashboardPage: React.FC = () => {
   const { isAuthenticated, logout } = useContext(AuthContext);
   const { articles } = useContext(ArticleContext);
+  const { projects, addProject, updateProject, deleteProject } = useContext(ProjectContext);
   const navigate = useNavigate();
   
   // Tab state
-  const [activeTab, setActiveTab] = useState('resume');
+  const [activeTab, setActiveTab] = useState('articles');
   
   // Message state
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -85,10 +87,26 @@ const AdminDashboardPage: React.FC = () => {
     navigate('/admin');
   };
 
+  // Projects state
+  const [showProjectForm, setShowProjectForm] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [projectFormData, setProjectFormData] = useState({
+    id: '',
+    title: '',
+    date: '',
+    description: '',
+    technologies: '',
+    content: '',
+    githubUrl: '',
+    demoUrl: '',
+    codeSnippet: '',
+  });
+  const [showProjectPreview, setShowProjectPreview] = useState(true);
+
   const tabs = [
-    { id: 'resume', label: '📄 Resume', icon: '📄' },
     { id: 'articles', label: '📝 Articles', icon: '📝' },
-    { id: 'annex', label: '📋 Annex', icon: '📋' },
+    { id: 'projects', label: '💻 Projects', icon: '💻' },
+    { id: 'resume', label: '📄 About', icon: '📄' },
     { id: 'settings', label: '⚙️ Settings', icon: '⚙️' },
   ];
 
@@ -277,6 +295,93 @@ export const ${variableName}: Article = {
     }
 
     setIsSubmitting(false);
+  };
+
+  // Project functions
+  const resetProjectForm = () => {
+    setProjectFormData({
+      id: '',
+      title: '',
+      date: '',
+      description: '',
+      technologies: '',
+      content: '',
+      githubUrl: '',
+      demoUrl: '',
+      codeSnippet: '',
+    });
+    setEditingProject(null);
+    setShowProjectForm(false);
+  };
+
+  const handleEditProject = (project: Project) => {
+    setProjectFormData({
+      ...project,
+      technologies: project.technologies.join(', '),
+      githubUrl: project.githubUrl || '',
+      demoUrl: project.demoUrl || '',
+      codeSnippet: project.codeSnippet || '',
+    });
+    setEditingProject(project);
+    setShowProjectForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const generateProjectId = (title: string): string => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  const handleProjectSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setMessage(null);
+
+    const projectId = editingProject ? projectFormData.id : generateProjectId(projectFormData.title);
+    
+    const project: Project = {
+      id: projectId,
+      title: projectFormData.title,
+      date: projectFormData.date || new Date().toISOString().split('T')[0],
+      description: projectFormData.description,
+      technologies: projectFormData.technologies
+        .split(',')
+        .map(t => t.trim())
+        .filter(t => t.length > 0),
+      content: projectFormData.content,
+      githubUrl: projectFormData.githubUrl || undefined,
+      demoUrl: projectFormData.demoUrl || undefined,
+      codeSnippet: projectFormData.codeSnippet || undefined,
+    };
+
+    if (editingProject) {
+      updateProject(project);
+      setMessage({ 
+        type: 'success', 
+        text: `Project "${project.title}" has been updated!` 
+      });
+    } else {
+      addProject(project);
+      setMessage({ 
+        type: 'success', 
+        text: `Project "${project.title}" has been created!` 
+      });
+    }
+    
+    resetProjectForm();
+  };
+
+  const handleDeleteProject = (project: Project) => {
+    if (!window.confirm(`Are you sure you want to delete "${project.title}"?`)) {
+      return;
+    }
+
+    deleteProject(project.id);
+    setMessage({ 
+      type: 'success', 
+      text: `Project "${project.title}" has been deleted.` 
+    });
   };
 
   // Annex functions
@@ -655,6 +760,259 @@ ${partsCode}
               {articles.length === 0 && (
                 <p className="text-gray-500 dark:text-gray-400 text-center py-8">
                   No articles yet. Create your first article above!
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Projects Tab */}
+      {activeTab === 'projects' && (
+        <div>
+          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">
+                {editingProject ? 'Edit Project' : 'Create New Project'}
+              </h2>
+              <div className="flex gap-2">
+                {showProjectForm && (
+                  <button
+                    type="button"
+                    onClick={() => setShowProjectPreview(!showProjectPreview)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                  >
+                    {showProjectPreview ? 'Hide Preview' : 'Show Preview'}
+                  </button>
+                )}
+                {!showProjectForm && (
+                  <button
+                    type="button"
+                    onClick={() => setShowProjectForm(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors"
+                  >
+                    New Project
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {showProjectForm && (
+              <div className={`admin-preview-grid ${showProjectPreview ? 'with-preview' : ''}`}>
+                <div className="space-y-4">
+                  <form onSubmit={handleProjectSubmit} id="project-form">
+                    <div className="mb-4">
+                      <label htmlFor="project-title" className="block text-sm font-medium mb-2">
+                        Project Title *
+                      </label>
+                      <input
+                        type="text"
+                        id="project-title"
+                        value={projectFormData.title}
+                        onChange={(e) => setProjectFormData({ ...projectFormData, title: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label htmlFor="project-date" className="block text-sm font-medium mb-2">
+                        Date
+                      </label>
+                      <input
+                        type="date"
+                        id="project-date"
+                        value={projectFormData.date}
+                        onChange={(e) => setProjectFormData({ ...projectFormData, date: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Leave empty to use today's date
+                      </p>
+                    </div>
+
+                    <div className="mb-4">
+                      <label htmlFor="project-description" className="block text-sm font-medium mb-2">
+                        Short Description *
+                      </label>
+                      <textarea
+                        id="project-description"
+                        value={projectFormData.description}
+                        onChange={(e) => setProjectFormData({ ...projectFormData, description: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                        rows={3}
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label htmlFor="project-technologies" className="block text-sm font-medium mb-2">
+                        Technologies (comma-separated)
+                      </label>
+                      <input
+                        type="text"
+                        id="project-technologies"
+                        value={projectFormData.technologies}
+                        onChange={(e) => setProjectFormData({ ...projectFormData, technologies: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="React, TypeScript, Node.js"
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label htmlFor="project-content" className="block text-sm font-medium mb-2">
+                        Full Description * (Supports LaTeX syntax)
+                      </label>
+                      <textarea
+                        id="project-content"
+                        value={projectFormData.content}
+                        onChange={(e) => setProjectFormData({ ...projectFormData, content: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
+                        rows={8}
+                        required
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label htmlFor="project-code" className="block text-sm font-medium mb-2">
+                        Code Snippet (Optional)
+                      </label>
+                      <textarea
+                        id="project-code"
+                        value={projectFormData.codeSnippet}
+                        onChange={(e) => setProjectFormData({ ...projectFormData, codeSnippet: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
+                        rows={6}
+                        placeholder="// Paste your code here"
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label htmlFor="project-github" className="block text-sm font-medium mb-2">
+                        GitHub URL (Optional)
+                      </label>
+                      <input
+                        type="url"
+                        id="project-github"
+                        value={projectFormData.githubUrl}
+                        onChange={(e) => setProjectFormData({ ...projectFormData, githubUrl: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="https://github.com/username/repo"
+                      />
+                    </div>
+
+                    <div className="mb-4">
+                      <label htmlFor="project-demo" className="block text-sm font-medium mb-2">
+                        Live Demo URL (Optional)
+                      </label>
+                      <input
+                        type="url"
+                        id="project-demo"
+                        value={projectFormData.demoUrl}
+                        onChange={(e) => setProjectFormData({ ...projectFormData, demoUrl: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                        placeholder="https://example.com"
+                      />
+                    </div>
+
+                    <div className="flex gap-2">
+                      <button
+                        type="submit"
+                        className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition-colors"
+                      >
+                        {editingProject ? 'Update Project' : 'Create Project'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={resetProjectForm}
+                        className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                {showProjectPreview && (
+                  <div>
+                    <h3 className="text-xl font-bold mb-4">Preview</h3>
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                      <h4 className="text-2xl font-bold mb-2">{projectFormData.title || 'Project Title'}</h4>
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        {projectFormData.description || 'Project description...'}
+                      </p>
+                      {projectFormData.technologies && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {projectFormData.technologies.split(',').map((tech, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded"
+                            >
+                              {tech.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="prose dark:prose-invert max-w-none text-sm">
+                        <p>{projectFormData.content || 'Full description...'}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+            <h2 className="text-2xl font-bold mb-4">Existing Projects ({projects.length})</h2>
+            
+            <div className="space-y-4">
+              {projects.map((project) => (
+                <div 
+                  key={project.id} 
+                  className="border border-gray-300 dark:border-gray-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold mb-1">{project.title}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{project.date}</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{project.description}</p>
+                      {project.technologies.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {project.technologies.map((tech, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-0.5 text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded"
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                      <button
+                        type="button"
+                        onClick={() => handleEditProject(project)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteProject(project)}
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded text-sm transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              {projects.length === 0 && (
+                <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+                  No projects yet. Create your first project above!
                 </p>
               )}
             </div>
