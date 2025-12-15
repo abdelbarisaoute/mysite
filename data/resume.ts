@@ -28,7 +28,7 @@ export const resumeData: Resume = {
     {
       id: 'courses',
       title: 'Courses and Certifications',
-      content: `\\textbf{Get Started with Python, Coursera} - \\textit{2025}\n\n\\begin{itemize}\n\\item Introduction to Python programming, basic data structures, and automation.\n\\end{itemize}`
+      content: `\\textbf{Get Started with Python, Coursera} - \\textit{2025}\n\n\\begin{itemize}\n\\item Introduction to Python programming, basic data structures, and automation.\n\\end{itemize}\n\n\\textbf{Julia Scientific Programming} - \\textit{2025}\n\n\\begin{itemize}\n\\item Practical introduction to scientific programming in Julia, including numerical methods, data analysis, and code optimization.\n\\end{itemize}`
     },
     {
       id: 'technical-skills',
