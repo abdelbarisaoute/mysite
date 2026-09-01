@@ -23,9 +23,9 @@ const App: React.FC = () => {
         <ArticleProvider>
           <ProjectProvider>
             <HashRouter>
-              <div className="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen transition-colors duration-300">
+              <div className="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen">
                 <Header />
-                <main className="max-w-[1600px] mx-auto p-4 sm:p-6 lg:p-8">
+                <main className="max-w-5xl mx-auto p-4 sm:p-6">
                   <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="/blog" element={<ContentsPage />} />
@@ -40,7 +40,7 @@ const App: React.FC = () => {
                     <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
                   </Routes>
                 </main>
-                <footer className="text-center p-4 mt-12 text-gray-500 dark:text-gray-400 text-sm">
+                <footer className="text-center p-4 mt-12 text-gray-500 dark:text-gray-400 text-sm border-t border-gray-200 dark:border-gray-800">
                     <p>&copy; 2025 Abdelbari SAOUTELHAK</p>
                 </footer>
               </div>

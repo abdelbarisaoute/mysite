@@ -95,7 +95,7 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
 
   return (
     <nav className="max-h-[calc(100vh-3rem)] overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-900 rounded p-4 border border-gray-200 dark:border-gray-800">
         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wide">
           Table of Contents
         </h3>
@@ -109,8 +109,8 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content }) => {
                 onClick={() => handleClick(item.id)}
                 className={`text-left w-full py-1.5 px-2 rounded transition-colors ${
                   activeId === item.id
-                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 font-medium'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                    ? 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 font-medium'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
               >
                 {item.title}

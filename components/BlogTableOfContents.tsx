@@ -13,7 +13,7 @@ const BlogTableOfContents: React.FC<BlogTableOfContentsProps> = ({ articles }) =
 
   return (
     <nav className="max-h-[calc(100vh-3rem)] overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-900 rounded p-4 border border-gray-200 dark:border-gray-800">
         <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wide">
           Published Blogs
         </h3>
@@ -22,7 +22,7 @@ const BlogTableOfContents: React.FC<BlogTableOfContentsProps> = ({ articles }) =
             <li key={article.id}>
               <Link
                 to={`/article/${article.id}`}
-                className="block py-2 px-2 rounded transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                className="block py-2 px-2 rounded transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 <div className="font-medium text-gray-900 dark:text-gray-100 mb-1">
                   {article.title}

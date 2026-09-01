@@ -20,9 +20,9 @@ const ResumePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-6 sm:p-10 rounded-lg shadow-sm">
-      <div className="mb-8 pb-6 border-b-2 border-blue-500">
-        <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-gray-100">{resume.name}</h1>
+    <div className="max-w-4xl mx-auto bg-white dark:bg-gray-900 p-6 sm:p-10 rounded border border-gray-200 dark:border-gray-800">
+      <div className="mb-8 pb-6 border-b border-gray-200 dark:border-gray-800">
+        <h1 className="text-3xl font-semibold text-center text-gray-900 dark:text-gray-100">{resume.name}</h1>
         <div 
           className="text-center text-gray-600 dark:text-gray-400 mt-3 text-sm"
           dangerouslySetInnerHTML={{ __html: resume.contact }}
@@ -32,7 +32,7 @@ const ResumePage: React.FC = () => {
       <div className="space-y-6">
         {resume.sections.map((section) => (
           <div key={section.id}>
-            <h2 className="text-xl font-bold mb-3 text-blue-600 dark:text-blue-400">
+            <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-100">
               {section.title}
             </h2>
             <div className="pl-1">

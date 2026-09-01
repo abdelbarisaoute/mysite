@@ -12,10 +12,10 @@ const ArticlePage: React.FC = () => {
 
   if (!article) {
     return (
-      <div className="text-center bg-white dark:bg-gray-800 p-8 rounded-lg shadow-sm">
-        <h1 className="text-3xl font-bold">Article not found</h1>
+      <div className="text-center bg-white dark:bg-gray-900 p-8 rounded border border-gray-200 dark:border-gray-800">
+        <h1 className="text-3xl font-semibold">Article not found</h1>
         <p className="mt-4">The article you are looking for does not exist.</p>
-        <Link to="/" className="inline-block mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+        <Link to="/" className="inline-block mt-6 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-800">
           Go to Homepage
         </Link>
       </div>
@@ -30,12 +30,12 @@ const ArticlePage: React.FC = () => {
       </aside>
 
       {/* Main Article Content */}
-      <article className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-sm flex-1 min-w-0">
-        <header className="mb-8 pb-6 border-b-2 border-blue-500">
+      <article className="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded border border-gray-200 dark:border-gray-800 flex-1 min-w-0">
+        <header className="mb-8 pb-6 border-b border-gray-200 dark:border-gray-800">
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">
             {new Date(article.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{article.title}</h1>
+          <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-gray-100 leading-tight">{article.title}</h1>
         </header>
         
         <ContentRenderer content={article.content} />
