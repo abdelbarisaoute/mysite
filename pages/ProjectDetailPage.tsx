@@ -12,7 +12,7 @@ const ProjectDetailPage: React.FC = () => {
   if (!project) {
     return (
       <div className="text-center py-12">
-        <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+        <h1 className="text-3xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
           Project Not Found
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
@@ -20,7 +20,7 @@ const ProjectDetailPage: React.FC = () => {
         </p>
         <Link
           to="/projects"
-          className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium"
+          className="text-gray-700 dark:text-gray-300 hover:underline underline-offset-4"
         >
           ← Back to Projects
         </Link>
@@ -32,12 +32,12 @@ const ProjectDetailPage: React.FC = () => {
     <div className="max-w-4xl mx-auto">
       <Link
         to="/projects"
-        className="inline-flex items-center text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium mb-6"
+        className="inline-flex items-center text-gray-700 dark:text-gray-300 hover:underline underline-offset-4 mb-6"
       >
         ← Back to Projects
       </Link>
 
-      <article className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
+      <article className="bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-800 p-8">
         <header className="mb-6">
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
             {new Date(project.date).toLocaleDateString('en-US', {
@@ -46,7 +46,7 @@ const ProjectDetailPage: React.FC = () => {
               day: 'numeric',
             })}
           </p>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+          <h1 className="text-4xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
             {project.title}
           </h1>
           <p className="text-lg text-gray-700 dark:text-gray-300 mb-4">
@@ -58,7 +58,7 @@ const ProjectDetailPage: React.FC = () => {
               {project.technologies.map((tech, index) => (
                 <span
                   key={index}
-                  className="px-3 py-1 text-sm font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full"
+                  className="px-3 py-1 text-sm border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded"
                 >
                   {tech}
                 </span>
@@ -72,7 +72,7 @@ const ProjectDetailPage: React.FC = () => {
                 href={project.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 View on GitHub →
               </a>
@@ -82,7 +82,7 @@ const ProjectDetailPage: React.FC = () => {
                 href={project.demoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 Live Demo →
               </a>
@@ -96,10 +96,10 @@ const ProjectDetailPage: React.FC = () => {
 
         {project.codeSnippet && (
           <div className="mt-8">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
               Code Sample
             </h2>
-            <pre className="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg overflow-x-auto">
+            <pre className="bg-gray-100 dark:bg-black p-4 rounded overflow-x-auto border border-gray-200 dark:border-gray-800">
               <code className="text-sm text-gray-800 dark:text-gray-200">
                 {project.codeSnippet}
               </code>

@@ -12,11 +12,11 @@ const ProjectsPage: React.FC = () => {
 
   return (
     <div className="space-y-8">
-      <section className="text-center bg-gradient-to-br from-purple-50 to-pink-50 dark:from-gray-800 dark:to-gray-900 p-12 rounded-xl shadow-sm">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+      <section className="text-center p-10 border border-gray-200 dark:border-gray-800 rounded">
+        <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
           Projects
         </h1>
-        <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto">
+        <p className="text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Browse through my projects and code samples
         </p>
       </section>
@@ -25,7 +25,7 @@ const ProjectsPage: React.FC = () => {
         {sortedProjects.map((project: Project) => (
           <article
             key={project.id}
-            className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-xl transition-all border-l-4 border-purple-500 hover:border-purple-600"
+            className="bg-white dark:bg-gray-900 p-6 rounded border border-gray-200 dark:border-gray-800"
           >
             <header>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
@@ -35,7 +35,7 @@ const ProjectsPage: React.FC = () => {
                   day: 'numeric',
                 })}
               </p>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 {project.title}
               </h2>
             </header>
@@ -49,7 +49,7 @@ const ProjectsPage: React.FC = () => {
                 {project.technologies.map((tech, index) => (
                   <span
                     key={index}
-                    className="px-2 py-1 text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded"
+                    className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded"
                   >
                     {tech}
                   </span>
@@ -60,7 +60,7 @@ const ProjectsPage: React.FC = () => {
             <div className="flex gap-3 mt-4">
               <Link
                 to={`/project/${project.id}`}
-                className="inline-flex items-center text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-medium"
+                className="inline-flex items-center text-sm text-gray-700 dark:text-gray-300 hover:underline underline-offset-4"
               >
                 View Details →
               </Link>
@@ -69,7 +69,7 @@ const ProjectsPage: React.FC = () => {
                   href={project.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium"
+                  className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:underline underline-offset-4"
                 >
                   GitHub →
                 </a>
@@ -79,7 +79,7 @@ const ProjectsPage: React.FC = () => {
                   href={project.demoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                  className="inline-flex items-center text-sm text-gray-700 dark:text-gray-300 hover:underline underline-offset-4"
                 >
                   Live Demo →
                 </a>
